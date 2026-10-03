@@ -1,0 +1,8 @@
+site_name: Architecture Dossier — управление заявками на ремонт и ТО
+docs_dir: docs
+
+nav:
+  - System Charter: 01-system-charter.md
+
+theme:
+  name: mkdocs
