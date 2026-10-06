@@ -3,6 +3,7 @@ docs_dir: docs
 
 nav:
   - System Charter: 01-system-charter.md
+  - Capabilities & Value Stream: 02-capability-value-stream.md
 
 theme:
   name: mkdocs
