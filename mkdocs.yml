@@ -4,6 +4,7 @@ docs_dir: docs
 nav:
   - System Charter: 01-system-charter.md
   - Capabilities & Value Stream: 02-capability-value-stream.md
+  - Experience Pack: 03-experience-pack.md
 
 theme:
   name: mkdocs

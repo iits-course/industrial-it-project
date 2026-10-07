@@ -19,6 +19,7 @@
 ## Структура репозитория
 
 - `docs/01-system-charter.md` — System Charter v0.1;
+- `docs/03-experience-pack.md` — Experience Pack v0.1: User Journey, Service Blueprint, точки отказа, требования-кандидаты;
 - `docs/diagrams/` — диаграммы C4, VSM и другие схемы следующих этапов;
 - `docs/adr/` — Architecture Decision Records, начиная с модуля 2;
 - `openapi/`, `asyncapi/` — спецификации интеграционных контрактов модуля 2;
