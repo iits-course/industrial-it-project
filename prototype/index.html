@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Интерактивный HTML-прототип системы управления ремонтными заявками">
+  <title>РемКонтур — заявки на ремонт</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Основная навигация">
+      <a class="brand" href="#/requests" aria-label="РемКонтур — на главную">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" role="img"><path d="M8 5h16a3 3 0 0 1 3 3v16a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3Z"/><path d="M11 21V11h5.5a3.5 3.5 0 0 1 0 7H11m6-1 4 4"/></svg>
+        </span>
+        <span><strong>РемКонтур</strong><small>Техническая служба</small></span>
+      </a>
+
+      <nav class="sidebar-nav">
+        <p class="nav-caption">Рабочее пространство</p>
+        <a href="#/requests" data-nav="requests">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16M4 12h16M4 19h16"/><circle cx="7" cy="5" r="1"/><circle cx="7" cy="12" r="1"/><circle cx="7" cy="19" r="1"/></svg>
+          Все заявки
+          <span class="nav-count" id="nav-request-count">0</span>
+        </a>
+        <a href="#/requests?mine=1" data-nav="mine">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></svg>
+          Мои заявки
+        </a>
+        <a href="#/requests/new" data-nav="new" id="nav-create-link">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          Создать заявку
+        </a>
+      </nav>
+
+      <section class="demo-panel" aria-labelledby="demo-title">
+        <div class="demo-heading">
+          <div>
+            <span class="eyebrow">Демо-режим</span>
+            <h2 id="demo-title">Сценарии проверки</h2>
+          </div>
+          <span class="demo-dot" aria-hidden="true"></span>
+        </div>
+        <label class="switch-row">
+          <span><strong>Соединение</strong><small id="network-copy">Система онлайн</small></span>
+          <input id="network-toggle" type="checkbox" checked>
+          <span class="switch" aria-hidden="true"></span>
+        </label>
+        <label class="switch-row">
+          <span><strong>Специалисты</strong><small>Скрыть доступных</small></span>
+          <input id="specialists-toggle" type="checkbox">
+          <span class="switch" aria-hidden="true"></span>
+        </label>
+        <label class="switch-row">
+          <span><strong>Пустой список</strong><small>Проверить empty state</small></span>
+          <input id="empty-toggle" type="checkbox">
+          <span class="switch" aria-hidden="true"></span>
+        </label>
+        <button class="demo-action" id="simulate-error" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 9v4m0 4h.01M10.3 4.6 2.5 18a2 2 0 0 0 1.7 3h15.6a2 2 0 0 0 1.7-3L13.7 4.6a2 2 0 0 0-3.4 0Z"/></svg>
+          Ошибка следующей операции
+        </button>
+        <button class="demo-action" id="reset-demo" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v6h6M20 20v-6h-6M5.5 15a7 7 0 0 0 11.6 2.6L20 14M4 10l2.9-3.6A7 7 0 0 1 18.5 9"/></svg>
+          Сбросить демо-данные
+        </button>
+      </section>
+
+      <div class="sidebar-footer">
+        <span class="prototype-label">HTML prototype · v0.2</span>
+        <span>Учебная среда</span>
+      </div>
+    </aside>
+
+    <div class="workspace">
+      <header class="topbar">
+        <div class="connection-pill" id="connection-pill" role="status">
+          <span></span><strong>Онлайн</strong><small id="queue-count">Нет событий в очереди</small>
+        </div>
+        <div class="topbar-actions">
+          <label class="role-control" for="role-select">
+            <span>Тестовая роль</span>
+            <select id="role-select" aria-label="Переключить тестовую роль">
+              <option value="operator">Сотрудник цеха</option>
+              <option value="dispatcher">Диспетчер</option>
+              <option value="engineer">Инженер</option>
+              <option value="manager">Руководитель</option>
+            </select>
+          </label>
+          <div class="avatar" id="user-avatar" aria-hidden="true">ЭМ</div>
+          <div class="user-copy"><strong id="user-name">Эрнест Миронов</strong><span id="user-role">Сотрудник цеха</span></div>
+        </div>
+      </header>
+
+      <main id="app" tabindex="-1">
+        <div class="page-loader" aria-label="Загрузка">
+          <span></span><span></span><span></span>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div class="toast-region" id="toast-region" aria-live="polite" aria-atomic="true"></div>
+
+  <template id="icon-template">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path></path></svg>
+  </template>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

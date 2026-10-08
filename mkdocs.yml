@@ -5,6 +5,10 @@ nav:
   - System Charter: 01-system-charter.md
   - Capabilities & Value Stream: 02-capability-value-stream.md
   - Experience Pack: 03-experience-pack.md
+  - Требования: 04-requirements.md
+  - Спецификация прототипа: 04-prototype.md
+  - План UX-тестирования: 04-prototype-testing.md
+  - Technical Spike: 04-technical-spike.md
 
 theme:
   name: mkdocs
