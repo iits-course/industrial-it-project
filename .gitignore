@@ -2,4 +2,4 @@ prototype/node_modules/
 prototype/test-results/
 prototype/playwright-report/
 prototype/.playwright-cache/
-
+*.pptx
