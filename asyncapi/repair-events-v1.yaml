@@ -1,0 +1,296 @@
+asyncapi: 3.1.0
+info:
+  title: Repair Request Domain Events
+  version: 1.0.0
+  description: |
+    Доменные события контекста «Управление заявками». Доставка at-least-once,
+    порядок гарантируется только в пределах request_id, потребители обязаны
+    дедуплицировать event_id и учитывать aggregate_version.
+defaultContentType: application/json
+servers:
+  production:
+    host: rabbitmq.example.internal:5672
+    protocol: amqp
+    description: Placeholder внутреннего RabbitMQ; адрес и TLS-параметры требуют согласования
+channels:
+  repairRequestCreatedV1:
+    address: repair.request-created.v1
+    description: Новая заявка получила окончательный серверный ID
+    messages:
+      RepairRequestCreatedV1:
+        $ref: '#/components/messages/RepairRequestCreatedV1'
+    bindings:
+      amqp:
+        is: routingKey
+        exchange:
+          name: repair.events.v1
+          type: topic
+          durable: true
+        bindingVersion: 0.3.0
+  repairRequestAssignedV1:
+    address: repair.request-assigned.v1
+    description: Сага назначения завершилась подтверждённым назначением
+    messages:
+      RepairRequestAssignedV1:
+        $ref: '#/components/messages/RepairRequestAssignedV1'
+    bindings:
+      amqp:
+        is: routingKey
+        exchange:
+          name: repair.events.v1
+          type: topic
+          durable: true
+        bindingVersion: 0.3.0
+  repairRequestCompletedV1:
+    address: repair.request-completed.v1
+    description: Инженер зафиксировал диагностику и результат; заявка ожидает закрытия
+    messages:
+      RepairRequestCompletedV1:
+        $ref: '#/components/messages/RepairRequestCompletedV1'
+    bindings:
+      amqp:
+        is: routingKey
+        exchange:
+          name: repair.events.v1
+          type: topic
+          durable: true
+        bindingVersion: 0.3.0
+operations:
+  publishRepairRequestCreatedV1:
+    action: send
+    summary: Repair Request Service публикует факт регистрации через Outbox
+    channel:
+      $ref: '#/channels/repairRequestCreatedV1'
+    messages:
+      - $ref: '#/channels/repairRequestCreatedV1/messages/RepairRequestCreatedV1'
+    bindings:
+      amqp:
+        ack: true
+        mandatory: true
+        bindingVersion: 0.3.0
+  publishRepairRequestAssignedV1:
+    action: send
+    summary: Repair Request Service публикует подтверждённое назначение через Outbox
+    channel:
+      $ref: '#/channels/repairRequestAssignedV1'
+    messages:
+      - $ref: '#/channels/repairRequestAssignedV1/messages/RepairRequestAssignedV1'
+    bindings:
+      amqp:
+        ack: true
+        mandatory: true
+        bindingVersion: 0.3.0
+  publishRepairRequestCompletedV1:
+    action: send
+    summary: Repair Request Service публикует завершение ремонта через Outbox
+    channel:
+      $ref: '#/channels/repairRequestCompletedV1'
+    messages:
+      - $ref: '#/channels/repairRequestCompletedV1/messages/RepairRequestCompletedV1'
+    bindings:
+      amqp:
+        ack: true
+        mandatory: true
+        bindingVersion: 0.3.0
+components:
+  correlationIds:
+    CorrelationId:
+      description: Один UUID на пользовательскую команду и порождённую цепочку
+      location: '$message.header#/correlation_id'
+  messages:
+    RepairRequestCreatedV1:
+      name: RepairRequestCreatedV1
+      title: Заявка зарегистрирована
+      summary: Минимальный факт для уведомлений и аналитики
+      contentType: application/json
+      correlationId:
+        $ref: '#/components/correlationIds/CorrelationId'
+      headers:
+        $ref: '#/components/schemas/EventHeaders'
+      payload:
+        $ref: '#/components/schemas/RepairRequestCreatedEnvelope'
+      traits:
+        - $ref: '#/components/messageTraits/AtLeastOnceV1'
+      examples:
+        - name: created
+          summary: Новая заявка на гидравлический пресс
+          headers:
+            correlation_id: 7aab468e-9da6-4234-8383-3a18c7b9841e
+            traceparent: 00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01
+          payload:
+            event_id: 44ad4376-8372-4be2-b8f8-0d70b93a8972
+            event_type: RepairRequestCreated
+            event_version: 1
+            occurred_at: '2026-10-29T05:42:00Z'
+            correlation_id: 7aab468e-9da6-4234-8383-3a18c7b9841e
+            aggregate_id: REQ-2026-1043
+            aggregate_version: 1
+            producer: repair-request-service
+            data:
+              equipment_id: EQ-042
+              org_unit_id: OU-PRESS
+              category: hydraulics
+              priority: high
+              status: new
+              detected_at: '2026-10-29T05:35:00Z'
+              registered_at: '2026-10-29T05:42:00Z'
+    RepairRequestAssignedV1:
+      name: RepairRequestAssignedV1
+      title: Исполнитель назначен
+      summary: Подтверждённый итог саги назначения
+      contentType: application/json
+      correlationId:
+        $ref: '#/components/correlationIds/CorrelationId'
+      headers:
+        $ref: '#/components/schemas/EventHeaders'
+      payload:
+        $ref: '#/components/schemas/RepairRequestAssignedEnvelope'
+      traits:
+        - $ref: '#/components/messageTraits/AtLeastOnceV1'
+      examples:
+        - name: assigned
+          headers:
+            correlation_id: 829eb93d-1332-4f0f-af12-157b62f47d22
+          payload:
+            event_id: af335e48-4361-4e59-aece-74469613d2e7
+            event_type: RepairRequestAssigned
+            event_version: 1
+            occurred_at: '2026-10-29T05:55:00Z'
+            correlation_id: 829eb93d-1332-4f0f-af12-157b62f47d22
+            aggregate_id: REQ-2026-1043
+            aggregate_version: 2
+            producer: repair-request-service
+            data:
+              assignment_id: ASN-01JBD31MAB
+              engineer_id: EMP-0241
+              saga_id: 8d36a23b-8bd8-46a4-a824-385bbf53c408
+              status: assigned
+              assigned_at: '2026-10-29T05:55:00Z'
+    RepairRequestCompletedV1:
+      name: RepairRequestCompletedV1
+      title: Ремонт завершён
+      summary: Результат зафиксирован, но заявка ещё не закрыта диспетчером
+      contentType: application/json
+      correlationId:
+        $ref: '#/components/correlationIds/CorrelationId'
+      headers:
+        $ref: '#/components/schemas/EventHeaders'
+      payload:
+        $ref: '#/components/schemas/RepairRequestCompletedEnvelope'
+      traits:
+        - $ref: '#/components/messageTraits/AtLeastOnceV1'
+      examples:
+        - name: completed
+          headers:
+            correlation_id: b1fcba37-fcc8-4df6-bcc8-cc7bac7c9063
+          payload:
+            event_id: b93071f0-1b6c-4764-81f7-953551d00731
+            event_type: RepairRequestCompleted
+            event_version: 1
+            occurred_at: '2026-10-29T08:14:00Z'
+            correlation_id: b1fcba37-fcc8-4df6-bcc8-cc7bac7c9063
+            aggregate_id: REQ-2026-1043
+            aggregate_version: 5
+            producer: repair-request-service
+            data:
+              work_result_id: WRK-01JBD8EP9Z
+              engineer_id: EMP-0241
+              status: completed
+              completed_at: '2026-10-29T08:14:00Z'
+              result_code: repaired
+  messageTraits:
+    AtLeastOnceV1:
+      description: |
+        x-delivery-guarantee=at-least-once; x-ordering-key=aggregate_id;
+        consumer фиксирует event_id и бизнес-изменение в одной локальной транзакции.
+      x-delivery-guarantee: at-least-once
+      x-ordering-key: aggregate_id
+      x-deduplication-key: event_id
+      x-schema-compatibility: backward
+  schemas:
+    EventHeaders:
+      type: object
+      additionalProperties: false
+      required: [correlation_id]
+      properties:
+        correlation_id: { type: string, format: uuid }
+        traceparent:
+          type: string
+          pattern: '^[0-9a-f]{2}-[0-9a-f]{32}-[0-9a-f]{16}-[0-9a-f]{2}$'
+    RepairRequestCreatedEnvelope:
+      type: object
+      additionalProperties: false
+      required: [event_id, event_type, event_version, occurred_at, correlation_id, aggregate_id, aggregate_version, producer, data]
+      properties:
+        event_id: { type: string, format: uuid }
+        event_type: { type: string, const: RepairRequestCreated }
+        event_version: { type: integer, const: 1 }
+        occurred_at: { type: string, format: date-time }
+        correlation_id: { type: string, format: uuid }
+        aggregate_id: { $ref: '#/components/schemas/RequestId' }
+        aggregate_version: { type: integer, minimum: 1 }
+        producer: { type: string, const: repair-request-service }
+        data: { $ref: '#/components/schemas/RepairRequestCreatedData' }
+    RepairRequestAssignedEnvelope:
+      type: object
+      additionalProperties: false
+      required: [event_id, event_type, event_version, occurred_at, correlation_id, aggregate_id, aggregate_version, producer, data]
+      properties:
+        event_id: { type: string, format: uuid }
+        event_type: { type: string, const: RepairRequestAssigned }
+        event_version: { type: integer, const: 1 }
+        occurred_at: { type: string, format: date-time }
+        correlation_id: { type: string, format: uuid }
+        aggregate_id: { $ref: '#/components/schemas/RequestId' }
+        aggregate_version: { type: integer, minimum: 1 }
+        producer: { type: string, const: repair-request-service }
+        data: { $ref: '#/components/schemas/RepairRequestAssignedData' }
+    RepairRequestCompletedEnvelope:
+      type: object
+      additionalProperties: false
+      required: [event_id, event_type, event_version, occurred_at, correlation_id, aggregate_id, aggregate_version, producer, data]
+      properties:
+        event_id: { type: string, format: uuid }
+        event_type: { type: string, const: RepairRequestCompleted }
+        event_version: { type: integer, const: 1 }
+        occurred_at: { type: string, format: date-time }
+        correlation_id: { type: string, format: uuid }
+        aggregate_id: { $ref: '#/components/schemas/RequestId' }
+        aggregate_version: { type: integer, minimum: 1 }
+        producer: { type: string, const: repair-request-service }
+        data: { $ref: '#/components/schemas/RepairRequestCompletedData' }
+    RepairRequestCreatedData:
+      type: object
+      additionalProperties: false
+      required: [equipment_id, org_unit_id, category, priority, status, detected_at, registered_at]
+      properties:
+        equipment_id: { type: string, minLength: 1, maxLength: 64 }
+        org_unit_id: { type: string, minLength: 1, maxLength: 64 }
+        category: { type: string, enum: [mechanics, electrical, hydraulics, automation, other] }
+        priority: { type: string, enum: [low, normal, high, critical] }
+        status: { type: string, const: new }
+        detected_at: { type: string, format: date-time }
+        registered_at: { type: string, format: date-time }
+    RepairRequestAssignedData:
+      type: object
+      additionalProperties: false
+      required: [assignment_id, engineer_id, saga_id, status, assigned_at]
+      properties:
+        assignment_id: { type: string, minLength: 1, maxLength: 64 }
+        engineer_id: { type: string, minLength: 1, maxLength: 64 }
+        saga_id: { type: string, format: uuid }
+        status: { type: string, const: assigned }
+        assigned_at: { type: string, format: date-time }
+    RepairRequestCompletedData:
+      type: object
+      additionalProperties: false
+      required: [work_result_id, engineer_id, status, completed_at, result_code]
+      properties:
+        work_result_id: { type: string, minLength: 1, maxLength: 64 }
+        engineer_id: { type: string, minLength: 1, maxLength: 64 }
+        status: { type: string, const: completed }
+        completed_at: { type: string, format: date-time }
+        result_code: { type: string, enum: [repaired, temporary_fix, no_fault_found, requires_external_service] }
+    RequestId:
+      type: string
+      pattern: '^REQ-[0-9]{4}-[0-9]{4,}$'

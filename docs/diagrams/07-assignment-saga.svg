@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1050" viewBox="0 0 1600 1050" role="img" aria-labelledby="title desc">
+  <title id="title">Сага назначения исполнителя</title>
+  <desc id="desc">Диаграмма последовательности оркестрируемой саги: диспетчер, сервис заявок, PostgreSQL, Workforce, broker и consumers, включая компенсацию резерва.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#39566f"/></marker>
+    <marker id="redarrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#bc4055"/></marker>
+    <style>
+      .bg{fill:#f7f9fb}.head{fill:#eaf3fc;stroke:#4c88bf;stroke-width:2;rx:10}.db{fill:#eef2f6;stroke:#627b90;stroke-width:2;rx:10}.ext{fill:#fff4e5;stroke:#ce8731;stroke-width:2;rx:10}.async{fill:#f2eeff;stroke:#7a63c0;stroke-width:2;rx:10}.title{font:700 26px Arial,sans-serif;fill:#10233d}.h{font:700 14px Arial,sans-serif;fill:#17314a}.t{font:12px Arial,sans-serif;fill:#415c73}.life{stroke:#8ca0b3;stroke-width:2;stroke-dasharray:7 5}.msg{stroke:#39566f;stroke-width:2;fill:none;marker-end:url(#arrow)}.return{stroke:#39566f;stroke-width:2;stroke-dasharray:6 4;fill:none;marker-end:url(#arrow)}.event{stroke:#735ab9;stroke-width:2;stroke-dasharray:6 4;fill:none;marker-end:url(#arrow)}.comp{stroke:#bc4055;stroke-width:2;fill:none;marker-end:url(#redarrow)}.label{font:12px Arial,sans-serif;fill:#28475f}.red{font:700 12px Arial,sans-serif;fill:#a92e45}.pivot{fill:#fff0f2;stroke:#d14c62;stroke-width:2;stroke-dasharray:8 5;rx:12}.alt{fill:#fffaf1;stroke:#d9a456;stroke-width:2;stroke-dasharray:7 5;rx:12}.note{fill:#eef9f3;stroke:#4a9a73;stroke-width:2;rx:12}
+    </style>
+  </defs>
+  <rect width="1600" height="1050" class="bg"/>
+  <text x="50" y="48" class="title">Saga · назначение инженера (оркестрация в Repair Request Service)</text>
+
+  <rect x="40" y="85" width="190" height="68" class="head"/><text x="68" y="114" class="h">Диспетчер / PWA</text><text x="68" y="136" class="t">инициатор команды</text>
+  <rect x="290" y="85" width="240" height="68" class="head"/><text x="318" y="114" class="h">Repair Request Service</text><text x="318" y="136" class="t">saga orchestrator</text>
+  <rect x="590" y="85" width="190" height="68" class="db"/><text x="618" y="114" class="h">PostgreSQL</text><text x="618" y="136" class="t">request · saga · outbox</text>
+  <rect x="840" y="85" width="190" height="68" class="ext"/><text x="868" y="114" class="h">Workforce Service</text><text x="868" y="136" class="t">reservations SoR</text>
+  <rect x="1090" y="85" width="170" height="68" class="async"/><text x="1118" y="114" class="h">RabbitMQ</text><text x="1118" y="136" class="t">topic exchange</text>
+  <rect x="1320" y="85" width="230" height="68" class="async"/><text x="1348" y="114" class="h">Consumers</text><text x="1348" y="136" class="t">notifications · analytics</text>
+
+  <path d="M135 153 V980" class="life"/><path d="M410 153 V980" class="life"/><path d="M685 153 V980" class="life"/>
+  <path d="M935 153 V980" class="life"/><path d="M1175 153 V980" class="life"/><path d="M1435 153 V980" class="life"/>
+
+  <path d="M135 205 H410" class="msg"/><text x="160" y="194" class="label">1 · PUT assignment · key + If-Match</text>
+  <path d="M410 255 H685" class="msg"/><text x="438" y="244" class="label">2 · TX: saga=started + assignment lock</text>
+  <path d="M685 295 H410" class="return"/><text x="512" y="284" class="label">commit</text>
+  <path d="M410 350 H935" class="msg"/><text x="510" y="339" class="label">3 · POST reserve · Idempotency-Key=saga_id · timeout 2 s</text>
+  <path d="M935 395 H410" class="return"/><text x="615" y="384" class="label">201 reservation_id либо timeout/409</text>
+
+  <rect x="275" y="435" width="795" height="175" class="alt"/>
+  <text x="295" y="460" class="h">alt · резерв отклонён или исход неизвестен</text>
+  <path d="M410 492 H935" class="msg"/><text x="525" y="481" class="label">GET reservation по saga_id после timeout</text>
+  <path d="M935 532 H410" class="return"/><text x="616" y="521" class="label">reserved / not found / still unknown</text>
+  <path d="M410 575 H685" class="comp"/><text x="438" y="564" class="red">TX: снять lock → compensated/manual_review</text>
+
+  <rect x="260" y="640" width="790" height="155" class="pivot"/>
+  <text x="282" y="666" class="red">4 · ПОВОРОТНЫЙ ШАГ · одна локальная ACID-транзакция</text>
+  <path d="M410 710 H685" class="msg"/><text x="438" y="699" class="label">Assignment + status=assigned + History + Outbox</text>
+  <path d="M685 754 H410" class="return"/><text x="510" y="743" class="label">commit · назначение — бизнес-факт</text>
+
+  <rect x="275" y="815" width="795" height="115" class="alt"/>
+  <text x="295" y="840" class="h">если commit до pivot не состоялся</text>
+  <path d="M410 875 H935" class="comp"/><text x="520" y="864" class="red">DELETE reservation · тот же saga_id</text>
+  <text x="300" y="910" class="t">После pivot компенсации нет: переназначение — новая бизнес-команда и новая сага.</text>
+
+  <path d="M685 985 H1175" class="event"/><text x="730" y="974" class="label">5 · Outbox Relay: read → RepairRequestAssigned.v1 → publisher confirm</text>
+  <path d="M1175 1015 H1435" class="event"/><text x="1210" y="1004" class="label">6 · at-least-once · inbox dedupe</text>
+
+  <rect x="1080" y="640" width="470" height="210" class="note"/>
+  <text x="1104" y="671" class="h">Гарантии</text>
+  <text x="1104" y="703" class="t">• один активный Assignment на request_id</text>
+  <text x="1104" y="730" class="t">• все команды Workforce идемпотентны по saga_id</text>
+  <text x="1104" y="757" class="t">• outbox в транзакции поворотного шага</text>
+  <text x="1104" y="784" class="t">• notification/BI не откатывают назначение</text>
+  <text x="1104" y="811" class="t">• неизвестный исход виден диспетчеру</text>
+</svg>

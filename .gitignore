@@ -2,4 +2,10 @@ prototype/node_modules/
 prototype/test-results/
 prototype/playwright-report/
 prototype/.playwright-cache/
+<<<<<<< HEAD
 *.pptx
+=======
+__pycache__/
+*.pyc
+
+>>>>>>> b50e425 (complete 6 and 7 weeks)
