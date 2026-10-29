@@ -1,0 +1,27 @@
+{
+  "timestamp": "2026-10-08T15:56:36.059Z",
+  "runtime": "v22.22.1",
+  "runsPerScenario": 50,
+  "scenarios": {
+    "S-01 offline local save": { "checks": 50, "passed": 50, "failed": 0 },
+    "S-02 response lost after server accept": { "checks": 50, "passed": 50, "failed": 0 },
+    "S-03 application restart": { "checks": 50, "passed": 50, "failed": 0 },
+    "S-04 repeated send": { "checks": 50, "passed": 50, "failed": 0 },
+    "S-05 synchronization after restore": { "checks": 50, "passed": 50, "failed": 0 },
+    "S-06 repeated interruption and restart": { "checks": 50, "passed": 50, "failed": 0 },
+    "S-07 invalid operation isolation": { "checks": 50, "passed": 50, "failed": 0 }
+  },
+  "totals": {
+    "checks": 350,
+    "lostOperations": 0,
+    "duplicates": 0,
+    "failures": 0
+  },
+  "syncLatencyMs": {
+    "min": 0.127,
+    "max": 0.4,
+    "average": 0.152
+  },
+  "verdict": "SUPPORTED_ON_MINIMAL_STAND",
+  "limitations": "Локальный Node.js стенд с файловым адаптером и имитацией сервера; реальная сеть, браузерные квоты, конкурентные клиенты и промышленный backend не проверялись."
+}

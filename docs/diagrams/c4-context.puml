@@ -1,0 +1,34 @@
+@startuml C1-Context
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+title C1 · System Context — РемКонтур v0.1
+caption Учебная гипотеза. Источники ролей: System Charter §5, Experience Pack §2. Внешние системы: Charter §4.
+
+Person(operator, "Оператор оборудования", "Регистрирует неисправность и смотрит статус")
+Person(master, "Мастер смены", "Уточняет заявку участка, предлагает приоритет")
+Person(dispatcher, "Диспетчер / координатор", "Утверждает приоритет и назначает исполнителя")
+Person(engineer, "Инженер техслужбы", "Фиксирует диагностику и результат")
+Person(head, "Руководитель техслужбы", "Контролирует очередь, сроки и историю")
+
+System(remkontur, "РемКонтур", "Управление заявками на ремонт и ТО: регистрация, назначение, результат, история")
+
+System_Ext(sso, "Корпоративный SSO", "Аутентификация учётной записи")
+System_Ext(directory, "Справочник сотрудников", "Люди, участки, роли")
+System_Ext(equipment, "Система учёта оборудования", "Карточки единиц оборудования")
+System_Ext(notifications, "Сервис уведомлений", "Доставка сообщений о заявке")
+
+Rel(operator, remkontur, "Создаёт заявки и смотрит статус")
+Rel(master, remkontur, "Уточняет заявки участка")
+Rel(dispatcher, remkontur, "Назначает исполнителя и утверждает приоритет")
+Rel(engineer, remkontur, "Фиксирует диагностику и результат")
+Rel(head, remkontur, "Просматривает очередь и историю")
+
+Rel(remkontur, sso, "Проверяет сессию")
+Rel(remkontur, directory, "Читает сотрудников и участки")
+Rel(remkontur, equipment, "Читает карточку оборудования")
+Rel(remkontur, notifications, "Передаёт события заявки")
+Rel(notifications, operator, "Сообщает об изменении статуса")
+Rel(notifications, engineer, "Сообщает о назначении")
+
+SHOW_LEGEND()
+@enduml

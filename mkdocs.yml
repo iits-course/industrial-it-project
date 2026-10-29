@@ -5,6 +5,29 @@ nav:
   - System Charter: 01-system-charter.md
   - Capabilities & Value Stream: 02-capability-value-stream.md
   - Experience Pack: 03-experience-pack.md
+  - Требования: 04-requirements.md
+  - Спецификация прототипа: 04-prototype.md
+  - План UX-тестирования: 04-prototype-testing.md
+  - Technical Spike: 04-technical-spike.md
+<<<<<<< HEAD
+  - Доменная архитектура: 05-domain-architecture.md
+  - Реестр ADR: adr/index.md
+  - ADR-001. Модульный монолит: adr/0001-architectural-style.md
+  - ADR-002. PostgreSQL: adr/0002-database.md
+  - ADR-003. Outbox без брокера: adr/0003-messaging.md
+=======
+  - Неделя 6 · Архитектура данных:
+      - Обзор: 06-data-architecture.md
+      - Логическая модель: data/06-logical-data-model.md
+      - Владение, CRUD и MDM: data/06-ownership-mdm.md
+      - OLTP/OLAP, DQ и Lineage: data/06-oltp-olap-quality-lineage.md
+      - ADR-001 · Доставка в аналитику: adr/ADR-001-analytics-delivery.md
+  - Неделя 7 · Интеграции:
+      - Контракты, Saga, Outbox: 07-integration-architecture.md
+      - Версии и проверки: 07-contract-versioning.md
+      - Оценка ML/NLP: 07-ml-nlp-assessment.md
+      - ADR-002 · Стиль Saga: adr/ADR-002-assignment-saga-orchestration.md
+>>>>>>> b50e425 (complete 6 and 7 weeks)
 
 theme:
   name: mkdocs
