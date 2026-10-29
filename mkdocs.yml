@@ -9,13 +9,11 @@ nav:
   - Спецификация прототипа: 04-prototype.md
   - План UX-тестирования: 04-prototype-testing.md
   - Technical Spike: 04-technical-spike.md
-<<<<<<< HEAD
   - Доменная архитектура: 05-domain-architecture.md
   - Реестр ADR: adr/index.md
   - ADR-001. Модульный монолит: adr/0001-architectural-style.md
   - ADR-002. PostgreSQL: adr/0002-database.md
-  - ADR-003. Outbox без брокера: adr/0003-messaging.md
-=======
+  - ADR-003. Outbox без брокера (заменён ADR-004): adr/0003-messaging.md
   - Неделя 6 · Архитектура данных:
       - Обзор: 06-data-architecture.md
       - Логическая модель: data/06-logical-data-model.md
@@ -27,7 +25,11 @@ nav:
       - Версии и проверки: 07-contract-versioning.md
       - Оценка ML/NLP: 07-ml-nlp-assessment.md
       - ADR-002 · Стиль Saga: adr/ADR-002-assignment-saga-orchestration.md
->>>>>>> b50e425 (complete 6 and 7 weeks)
+  - Неделя 8 · Внешняя среда:
+      - Обзор: 08-external-environment.md
+      - ADR-004 · Брокер RabbitMQ: adr/ADR-004-message-broker-rabbitmq.md
+      - ADR-005 · Канал уведомлений: adr/ADR-005-notification-channel-adapter.md
+      - ADR-006 · Внешняя граница и ACL: adr/ADR-006-external-boundary-acl.md
 
 theme:
   name: mkdocs

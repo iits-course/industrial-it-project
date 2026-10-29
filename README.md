@@ -25,24 +25,18 @@
 - `docs/04-prototype.md` — спецификация и статус реализации интерактивного прототипа;
 - `docs/04-prototype-testing.md` — учебная UX-симуляция и шаблон фактического тестирования;
 - `docs/04-technical-spike.md` — карточка и фактические результаты минимального эксперимента потери связи;
-<<<<<<< HEAD
 - `docs/05-domain-architecture.md` — Event Storming, карта контекстов, C4 и таблица владения (занятие 5);
-- `docs/adr/` — ADR-001…003: стиль, СУБД, доставка событий;
-- `prototype/` — рабочий интерактивный HTML-прототип, автоматические браузерные тесты и стенд Technical Spike;
-- `docs/diagrams/` — VSM, Service Blueprint, C4 (Structurizr DSL, PlantUML, SVG), Event Storming и карта контекстов;
-- `openapi/`, `asyncapi/` — спецификации интеграционных контрактов модуля 2;
-=======
 - `docs/06-data-architecture.md` — комплект недели 6: модель данных, владение, MDM, OLTP/OLAP, DQ и lineage;
 - `docs/data/` — детальные артефакты модели, CRUD/MDM, Data Quality и Data Lineage;
 - `docs/07-integration-architecture.md` — комплект недели 7: контракты, Saga, Outbox и идемпотентность;
 - `docs/07-contract-versioning.md` — политика версий, compatibility и воспроизводимые проверки контрактов;
 - `docs/07-ml-nlp-assessment.md` — оценка NLP-кандидата, Human-in-the-Loop и решение go/no-go;
+- `docs/08-external-environment.md` — комплект недели 8: внешняя среда, адаптеры (ACL), таблицы перевода моделей, матрица зависимости от поставщиков, план проверки;
+- `docs/adr/` — ADR недели 5 (0001…0003: стиль, СУБД, доставка событий), ADR недель 6–7 (доставка в аналитику, стиль саги) и ADR-004…006 недели 8 (брокер, канал уведомлений, внешняя граница); реестр — `docs/adr/index.md`;
 - `prototype/` — рабочий интерактивный HTML-прототип, автоматические браузерные тесты и стенд Technical Spike;
-- `docs/diagrams/` — Service Blueprint, C2-контуры, lineage и sequence diagram саги;
-- `docs/adr/` — ADR доставки данных в аналитику и стиля саги;
+- `docs/diagrams/` — VSM, Service Blueprint, C4 (Structurizr DSL, PlantUML, SVG), Event Storming, карта контекстов, C2-контуры данных, lineage, сага и C2 v0.2 с внешней границей;
 - `openapi/`, `asyncapi/` — версионированные синхронные и событийные контракты;
 - `scripts/validate_contracts.py` — офлайн-проверка структуры и проектных инвариантов контрактов;
->>>>>>> b50e425 (complete 6 and 7 weeks)
 - `mkdocs.yml` — конфигурация сборки документации по принципу Docs-as-Code.
 
 ## Запуск прототипа
@@ -55,6 +49,8 @@ python3 -m http.server 4173
 После запуска открыть <http://127.0.0.1:4173>. Полная инструкция, тестовые роли и команды проверок находятся в `prototype/README.md`.
 
 ## Проверка контрактов недель 6–7
+
+Нужны зависимости: `pip install pyyaml jsonschema`.
 
 ```bash
 python3 scripts/validate_contracts.py

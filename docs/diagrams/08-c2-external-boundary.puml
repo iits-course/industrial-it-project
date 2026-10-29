@@ -1,0 +1,43 @@
+@startuml C2-External-Boundary
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title C2 v0.2 · Внешняя граница — РемКонтур
+caption Неделя 8 (Тема 2.4). Адаптеры стоят на каждом стыке с legacy и вендором (ADR-006); RabbitMQ — ADR-004; канал уведомлений — ADR-005. Заменяет прямые стрелки C2 v0.1 из 05 §6.
+
+Person(users, "Операторы, диспетчеры, инженеры", "Роли из Charter §5")
+
+System_Boundary(b, "РемКонтур") {
+    Container(arm, "АРМ сотрудника", "SPA/PWA, IndexedDB", "Формы и очередь неподтверждённых операций создания (NFR-02)")
+    Container(app, "Приложение РемКонтур (Repair Request Service)", "Python, FastAPI, модульный монолит", "Модули: work-request, dispatching, access-audit. Единственный писатель агрегата заявки")
+    ContainerDb(db, "PostgreSQL OLTP", "PostgreSQL", "Заявки, история, аудит, idempotency, MDM read model, outbox")
+    Container(relay, "Outbox Relay", "Python worker", "Читает outbox, публикует событие с publisher confirm")
+    Container(mq, "RabbitMQ", "AMQP, topic exchange", "События v1, at-least-once (ADR-004)")
+    Container(notifworker, "Notification Worker", "Python worker", "Consumer: inbox, retry, DLQ")
+    Container(analytics, "Analytics Loader + Warehouse + BI", "OLAP-контур", "raw -> core -> mart, read-only относительно OLTP")
+    Container(mda, "Master Data Adapter · ACL", "Python worker", "Фасад, транслятор, защита, протокол. Только чтение EAM и HR. Владелец: Martin")
+    Container(notifadapter, "Адаптер уведомлений · ACL", "Python, модуль воркера", "Фасад deliver(), транслятор статусов, таймаут, повтор с тем же ключом. Владелец: Amir")
+}
+
+System_Ext(sso, "Корпоративный SSO", "OIDC, стандарт: без ACL")
+System_Ext(workforce, "Workforce Service", "Соседняя команда, контракт workforce-v1: без ACL")
+System_Ext(eam, "EAM / учёт оборудования", "Legacy, внутренняя")
+System_Ext(hr, "HR / IAM каталог", "Legacy, внутренняя")
+System_Ext(provider, "Провайдер уведомлений", "Вендор или корпоративная платформа, не выбран")
+
+Rel(users, arm, "Создают заявки, назначают, фиксируют результат")
+Rel(arm, app, "Команды и запросы", "HTTPS/JSON, синхронно")
+Rel(app, db, "Читает и пишет", "SQL, синхронно")
+Rel(app, sso, "Проверяет токен", "OIDC/HTTPS, кэш ключей")
+Rel(app, workforce, "Резерв инженера в саге", "REST, таймаут 2 с")
+Rel(mda, db, "Обновляет MDM read model", "SQL, единственный писатель проекции")
+Rel(mda, eam, "Читает оборудование", "API / файл / выгрузка, read-only")
+Rel(mda, hr, "Читает сотрудников и подразделения", "API / выгрузка, read-only")
+Rel(relay, db, "Читает outbox", "SQL")
+Rel(relay, mq, "Публикует события", "AMQP, асинхронно")
+Rel(mq, notifworker, "Доставляет события", "AMQP")
+Rel(mq, analytics, "Доставляет события", "AMQP")
+Rel(notifworker, notifadapter, "deliver(event_id, получатель, шаблон)", "вызов внутри воркера")
+Rel(notifadapter, provider, "Отправляет сообщение", "HTTPS, таймаут 5 с, очередь повторов")
+
+SHOW_LEGEND()
+@enduml
