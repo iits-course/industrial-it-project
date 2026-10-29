@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720" font-family="Helvetica Neue, Helvetica, Arial, sans-serif">
+  <title>Карта ограниченных контекстов — РемКонтур v0.1</title>
+  <defs>
+    <marker id="cm-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#455a64"/>
+    </marker>
+  </defs>
+  <rect width="1280" height="720" fill="#ffffff"/>
+  <text x="24" y="28" font-size="18" font-weight="700" fill="#1f2933">Карта ограниченных контекстов · РемКонтур v0.1</text>
+  <text x="24" y="48" font-size="12" fill="#5f6b7a">Пять контекстов: core, supporting и generic. Связи показывают границы и тип взаимодействия.</text>
+
+  <rect x="470" y="80" width="300" height="150" rx="10" fill="#e8f5e9" stroke="#2e7d32" stroke-width="2.5"/>
+  <text x="620" y="108" font-size="11" fill="#2e7d32" text-anchor="middle">CORE</text>
+  <text x="620" y="134" font-size="16" font-weight="700" fill="#1b5e20" text-anchor="middle">Управление заявками</text>
+  <text x="620" y="156" font-size="12" fill="#33691e" text-anchor="middle">Регистрация, история, результат, закрытие,</text>
+  <text x="620" y="174" font-size="12" fill="#33691e" text-anchor="middle">локальная очередь создания</text>
+  <text x="620" y="202" font-size="11" fill="#1b5e20" text-anchor="middle">Владелец: руководитель техслужбы</text>
+
+  <rect x="80" y="80" width="280" height="150" rx="10" fill="#e3f2fd" stroke="#1565c0" stroke-width="2"/>
+  <text x="220" y="108" font-size="11" fill="#1565c0" text-anchor="middle">SUPPORTING</text>
+  <text x="220" y="134" font-size="16" font-weight="700" fill="#0d47a1" text-anchor="middle">Диспетчеризация</text>
+  <text x="220" y="156" font-size="12" fill="#1565c0" text-anchor="middle">Очередь, окончательный приоритет,</text>
+  <text x="220" y="174" font-size="12" fill="#1565c0" text-anchor="middle">назначение исполнителя</text>
+  <text x="220" y="202" font-size="11" fill="#0d47a1" text-anchor="middle">Владелец: координатор техслужбы</text>
+
+  <rect x="880" y="80" width="280" height="150" rx="10" fill="#fff8e1" stroke="#f9a825" stroke-width="2"/>
+  <text x="1020" y="108" font-size="11" fill="#f9a825" text-anchor="middle">SUPPORTING · ACL / Conformist</text>
+  <text x="1020" y="134" font-size="16" font-weight="700" fill="#f57f17" text-anchor="middle">Справочник оборудования</text>
+  <text x="1020" y="156" font-size="12" fill="#ef6c00" text-anchor="middle">Чтение карточки единицы,</text>
+  <text x="1020" y="174" font-size="12" fill="#ef6c00" text-anchor="middle">снимок названия в заявке</text>
+  <text x="1020" y="202" font-size="11" fill="#e65100" text-anchor="middle">Владелец: внешняя мастер-система</text>
+
+  <rect x="80" y="380" width="280" height="140" rx="10" fill="#f3e5f5" stroke="#6a1b9a" stroke-width="2"/>
+  <text x="220" y="410" font-size="11" fill="#6a1b9a" text-anchor="middle">GENERIC</text>
+  <text x="220" y="436" font-size="16" font-weight="700" fill="#4a148c" text-anchor="middle">Доступ и аудит</text>
+  <text x="220" y="458" font-size="12" fill="#6a1b9a" text-anchor="middle">Сессия, роли, журнал отказов</text>
+  <text x="220" y="490" font-size="11" fill="#4a148c" text-anchor="middle">Владелец: ИТ-служба / ИБ</text>
+
+  <rect x="880" y="380" width="280" height="140" rx="10" fill="#f3e5f5" stroke="#6a1b9a" stroke-width="2"/>
+  <text x="1020" y="410" font-size="11" fill="#6a1b9a" text-anchor="middle">GENERIC · ACL</text>
+  <text x="1020" y="436" font-size="16" font-weight="700" fill="#4a148c" text-anchor="middle">Уведомления</text>
+  <text x="1020" y="458" font-size="12" fill="#6a1b9a" text-anchor="middle">Адаптер к корпоративному каналу</text>
+  <text x="1020" y="490" font-size="11" fill="#4a148c" text-anchor="middle">Владелец: ИТ-платформа</text>
+
+  <line x1="360" y1="155" x2="470" y2="155" stroke="#455a64" stroke-width="1.6" marker-end="url(#cm-arr)"/>
+  <text x="415" y="140" font-size="11" font-weight="700" fill="#37474f" text-anchor="middle">C-S</text>
+  <text x="415" y="178" font-size="10" fill="#546e7a" text-anchor="middle">команды назначения</text>
+
+  <line x1="770" y1="155" x2="880" y2="155" stroke="#455a64" stroke-width="1.6" marker-end="url(#cm-arr)"/>
+  <text x="825" y="140" font-size="11" font-weight="700" fill="#37474f" text-anchor="middle">ACL</text>
+  <text x="825" y="178" font-size="10" fill="#546e7a" text-anchor="middle">чтение оборудования</text>
+
+  <line x1="220" y1="230" x2="220" y2="380" stroke="#455a64" stroke-width="1.6" marker-end="url(#cm-arr)"/>
+  <text x="300" y="310" font-size="11" font-weight="700" fill="#37474f">C-S / OHS</text>
+  <text x="300" y="326" font-size="10" fill="#546e7a">проверка полномочий</text>
+
+  <line x1="620" y1="230" x2="220" y2="380" stroke="#455a64" stroke-width="1.6" marker-end="url(#cm-arr)"/>
+  <text x="400" y="270" font-size="11" font-weight="700" fill="#37474f">C-S / OHS</text>
+
+  <line x1="770" y1="200" x2="1020" y2="380" stroke="#455a64" stroke-width="1.6" marker-end="url(#cm-arr)"/>
+  <text x="920" y="300" font-size="11" font-weight="700" fill="#37474f">OHS + ACL</text>
+  <text x="920" y="316" font-size="10" fill="#546e7a">события заявки в outbox</text>
+
+  <rect x="24" y="560" width="1232" height="136" rx="8" fill="#f4f6f8"/>
+  <text x="40" y="584" font-size="12" font-weight="700" fill="#1f2933">Как читать отношения</text>
+  <text x="40" y="606" font-size="12" fill="#374151">Customer-Supplier: потребитель задаёт контракт. Диспетчеризация использует команды заявок без дублирования модели.</text>
+  <text x="40" y="626" font-size="12" fill="#374151">Open Host Service: стабильные события и API заявок для интеграций.</text>
+  <text x="40" y="646" font-size="12" fill="#374151">Anti-Corruption Layer: перевод внешних моделей оборудования и канала уведомлений в внутренний язык.</text>
+  <text x="40" y="674" font-size="12" fill="#5f6b7a">Версия 0.1 · 2026-10-28</text>
+</svg>

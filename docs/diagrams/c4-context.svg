@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 820" width="1280" height="820" font-family="Helvetica Neue, Helvetica, Arial, sans-serif">
+  <title>C1 System Context — РемКонтур v0.1</title>
+  <defs>
+    <marker id="c1-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#4b5563"/>
+    </marker>
+  </defs>
+  <rect width="1280" height="820" fill="#ffffff"/>
+  <text x="24" y="28" font-size="18" font-weight="700" fill="#1f2933">C1 · System Context — РемКонтур v0.1</text>
+  <text x="24" y="48" font-size="12" fill="#5f6b7a">В центре одна система, без технологических деталей. Подписи на стрелках — действие инициатора.</text>
+
+  <rect x="24" y="80" width="220" height="86" rx="8" fill="#084c61"/>
+  <text x="134" y="106" font-size="13" font-weight="700" fill="#fff" text-anchor="middle">Оператор</text>
+  <text x="134" y="126" font-size="11" fill="#d7eef3" text-anchor="middle">Создаёт заявку и смотрит статус</text>
+
+  <rect x="24" y="186" width="220" height="86" rx="8" fill="#084c61"/>
+  <text x="134" y="212" font-size="13" font-weight="700" fill="#fff" text-anchor="middle">Мастер смены</text>
+  <text x="134" y="232" font-size="11" fill="#d7eef3" text-anchor="middle">Уточняет данные и приоритет</text>
+
+  <rect x="24" y="292" width="220" height="86" rx="8" fill="#084c61"/>
+  <text x="134" y="318" font-size="13" font-weight="700" fill="#fff" text-anchor="middle">Диспетчер</text>
+  <text x="134" y="338" font-size="11" fill="#d7eef3" text-anchor="middle">Назначает исполнителя</text>
+
+  <rect x="24" y="398" width="220" height="86" rx="8" fill="#084c61"/>
+  <text x="134" y="424" font-size="13" font-weight="700" fill="#fff" text-anchor="middle">Инженер</text>
+  <text x="134" y="444" font-size="11" fill="#d7eef3" text-anchor="middle">Фиксирует результат</text>
+
+  <rect x="24" y="504" width="220" height="86" rx="8" fill="#084c61"/>
+  <text x="134" y="530" font-size="13" font-weight="700" fill="#fff" text-anchor="middle">Руководитель</text>
+  <text x="134" y="550" font-size="11" fill="#d7eef3" text-anchor="middle">Контролирует очередь и сроки</text>
+
+  <rect x="430" y="250" width="300" height="150" rx="10" fill="#177e89" stroke="#0e4f56" stroke-width="3"/>
+  <text x="580" y="292" font-size="11" fill="#d7eef3" text-anchor="middle">НАША СИСТЕМА</text>
+  <text x="580" y="322" font-size="20" font-weight="700" fill="#fff" text-anchor="middle">РемКонтур</text>
+  <text x="580" y="348" font-size="12" fill="#d7eef3" text-anchor="middle">Регистрация, диспетчеризация, результат, история</text>
+  <text x="580" y="366" font-size="12" fill="#d7eef3" text-anchor="middle">заявок на ремонт и ТО</text>
+
+  <rect x="1036" y="80" width="220" height="86" rx="8" fill="#6b7280"/>
+  <text x="1146" y="106" font-size="13" font-weight="700" fill="#fff" text-anchor="middle">Корпоративный SSO</text>
+  <text x="1146" y="126" font-size="11" fill="#e5e7eb" text-anchor="middle">Аутентификация</text>
+
+  <rect x="1036" y="186" width="220" height="86" rx="8" fill="#6b7280"/>
+  <text x="1146" y="212" font-size="13" font-weight="700" fill="#fff" text-anchor="middle">Справочник сотрудников</text>
+  <text x="1146" y="232" font-size="11" fill="#e5e7eb" text-anchor="middle">Люди, участки, роли</text>
+
+  <rect x="1036" y="292" width="220" height="86" rx="8" fill="#6b7280"/>
+  <text x="1146" y="318" font-size="13" font-weight="700" fill="#fff" text-anchor="middle">Учёт оборудования</text>
+  <text x="1146" y="338" font-size="11" fill="#e5e7eb" text-anchor="middle">Карточки единиц</text>
+
+  <rect x="1036" y="398" width="220" height="86" rx="8" fill="#6b7280"/>
+  <text x="1146" y="424" font-size="13" font-weight="700" fill="#fff" text-anchor="middle">Сервис уведомлений</text>
+  <text x="1146" y="444" font-size="11" fill="#e5e7eb" text-anchor="middle">Сообщения о событиях заявки</text>
+
+  <line x1="244" y1="123" x2="430" y2="280" stroke="#4b5563" stroke-width="1.4" marker-end="url(#c1-arr)"/>
+  <line x1="244" y1="229" x2="430" y2="310" stroke="#4b5563" stroke-width="1.4" marker-end="url(#c1-arr)"/>
+  <line x1="244" y1="335" x2="430" y2="325" stroke="#4b5563" stroke-width="1.4" marker-end="url(#c1-arr)"/>
+  <line x1="244" y1="441" x2="430" y2="350" stroke="#4b5563" stroke-width="1.4" marker-end="url(#c1-arr)"/>
+  <line x1="244" y1="547" x2="430" y2="380" stroke="#4b5563" stroke-width="1.4" marker-end="url(#c1-arr)"/>
+
+  <line x1="730" y1="280" x2="1036" y2="123" stroke="#4b5563" stroke-width="1.4" marker-end="url(#c1-arr)"/>
+  <line x1="730" y1="310" x2="1036" y2="229" stroke="#4b5563" stroke-width="1.4" marker-end="url(#c1-arr)"/>
+  <line x1="730" y1="340" x2="1036" y2="335" stroke="#4b5563" stroke-width="1.4" marker-end="url(#c1-arr)"/>
+  <line x1="730" y1="380" x2="1036" y2="430" stroke="#4b5563" stroke-width="1.4" marker-end="url(#c1-arr)"/>
+  <line x1="1146" y1="484" x2="244" y2="590" stroke="#9ca3af" stroke-width="1.2" stroke-dasharray="5 4" marker-end="url(#c1-arr)"/>
+
+  <text x="330" y="250" font-size="10" fill="#374151">Используют систему</text>
+  <text x="820" y="200" font-size="10" fill="#374151">Проверяет сессию</text>
+  <text x="820" y="250" font-size="10" fill="#374151">Читает сотрудников</text>
+  <text x="790" y="318" font-size="10" fill="#374151">Читает оборудование</text>
+  <text x="790" y="410" font-size="10" fill="#374151">Передаёт события заявки</text>
+  <text x="560" y="640" font-size="10" fill="#6b7280">Уведомления доставляются пользователям вне транзакции заявки</text>
+
+  <rect x="24" y="700" width="1232" height="96" rx="8" fill="#f4f6f8"/>
+  <text x="40" y="724" font-size="12" font-weight="700" fill="#1f2933">Легенда</text>
+  <rect x="40" y="740" width="22" height="14" rx="3" fill="#084c61"/>
+  <text x="70" y="752" font-size="12" fill="#1f2933">Person</text>
+  <rect x="430" y="740" width="22" height="14" rx="3" fill="#177e89"/>
+  <text x="460" y="752" font-size="12" fill="#1f2933">Software System (наша граница)</text>
+  <rect x="780" y="740" width="22" height="14" rx="3" fill="#6b7280"/>
+  <text x="810" y="752" font-size="12" fill="#1f2933">Внешняя система</text>
+  <text x="40" y="778" font-size="12" fill="#5f6b7a">Версия 0.1 · 2026-10-28</text>
+</svg>

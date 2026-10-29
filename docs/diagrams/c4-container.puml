@@ -1,0 +1,36 @@
+@startuml C2-Containers
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title C2 · Container — РемКонтур v0.1
+caption Модульный монолит (ADR-001), PostgreSQL (ADR-002), без брокера (ADR-003). Офлайн NFR-02 — в АРМ.
+
+Person(operator, "Оператор оборудования")
+Person(dispatcher, "Диспетчер / координатор")
+Person(engineer, "Инженер техслужбы")
+
+System_Boundary(b, "РемКонтур") {
+    Container(arm, "АРМ сотрудника", "SPA/PWA, JavaScript, IndexedDB", "Список, создание, карточка; очередь неподтверждённых операций создания")
+    Container(app, "Приложение РемКонтур", "Python, FastAPI", "Модули: заявки, диспетчеризация, доступ/аудит, ACL оборудования, запись outbox")
+    ContainerDb(db, "БД заявок", "PostgreSQL", "Заявки, история, аудит, operation_id, outbox. Единственная система записи")
+    Container(worker, "Обработчик исходящих", "Python worker", "Читает outbox и доставляет уведомления; агрегат заявки не меняет")
+}
+
+System_Ext(sso, "Корпоративный SSO")
+System_Ext(directory, "Справочник сотрудников")
+System_Ext(equipment, "Система учёта оборудования")
+System_Ext(notifications, "Сервис уведомлений")
+
+Rel(operator, arm, "Создаёт заявки, в том числе без связи")
+Rel(dispatcher, arm, "Назначает исполнителя")
+Rel(engineer, arm, "Фиксирует результат")
+
+Rel(arm, app, "Команды и запросы", "HTTPS/JSON, синхронно")
+Rel(app, db, "Читает и пишет", "SQL, синхронно")
+Rel(worker, db, "Читает outbox, отмечает доставку", "SQL, синхронно")
+Rel(worker, notifications, "Отправляет уведомление", "HTTPS, асинхронно относительно пользователя")
+Rel(app, sso, "Проверяет токен", "OIDC/HTTPS, синхронно")
+Rel(app, directory, "Читает сотрудника", "HTTPS/JSON, синхронно")
+Rel(app, equipment, "Читает оборудование", "HTTPS/JSON, синхронно")
+
+SHOW_LEGEND()
+@enduml
