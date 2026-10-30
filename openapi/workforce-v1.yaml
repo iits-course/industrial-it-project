@@ -1,0 +1,223 @@
+openapi: 3.0.3
+info:
+  title: Workforce Reservation API
+  version: 1.0.0
+  description: |
+    Внутренний синхронный контракт резервирования инженера для саги назначения.
+    Сервис заявок не меняет загрузку сотрудника напрямую. Все команды используют
+    один saga_id как ключ идемпотентности. Timeout клиента — 2 секунды.
+servers:
+  - url: https://workforce-api.example.internal
+    description: Placeholder внутренней среды
+tags:
+  - name: Reservations
+    description: Идемпотентное резервирование и компенсация загрузки инженера
+paths:
+  /v1/reservations:
+    post:
+      tags: [Reservations]
+      summary: Зарезервировать инженера для заявки
+      operationId: reserveEngineerV1
+      x-idempotent: true
+      x-timeout-ms: 2000
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateReservation' }
+            example:
+              saga_id: 8d36a23b-8bd8-46a4-a824-385bbf53c408
+              request_id: REQ-2026-1042
+              engineer_id: EMP-0241
+              priority: high
+              expires_at: '2026-10-29T09:00:00Z'
+      responses:
+        '201':
+          description: Резерв подтверждён либо возвращён сохранённый результат повтора
+          headers:
+            Idempotent-Replayed:
+              schema: { type: boolean, default: false }
+              description: true для безопасного повтора
+            Location:
+              schema: { type: string, example: /v1/reservations/RSV-01JBD2QK5E }
+              description: URI резерва
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Reservation' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/UnprocessableEntity' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+        '503': { $ref: '#/components/responses/ServiceUnavailable' }
+  /v1/reservations/{reservationId}:
+    get:
+      tags: [Reservations]
+      summary: Проверить исход резервирования после таймаута
+      operationId: getReservationV1
+      x-timeout-ms: 1500
+      parameters:
+        - $ref: '#/components/parameters/ReservationId'
+        - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          description: Текущее подтверждённое состояние резерва
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Reservation' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+        '503': { $ref: '#/components/responses/ServiceUnavailable' }
+    delete:
+      tags: [Reservations]
+      summary: Компенсировать резервирование инженера
+      operationId: cancelReservationV1
+      description: Повтор отмены с тем же ключом безопасен; уже отменённый резерв возвращает 204.
+      x-idempotent: true
+      x-timeout-ms: 2000
+      parameters:
+        - $ref: '#/components/parameters/ReservationId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '204':
+          description: Резерв отменён либо был отменён ранее
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+        '503': { $ref: '#/components/responses/ServiceUnavailable' }
+  /v1/reservations/by-saga/{sagaId}:
+    get:
+      tags: [Reservations]
+      summary: Проверить исход резервирования по известному saga_id
+      operationId: getReservationBySagaV1
+      description: Используется оркестратором, если ответ POST потерян и reservation_id неизвестен.
+      x-timeout-ms: 1500
+      parameters:
+        - $ref: '#/components/parameters/SagaId'
+        - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          description: Резерв был создан; состояние является подтверждённым
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Reservation' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+        '503': { $ref: '#/components/responses/ServiceUnavailable' }
+components:
+  securitySchemes:
+    serviceToken:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Service-to-service token; конкретный IdP определяется в модуле безопасности
+  parameters:
+    ReservationId:
+      name: reservationId
+      in: path
+      required: true
+      schema: { type: string, pattern: '^RSV-[A-Z0-9]{10,32}$' }
+    SagaId:
+      name: sagaId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: UUID saga_id; одинаковая операция повторяется с тем же ключом и телом
+      schema: { type: string, format: uuid }
+    CorrelationId:
+      name: X-Correlation-Id
+      in: header
+      required: false
+      schema: { type: string, format: uuid }
+  schemas:
+    CreateReservation:
+      type: object
+      additionalProperties: false
+      required: [saga_id, request_id, engineer_id, priority, expires_at]
+      properties:
+        saga_id: { type: string, format: uuid }
+        request_id: { type: string, pattern: '^REQ-[0-9]{4}-[0-9]{4,}$' }
+        engineer_id: { type: string, minLength: 1, maxLength: 64 }
+        priority: { type: string, enum: [low, normal, high, critical] }
+        expires_at: { type: string, format: date-time }
+    Reservation:
+      type: object
+      additionalProperties: false
+      required: [reservation_id, saga_id, request_id, engineer_id, status, created_at, updated_at]
+      properties:
+        reservation_id: { type: string, pattern: '^RSV-[A-Z0-9]{10,32}$' }
+        saga_id: { type: string, format: uuid }
+        request_id: { type: string }
+        engineer_id: { type: string }
+        status: { type: string, enum: [reserved, cancelled, expired] }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    ProblemDetails:
+      type: object
+      additionalProperties: false
+      required: [type, title, status, code, detail, correlation_id]
+      properties:
+        type: { type: string, format: uri-reference }
+        title: { type: string }
+        status: { type: integer, minimum: 400, maximum: 599 }
+        code:
+          type: string
+          enum:
+            - INVALID_REQUEST
+            - UNAUTHORIZED
+            - FORBIDDEN
+            - NOT_FOUND
+            - ENGINEER_UNAVAILABLE
+            - IDEMPOTENCY_KEY_REUSED
+            - RESERVATION_ALREADY_CONSUMED
+            - RATE_LIMITED
+            - DEPENDENCY_UNAVAILABLE
+        detail: { type: string }
+        correlation_id: { type: string, format: uuid }
+        retryable: { type: boolean, default: false }
+  responses:
+    BadRequest:
+      description: Некорректный запрос
+      content: { application/problem+json: { schema: { $ref: '#/components/schemas/ProblemDetails' } } }
+    Unauthorized:
+      description: Нет действительного service token
+      content: { application/problem+json: { schema: { $ref: '#/components/schemas/ProblemDetails' } } }
+    Forbidden:
+      description: Сервис не имеет права на операцию
+      content: { application/problem+json: { schema: { $ref: '#/components/schemas/ProblemDetails' } } }
+    NotFound:
+      description: Резерв не найден
+      content: { application/problem+json: { schema: { $ref: '#/components/schemas/ProblemDetails' } } }
+    Conflict:
+      description: Инженер недоступен, резерв уже использован либо ключ применён с другим телом
+      content: { application/problem+json: { schema: { $ref: '#/components/schemas/ProblemDetails' } } }
+    UnprocessableEntity:
+      description: Нарушено бизнес-правило резервирования
+      content: { application/problem+json: { schema: { $ref: '#/components/schemas/ProblemDetails' } } }
+    TooManyRequests:
+      description: Превышен лимит
+      headers:
+        Retry-After: { schema: { type: integer, minimum: 1 }, description: 'Пауза, секунды' }
+      content: { application/problem+json: { schema: { $ref: '#/components/schemas/ProblemDetails' } } }
+    ServiceUnavailable:
+      description: Временная недоступность; исход может быть неизвестен, проверить GET перед новым действием
+      headers:
+        Retry-After: { schema: { type: integer, minimum: 1 }, description: 'Пауза, секунды' }
+      content: { application/problem+json: { schema: { $ref: '#/components/schemas/ProblemDetails' } } }
+security:
+  - serviceToken: []

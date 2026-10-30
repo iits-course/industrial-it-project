@@ -1,0 +1,136 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1640 900" width="1640" height="900" font-family="Helvetica Neue, Helvetica, Arial, sans-serif">
+<title>C2 v0.2 · внешняя граница РемКонтур: адаптеры на стыках с legacy и вендорами</title>
+<defs>
+<marker id="at" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#00838f"/></marker>
+<marker id="ap" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6a4fb3"/></marker>
+</defs>
+<rect width="1640" height="900" fill="#ffffff"/>
+<text x="24" y="32" font-size="19" font-weight="700" fill="#1f2933">C2 v0.2 · внешняя граница РемКонтур (неделя 8, Тема 2.4)</text>
+<text x="24" y="53" font-size="12" fill="#5f6b7a">Адаптеры на стыках с legacy и вендором; мимо адаптера нет ни одной стрелки, кроме двух исключений по ADR-006 (SSO по OIDC и Workforce по контракту). Учебная гипотеза v0.2: заменяет прямые стрелки C2 v0.1 (05 §6).</text>
+<rect x="24" y="76" width="1190" height="760" rx="14" fill="#fbfcfe" stroke="#2b6cdf" stroke-width="2" stroke-dasharray="8 5"/>
+<text x="44" y="102" font-size="14" font-weight="700" fill="#2b6cdf">Граница системы РемКонтур</text>
+<text x="1330" y="102" font-size="14" font-weight="700" fill="#6b7785">Внешние системы</text>
+<rect x="44" y="130" width="210" height="108" rx="9" fill="#eef4fe" stroke="#2b6cdf" stroke-width="1.5"/>
+<text x="56" y="154" font-size="13.5" font-weight="700" fill="#1f2933">АРМ сотрудника</text>
+<text x="56" y="174" font-size="11" fill="#5f6b7a">SPA/PWA, IndexedDB</text>
+<text x="56" y="188" font-size="11" fill="#5f6b7a">Формы и очередь</text>
+<text x="56" y="202" font-size="11" fill="#5f6b7a">неподтверждённых операций</text>
+<text x="56" y="216" font-size="11" fill="#5f6b7a">создания (NFR-02)</text>
+<rect x="330" y="130" width="260" height="250" rx="9" fill="#eef4fe" stroke="#2b6cdf" stroke-width="1.5"/>
+<text x="342" y="154" font-size="13.5" font-weight="700" fill="#1f2933">Приложение РемКонтур</text>
+<text x="342" y="174" font-size="11" fill="#5f6b7a">Repair Request Service · Python,</text>
+<text x="342" y="188" font-size="11" fill="#5f6b7a">FastAPI</text>
+<text x="342" y="202" font-size="11" fill="#5f6b7a">Модульный монолит (ADR-0001):</text>
+<text x="342" y="216" font-size="11" fill="#5f6b7a">work-request, dispatching,</text>
+<text x="342" y="230" font-size="11" fill="#5f6b7a">access-audit</text>
+<text x="342" y="244" font-size="11" fill="#5f6b7a">Единственный писатель агрегата заявки</text>
+<rect x="330" y="440" width="260" height="96" rx="9" fill="#eef4fe" stroke="#2b6cdf" stroke-width="1.5"/>
+<text x="342" y="464" font-size="13.5" font-weight="700" fill="#1f2933">PostgreSQL OLTP</text>
+<text x="342" y="484" font-size="11" fill="#5f6b7a">Заявки, история, аудит, idempotency,</text>
+<text x="342" y="498" font-size="11" fill="#5f6b7a">MDM read model, outbox (ADR-0002)</text>
+<rect x="330" y="590" width="260" height="80" rx="9" fill="#eef4fe" stroke="#2b6cdf" stroke-width="1.5"/>
+<text x="342" y="614" font-size="13.5" font-weight="700" fill="#1f2933">Outbox Relay</text>
+<text x="342" y="634" font-size="11" fill="#5f6b7a">Читает outbox, публикует</text>
+<text x="342" y="648" font-size="11" fill="#5f6b7a">с publisher confirm</text>
+<rect x="640" y="590" width="230" height="80" rx="9" fill="#eef4fe" stroke="#2b6cdf" stroke-width="1.5"/>
+<text x="652" y="614" font-size="13.5" font-weight="700" fill="#1f2933">RabbitMQ</text>
+<text x="652" y="634" font-size="11" fill="#5f6b7a">AMQP, topic exchange</text>
+<text x="652" y="648" font-size="11" fill="#5f6b7a">события v1 · ADR-004</text>
+<rect x="640" y="730" width="230" height="80" rx="9" fill="#eef4fe" stroke="#2b6cdf" stroke-width="1.5"/>
+<text x="652" y="754" font-size="13.5" font-weight="700" fill="#1f2933">Notification Worker</text>
+<text x="652" y="774" font-size="11" fill="#5f6b7a">Consumer: inbox, retry, DLQ</text>
+<rect x="330" y="730" width="260" height="84" rx="9" fill="#eef4fe" stroke="#2b6cdf" stroke-width="1.5"/>
+<text x="342" y="754" font-size="13.5" font-weight="700" fill="#1f2933">Analytics Loader + Warehouse +</text>
+<text x="342" y="771" font-size="13.5" font-weight="700" fill="#1f2933">BI</text>
+<text x="342" y="791" font-size="11" fill="#5f6b7a">OLAP-контур, read-only к OLTP</text>
+<rect x="920" y="430" width="250" height="140" rx="9" fill="#e7f6ee" stroke="#1b7f4b" stroke-width="3"/>
+<text x="932" y="454" font-size="13.5" font-weight="700" fill="#1f2933">Master Data Adapter</text>
+<text x="932" y="474" font-size="11" fill="#5f6b7a">Фасад · транслятор · защита ·</text>
+<text x="932" y="488" font-size="11" fill="#5f6b7a">протокол</text>
+<text x="932" y="502" font-size="11" fill="#5f6b7a">Только чтение EAM и HR, записи в</text>
+<text x="932" y="516" font-size="11" fill="#5f6b7a">чужие БД нет</text>
+<text x="932" y="530" font-size="11" fill="#5f6b7a">Владелец: Martin</text>
+<rect x="1135.4" y="420" width="26.6" height="19" rx="9" fill="#1b7f4b"/>
+<text x="1148.7" y="434" font-size="10.5" font-weight="700" fill="#fff" text-anchor="middle">ACL</text>
+<rect x="920" y="730" width="250" height="96" rx="9" fill="#e7f6ee" stroke="#1b7f4b" stroke-width="3"/>
+<text x="932" y="754" font-size="13.5" font-weight="700" fill="#1f2933">Адаптер уведомлений</text>
+<text x="932" y="774" font-size="11" fill="#5f6b7a">Фасад deliver() · транслятор статусов</text>
+<text x="932" y="788" font-size="11" fill="#5f6b7a">Таймаут 5 с, повтор с тем же ключом</text>
+<text x="932" y="802" font-size="11" fill="#5f6b7a">Владелец: Amir</text>
+<rect x="1135.4" y="720" width="26.6" height="19" rx="9" fill="#1b7f4b"/>
+<text x="1148.7" y="734" font-size="10.5" font-weight="700" fill="#fff" text-anchor="middle">ACL</text>
+<rect x="1330" y="128" width="270" height="70" rx="9" fill="#f1f3f5" stroke="#6b7785" stroke-width="1.5"/>
+<text x="1342" y="152" font-size="13.5" font-weight="700" fill="#1f2933">Корпоративный SSO</text>
+<text x="1342" y="172" font-size="11" fill="#5f6b7a">OIDC, стандарт · без ACL (ADR-006)</text>
+<rect x="1534.4" y="118" width="57.6" height="19" rx="9" fill="#6b7785"/>
+<text x="1563.2" y="132" font-size="10.5" font-weight="700" fill="#fff" text-anchor="middle">стандарт</text>
+<rect x="1330" y="242" width="270" height="82" rx="9" fill="#f1f3f5" stroke="#6b7785" stroke-width="1.5"/>
+<text x="1342" y="266" font-size="13.5" font-weight="700" fill="#1f2933">Workforce Service</text>
+<text x="1342" y="286" font-size="11" fill="#5f6b7a">Соседняя команда, контракт workforce-v1</text>
+<text x="1342" y="300" font-size="11" fill="#5f6b7a">без ACL (ADR-006)</text>
+<rect x="1534.4" y="232" width="57.6" height="19" rx="9" fill="#6b7785"/>
+<text x="1563.2" y="246" font-size="10.5" font-weight="700" fill="#fff" text-anchor="middle">контракт</text>
+<rect x="1330" y="428" width="270" height="76" rx="9" fill="#f1f3f5" stroke="#6b7785" stroke-width="1.5"/>
+<text x="1342" y="452" font-size="13.5" font-weight="700" fill="#1f2933">EAM / учёт оборудования</text>
+<text x="1342" y="472" font-size="11" fill="#5f6b7a">Legacy, внутренняя · не наш выбор</text>
+<rect x="1546.8" y="418" width="45.2" height="19" rx="9" fill="#6b7785"/>
+<text x="1569.4" y="432" font-size="10.5" font-weight="700" fill="#fff" text-anchor="middle">legacy</text>
+<rect x="1330" y="516" width="270" height="76" rx="9" fill="#f1f3f5" stroke="#6b7785" stroke-width="1.5"/>
+<text x="1342" y="540" font-size="13.5" font-weight="700" fill="#1f2933">HR / IAM каталог</text>
+<text x="1342" y="560" font-size="11" fill="#5f6b7a">Legacy, внутренняя · не наш выбор</text>
+<rect x="1546.8" y="506" width="45.2" height="19" rx="9" fill="#6b7785"/>
+<text x="1569.4" y="520" font-size="10.5" font-weight="700" fill="#fff" text-anchor="middle">legacy</text>
+<rect x="1330" y="736" width="270" height="84" rx="9" fill="#f1f3f5" stroke="#6b7785" stroke-width="1.5"/>
+<text x="1342" y="760" font-size="13.5" font-weight="700" fill="#1f2933">Провайдер уведомлений</text>
+<text x="1342" y="780" font-size="11" fill="#5f6b7a">Вендор или корп. платформа</text>
+<text x="1342" y="794" font-size="11" fill="#5f6b7a">Не выбран (OQ-12) · ADR-005</text>
+<rect x="1546.8" y="726" width="45.2" height="19" rx="9" fill="#6b7785"/>
+<text x="1569.4" y="740" font-size="10.5" font-weight="700" fill="#fff" text-anchor="middle">вендор</text>
+<path d="M254,170 L330,170" fill="none" stroke="#00838f" stroke-width="1.8" marker-end="url(#at)"/>
+<rect x="257.5" y="195.0" width="69.0" height="32" rx="4" fill="#ffffff" opacity="0.92"/>
+<text x="292" y="208.0" font-size="10.5" fill="#00838f" text-anchor="middle" font-weight="600">HTTPS/JSON</text>
+<text x="292" y="222.0" font-size="10.5" fill="#00838f" text-anchor="middle" font-weight="600">синхронно</text>
+<path d="M590,160 L1330,160" fill="none" stroke="#00838f" stroke-width="1.8" marker-end="url(#at)"/>
+<rect x="825.2" y="150.0" width="269.6" height="18" rx="4" fill="#ffffff" opacity="0.92"/>
+<text x="960" y="163.0" font-size="10.5" fill="#00838f" text-anchor="middle" font-weight="600">OIDC · проверка токена, кэш ключей · без ACL</text>
+<path d="M590,283 L1330,283" fill="none" stroke="#00838f" stroke-width="1.8" marker-end="url(#at)"/>
+<rect x="810.45" y="273.0" width="299.1" height="18" rx="4" fill="#ffffff" opacity="0.92"/>
+<text x="960" y="286.0" font-size="10.5" fill="#00838f" text-anchor="middle" font-weight="600">REST workforce-v1 · таймаут 2 с · сага назначения</text>
+<path d="M460,380 L460,440" fill="none" stroke="#00838f" stroke-width="1.8" marker-end="url(#at)" marker-start="url(#at)"/>
+<rect x="468.15" y="400.0" width="27.700000000000003" height="18" rx="4" fill="#ffffff" opacity="0.92"/>
+<text x="482" y="413.0" font-size="10.5" fill="#00838f" text-anchor="middle" font-weight="600">SQL</text>
+<path d="M920,478 L590,478" fill="none" stroke="#00838f" stroke-width="1.8" marker-end="url(#at)"/>
+<rect x="661.5" y="453.0" width="187.0" height="32" rx="4" fill="#ffffff" opacity="0.92"/>
+<text x="755" y="466.0" font-size="10.5" fill="#00838f" text-anchor="middle" font-weight="600">запись read model · SQL</text>
+<text x="755" y="480.0" font-size="10.5" fill="#00838f" text-anchor="middle" font-weight="600">единственный писатель проекции</text>
+<path d="M1170,466 L1330,466" fill="none" stroke="#00838f" stroke-width="1.8" marker-end="url(#at)"/>
+<rect x="1180.1" y="433.0" width="139.8" height="32" rx="4" fill="#ffffff" opacity="0.92"/>
+<text x="1250" y="446.0" font-size="10.5" fill="#00838f" text-anchor="middle" font-weight="600">API / файл · read-only</text>
+<text x="1250" y="460.0" font-size="10.5" fill="#00838f" text-anchor="middle" font-weight="600">контракт неизвестен</text>
+<path d="M1170,554 L1330,554" fill="none" stroke="#00838f" stroke-width="1.8" marker-end="url(#at)"/>
+<rect x="1168.3" y="528.0" width="163.4" height="18" rx="4" fill="#ffffff" opacity="0.92"/>
+<text x="1250" y="541.0" font-size="10.5" fill="#00838f" text-anchor="middle" font-weight="600">API / выгрузка · read-only</text>
+<path d="M460,536 L460,590" fill="none" stroke="#00838f" stroke-width="1.8" marker-end="url(#at)"/>
+<rect x="456.65" y="553.0" width="86.7" height="18" rx="4" fill="#ffffff" opacity="0.92"/>
+<text x="500" y="566.0" font-size="10.5" fill="#00838f" text-anchor="middle" font-weight="600">читает outbox</text>
+<path d="M590,630 L640,630" fill="none" stroke="#6a4fb3" stroke-width="1.8" stroke-dasharray="7 4" marker-end="url(#ap)"/>
+<path d="M755,670 L755,730" fill="none" stroke="#6a4fb3" stroke-width="1.8" stroke-dasharray="7 4" marker-end="url(#ap)"/>
+<rect x="758.45" y="690.0" width="63.1" height="18" rx="4" fill="#ffffff" opacity="0.92"/>
+<text x="790" y="703.0" font-size="10.5" fill="#6a4fb3" text-anchor="middle" font-weight="600">events v1</text>
+<path d="M660,670 L660,700 L460,700 L460,730" fill="none" stroke="#6a4fb3" stroke-width="1.8" stroke-dasharray="7 4" marker-end="url(#ap)"/>
+<rect x="528.45" y="690.0" width="63.1" height="18" rx="4" fill="#ffffff" opacity="0.92"/>
+<text x="560" y="703.0" font-size="10.5" fill="#6a4fb3" text-anchor="middle" font-weight="600">events v1</text>
+<path d="M870,770 L920,770" fill="none" stroke="#00838f" stroke-width="1.8" marker-end="url(#at)"/>
+<rect x="863.45" y="742.0" width="63.1" height="18" rx="4" fill="#ffffff" opacity="0.92"/>
+<text x="895" y="755.0" font-size="10.5" fill="#00838f" text-anchor="middle" font-weight="600">deliver()</text>
+<path d="M1170,778 L1330,778" fill="none" stroke="#00838f" stroke-width="1.8" marker-end="url(#at)"/>
+<rect x="1188.95" y="728.0" width="122.10000000000001" height="32" rx="4" fill="#ffffff" opacity="0.92"/>
+<text x="1250" y="741.0" font-size="10.5" fill="#00838f" text-anchor="middle" font-weight="600">HTTPS · таймаут 5 с</text>
+<text x="1250" y="755.0" font-size="10.5" fill="#00838f" text-anchor="middle" font-weight="600">очередь повторов</text>
+<rect x="44" y="858" width="1150" height="22" rx="4" fill="#ffffff"/>
+<rect x="52" y="862" width="26" height="14" rx="3" fill="#eef4fe" stroke="#2b6cdf" stroke-width="1.5"/><text x="86" y="874" font-size="11" fill="#1f2933">контейнер РемКонтур</text>
+<rect x="230" y="862" width="26" height="14" rx="3" fill="#e7f6ee" stroke="#1b7f4b" stroke-width="3"/><text x="264" y="874" font-size="11" fill="#1f2933">адаптер (ACL): владелец, контракт, метрики</text>
+<rect x="520" y="862" width="26" height="14" rx="3" fill="#f1f3f5" stroke="#6b7785" stroke-width="1.5"/><text x="554" y="874" font-size="11" fill="#1f2933">внешняя система</text>
+<path d="M690,869 L730,869" stroke="#00838f" stroke-width="1.8" marker-end="url(#at)"/><text x="738" y="874" font-size="11" fill="#1f2933">синхронный вызов</text>
+<path d="M870,869 L910,869" stroke="#6a4fb3" stroke-width="1.8" stroke-dasharray="7 4" marker-end="url(#ap)"/><text x="918" y="874" font-size="11" fill="#1f2933">асинхронно (события)</text>
+</svg>

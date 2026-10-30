@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="620" viewBox="0 0 1500 620" role="img" aria-labelledby="title desc">
+  <title id="title">Data Lineage KPI времени назначения</title>
+  <desc id="desc">Путь данных от действий создания и назначения заявки через OLTP, Outbox, RabbitMQ, аналитические слои до дашборда руководителя.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#476582"/></marker>
+    <style>
+      .title{font:700 25px Arial,sans-serif;fill:#10233d}.sub{font:14px Arial,sans-serif;fill:#52677d}.box{fill:#fff;stroke:#8ba3b9;stroke-width:2;rx:14}.source{fill:#edf6ff;stroke:#3784d6}.flow{fill:#f5f1ff;stroke:#7867c8}.data{fill:#eefaf5;stroke:#3b9a72}.mart{fill:#fff6e8;stroke:#d68a26}.h{font:700 16px Arial,sans-serif;fill:#152a43}.t{font:13px Arial,sans-serif;fill:#445d73}.code{font:12px monospace;fill:#29455f}.arrow{stroke:#476582;stroke-width:2;fill:none;marker-end:url(#arrow)}.dq{font:700 11px Arial,sans-serif;fill:#8d4f00}.owner{font:12px Arial,sans-serif;fill:#62788b}.note{fill:#f8fafc;stroke:#cbd6df;stroke-dasharray:6 4;rx:10}.metric{font:700 15px Arial,sans-serif;fill:#7d4b04}
+    </style>
+  </defs>
+  <rect width="1500" height="620" fill="#f6f8fb"/>
+  <text x="50" y="48" class="title">Data Lineage · среднее время регистрации → первого назначения</text>
+  <text x="50" y="75" class="sub">Target-гипотеза ≤ 30 минут · время факта в UTC · витрина показывает свежесть и статус DQ</text>
+
+  <rect x="50" y="125" width="200" height="210" class="box source"/>
+  <text x="72" y="157" class="h">1 · Действия ролей</text>
+  <text x="72" y="187" class="t">Оператор создаёт заявку</text>
+  <text x="72" y="212" class="t">Диспетчер назначает</text>
+  <text x="72" y="247" class="code">Idempotency-Key</text>
+  <text x="72" y="269" class="code">correlation_id</text>
+  <text x="72" y="306" class="owner">Владелец: процесс</text>
+
+  <rect x="295" y="125" width="210" height="210" class="box source"/>
+  <text x="317" y="157" class="h">2 · PostgreSQL OLTP</text>
+  <text x="317" y="188" class="code">request.created_at</text>
+  <text x="317" y="212" class="code">assignment.confirmed_at</text>
+  <text x="317" y="236" class="code">aggregate_version</text>
+  <text x="317" y="270" class="dq">DQ-01 · DQ-03 · DQ-04</text>
+  <text x="317" y="306" class="owner">SoR: сервис заявок</text>
+
+  <rect x="550" y="125" width="210" height="210" class="box flow"/>
+  <text x="572" y="157" class="h">3 · Outbox + broker</text>
+  <text x="572" y="188" class="code">Created.v1</text>
+  <text x="572" y="212" class="code">Assigned.v1</text>
+  <text x="572" y="246" class="t">at-least-once</text>
+  <text x="572" y="270" class="t">dedupe: event_id</text>
+  <text x="572" y="306" class="owner">Custodian: integration</text>
+
+  <rect x="805" y="125" width="210" height="210" class="box data"/>
+  <text x="827" y="157" class="h">4 · Raw / Core</text>
+  <text x="827" y="188" class="t">schema validation</text>
+  <text x="827" y="212" class="t">join по request_id</text>
+  <text x="827" y="236" class="t">MIN(confirmed_at)</text>
+  <text x="827" y="270" class="dq">DQ-05 · DQ-06</text>
+  <text x="827" y="306" class="owner">Custodian: Data Platform</text>
+
+  <rect x="1060" y="125" width="190" height="210" class="box mart"/>
+  <text x="1082" y="157" class="h">5 · KPI mart</text>
+  <text x="1082" y="188" class="code">lead_time_min</text>
+  <text x="1082" y="212" class="t">AVG · p50 · p95</text>
+  <text x="1082" y="236" class="t">доля без назначения</text>
+  <text x="1082" y="270" class="dq">freshness ≤ 15 мин</text>
+  <text x="1082" y="306" class="owner">Steward: аналитик</text>
+
+  <rect x="1295" y="125" width="155" height="210" class="box mart"/>
+  <text x="1317" y="157" class="h">6 · Dashboard</text>
+  <text x="1317" y="193" class="metric">AVG ≤ 30 мин?</text>
+  <text x="1317" y="224" class="t">срез: участок</text>
+  <text x="1317" y="247" class="t">приоритет · период</text>
+  <text x="1317" y="282" class="t">DQ / freshness</text>
+  <text x="1317" y="306" class="owner">Owner: руководитель</text>
+
+  <path d="M250 230 H295" class="arrow"/><path d="M505 230 H550" class="arrow"/>
+  <path d="M760 230 H805" class="arrow"/><path d="M1015 230 H1060" class="arrow"/>
+  <path d="M1250 230 H1295" class="arrow"/>
+
+  <rect x="245" y="400" width="1010" height="145" class="note"/>
+  <text x="270" y="432" class="h">Формула и правила выборки</text>
+  <text x="270" y="464" class="code">lead_time_minutes = (first_confirmed_assignment_at - registered_at) / 60</text>
+  <text x="270" y="494" class="t">В KPI входят зарегистрированные в периоде заявки с первым подтверждённым назначением.</text>
+  <text x="270" y="519" class="t">Заявки без назначения показываются отдельной долей; переназначение не переписывает первый timestamp.</text>
+</svg>

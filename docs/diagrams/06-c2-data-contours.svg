@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="930" viewBox="0 0 1600 930" role="img" aria-labelledby="title desc">
+  <title id="title">C2: контейнеры и контуры данных системы управления заявками</title>
+  <desc id="desc">Операционный контур с клиентом, сервисом заявок и PostgreSQL, мастер-источники, брокер и отдельный аналитический контур.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#526d87"/></marker>
+    <style>
+      .bg{fill:#f5f7fa}.boundary{fill:#fff;stroke:#9cafc1;stroke-width:2;rx:20}.zone{fill:#f9fbfd;stroke:#b8c6d3;stroke-width:2;stroke-dasharray:8 5;rx:16}.external{fill:#fff6e8;stroke:#d5953f;stroke-width:2;rx:12}.op{fill:#eaf4ff;stroke:#397fc6;stroke-width:2;rx:12}.async{fill:#f3efff;stroke:#7661bd;stroke-width:2;rx:12}.analytics{fill:#ecf9f2;stroke:#3c956b;stroke-width:2;rx:12}.db{fill:#eef3f7;stroke:#607a91;stroke-width:2;rx:12}.title{font:700 26px Arial,sans-serif;fill:#10233d}.zoneTitle{font:700 18px Arial,sans-serif;fill:#29445e}.h{font:700 15px Arial,sans-serif;fill:#17314c}.t{font:12px Arial,sans-serif;fill:#4d657b}.small{font:11px Arial,sans-serif;fill:#60778b}.arrow{stroke:#526d87;stroke-width:2;fill:none;marker-end:url(#arrow)}.event{stroke:#755db8;stroke-width:2;stroke-dasharray:7 4;fill:none;marker-end:url(#arrow)}.label{font:11px Arial,sans-serif;fill:#405a72}.legend{font:12px Arial,sans-serif;fill:#3f5870}
+    </style>
+  </defs>
+  <rect width="1600" height="930" class="bg"/>
+  <text x="50" y="48" class="title">C2 · система заявок, мастер-данные и аналитический контур</text>
+
+  <rect x="40" y="85" width="290" height="765" class="zone"/>
+  <text x="62" y="117" class="zoneTitle">Внешние системы</text>
+  <rect x="70" y="160" width="230" height="105" class="external"/>
+  <text x="90" y="190" class="h">EAM / учёт оборудования</text><text x="90" y="217" class="t">SoR Equipment</text><text x="90" y="240" class="small">ID · модель · статус · участок</text>
+  <rect x="70" y="305" width="230" height="105" class="external"/>
+  <text x="90" y="335" class="h">HR / IAM каталог</text><text x="90" y="362" class="t">SoR Employee, OrgUnit</text><text x="90" y="385" class="small">ID · роль · статус</text>
+  <rect x="70" y="455" width="230" height="105" class="external"/>
+  <text x="90" y="485" class="h">Notification gateway</text><text x="90" y="512" class="t">Email / корпоративный канал</text><text x="90" y="535" class="small">адреса не входят в события</text>
+  <rect x="70" y="605" width="230" height="105" class="external"/>
+  <text x="90" y="635" class="h">Workforce Service</text><text x="90" y="662" class="t">SoR резервов загрузки</text><text x="90" y="685" class="small">reserve · get · cancel</text>
+
+  <rect x="365" y="85" width="760" height="765" class="boundary"/>
+  <text x="390" y="117" class="zoneTitle">Граница системы управления заявками</text>
+  <rect x="410" y="155" width="230" height="110" class="op"/>
+  <text x="433" y="187" class="h">Web / PWA client</text><text x="433" y="214" class="t">ролевой UI · локальная очередь</text><text x="433" y="238" class="small">не SoR до server confirmation</text>
+  <rect x="710" y="155" width="300" height="125" class="op"/>
+  <text x="733" y="187" class="h">Repair Request Service</text><text x="733" y="214" class="t">API · lifecycle · saga orchestrator</text><text x="733" y="238" class="small">SoR Request / Assignment / Result</text><text x="733" y="259" class="small">модульный core</text>
+  <rect x="710" y="355" width="300" height="145" class="db"/>
+  <text x="733" y="387" class="h">PostgreSQL OLTP</text><text x="733" y="414" class="t">request · history · idempotency</text><text x="733" y="438" class="t">MDM read model · saga · outbox</text><text x="733" y="471" class="small">ACID · constraints · primary</text>
+  <rect x="410" y="355" width="230" height="110" class="op"/>
+  <text x="433" y="387" class="h">Master Data Adapter</text><text x="433" y="414" class="t">consolidation · survivorship</text><text x="433" y="438" class="small">без обратной записи в EAM/HR</text>
+  <rect x="710" y="570" width="180" height="100" class="async"/>
+  <text x="733" y="602" class="h">Outbox Relay</text><text x="733" y="629" class="t">polling · confirm</text><text x="733" y="651" class="small">at-least-once</text>
+  <rect x="930" y="570" width="150" height="100" class="async"/>
+  <text x="953" y="602" class="h">RabbitMQ</text><text x="953" y="629" class="t">topic exchange</text><text x="953" y="651" class="small">events v1</text>
+  <rect x="410" y="705" width="230" height="100" class="async"/>
+  <text x="433" y="737" class="h">Notification Worker</text><text x="433" y="764" class="t">consumer · inbox · retry/DLQ</text><text x="433" y="786" class="small">не влияет на commit заявки</text>
+
+  <rect x="1160" y="85" width="400" height="765" class="zone"/>
+  <text x="1185" y="117" class="zoneTitle">OLAP · аналитика</text>
+  <rect x="1205" y="210" width="310" height="110" class="analytics"/>
+  <text x="1228" y="242" class="h">Analytics Loader</text><text x="1228" y="269" class="t">schema · dedupe · ordering · DQ</text><text x="1228" y="293" class="small">bootstrap + events</text>
+  <rect x="1205" y="390" width="310" height="130" class="analytics"/>
+  <text x="1228" y="422" class="h">Analytics Warehouse</text><text x="1228" y="449" class="t">raw → core → mart</text><text x="1228" y="473" class="t">fact_request_lifecycle</text><text x="1228" y="497" class="small">read-only относительно OLTP</text>
+  <rect x="1205" y="590" width="310" height="105" class="analytics"/>
+  <text x="1228" y="622" class="h">BI Dashboard</text><text x="1228" y="649" class="t">KPI · p50/p95 · freshness</text><text x="1228" y="673" class="small">руководитель техслужбы</text>
+
+  <path d="M640 210 H710" class="arrow"/><text x="650" y="197" class="label">REST</text>
+  <path d="M860 280 V355" class="arrow"/><text x="874" y="326" class="label">ACID</text>
+  <path d="M640 410 H710" class="arrow"/><text x="651" y="397" class="label">read model</text>
+  <path d="M300 212 H345 V385 H410" class="arrow"/><path d="M300 357 H365 V415 H410" class="arrow"/>
+  <path d="M710 425 H640" class="arrow"/>
+  <path d="M930 640 H670 V755 H640" class="event"/>
+  <path d="M860 500 V570" class="arrow"/><path d="M890 620 H930" class="event"/>
+  <path d="M1080 620 H1150 V265 H1205" class="event"/>
+  <path d="M1360 320 V390" class="arrow"/><path d="M1360 520 V590" class="arrow"/>
+  <path d="M410 755 H325 V507 H300" class="arrow"/>
+  <path d="M710 220 H675 V657 H300" class="arrow"/><text x="405" y="644" class="label">reserve/get/cancel REST</text>
+
+  <text x="50" y="895" class="legend">Сплошная стрелка — синхронный вызов/запись · пунктирная фиолетовая — доменное событие · OLAP ничего не пишет обратно в OLTP</text>
+</svg>
