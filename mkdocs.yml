@@ -31,5 +31,15 @@ nav:
       - ADR-005 · Канал уведомлений: adr/ADR-005-notification-channel-adapter.md
       - ADR-006 · Внешняя граница и ACL: adr/ADR-006-external-boundary-acl.md
 
+  - Неделя 9 · Безопасность:
+      - DFD и STRIDE: security/09-threat-model.md
+      - Доступ и аудит: security/09-access-audit.md
+      - ADR-007 · Доступ к назначению и аудит: adr/ADR-007-assignment-security.md
+  - Неделя 10 · Качество:
+      - Стратегия качества: quality/10-quality-strategy.md
+      - Каталог E2E: quality/10-e2e-catalog.md
+      - Матрица трассировки: quality/10-traceability.md
+      - ADR-008 · Синтетические тестовые данные: adr/ADR-008-synthetic-test-data.md
+
 theme:
   name: mkdocs

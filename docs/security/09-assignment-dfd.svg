@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 610" role="img" aria-labelledby="title"><title id="title">DFD · Назначение исполнителя</title><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="#38536d"/></marker></defs><rect width="1120" height="610" fill="#f5f8fc"/>
+<text x="560" y="34" text-anchor="middle" font-family="sans-serif" font-size="23" fill="#17324d">DFD · Назначение исполнителя</text>
+<rect x="308" y="65" width="492" height="273" rx="10" fill="#fff" stroke="#7390aa" stroke-dasharray="6 4"/>
+<text x="553" y="88" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#17324d">Контур приложения РемКонтур</text>
+<rect x="25" y="135" width="165" height="58" rx="8" fill="#fff4df" stroke="#527596" stroke-dasharray="5 4"/>
+<text x="107.5" y="160" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#17324d">АРМ диспетчера</text>
+<rect x="25" y="250" width="165" height="58" rx="8" fill="#fff4df" stroke="#527596" stroke-dasharray="5 4"/>
+<text x="107.5" y="275" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#17324d">Корпоративный SSO</text>
+<rect x="375" y="130" width="230" height="70" rx="8" fill="#e2effc" stroke="#527596" />
+<text x="490.0" y="155" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#17324d">Repair Request Service</text>
+<text x="490.0" y="174" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#17324d">access-audit + оркестратор</text>
+<rect x="650" y="135" width="130" height="58" rx="8" fill="#e2effc" stroke="#527596" />
+<text x="715.0" y="160" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#17324d">PostgreSQL</text>
+<rect x="650" y="250" width="130" height="58" rx="8" fill="#e2effc" stroke="#527596" />
+<text x="715.0" y="275" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#17324d">Outbox Relay</text>
+<rect x="920" y="135" width="175" height="58" rx="8" fill="#fff4df" stroke="#527596" stroke-dasharray="5 4"/>
+<text x="1007.5" y="160" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#17324d">Workforce Service</text>
+<rect x="332" y="250" width="240" height="58" rx="8" fill="#fff4df" stroke="#527596" stroke-dasharray="5 4"/>
+<text x="452.0" y="275" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#17324d">Защищённый аудит</text>
+<rect x="630" y="397" width="170" height="58" rx="8" fill="#fff4df" stroke="#527596" stroke-dasharray="5 4"/>
+<text x="715.0" y="422" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#17324d">RabbitMQ</text>
+<rect x="359" y="495" width="240" height="65" rx="8" fill="#fff4df" stroke="#527596" stroke-dasharray="5 4"/>
+<text x="479.0" y="520" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#17324d">Notification Worker</text>
+<text x="479.0" y="539" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#17324d">и адаптер</text>
+<rect x="650" y="495" width="150" height="65" rx="8" fill="#fff4df" stroke="#527596" stroke-dasharray="5 4"/>
+<text x="725.0" y="520" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#17324d">Analytics Loader</text>
+<rect x="25" y="495" width="165" height="65" rx="8" fill="#fff4df" stroke="#527596" stroke-dasharray="5 4"/>
+<text x="107.5" y="520" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#17324d">Провайдер</text>
+<rect x="65" y="350" width="130" height="58" rx="8" fill="#fff4df" stroke="#527596" stroke-dasharray="5 4"/>
+<text x="130.0" y="375" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#17324d">ИБ</text>
+<path d="M190 159H375" fill="none" stroke="#38536d" stroke-width="1.7" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+<text x="282" y="148" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#17324d">B1 · команда / итог</text>
+<path d="M106 193V250" fill="none" stroke="#38536d" stroke-width="1.7" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+<text x="171" y="227" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#17324d">B2 · OIDC</text>
+<path d="M190 279H260V184H375" fill="none" stroke="#38536d" stroke-width="1.7"  marker-end="url(#arrow)"/>
+<text x="271" y="267" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#17324d">B2 · JWKS</text>
+<path d="M605 154H650" fill="none" stroke="#38536d" stroke-width="1.7" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+<path d="M715 193V250" fill="none" stroke="#38536d" stroke-width="1.7"  marker-end="url(#arrow)"/>
+<text x="758" y="226" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#17324d">outbox</text>
+<path d="M605 182H625V111H1008V135" fill="none" stroke="#38536d" stroke-width="1.7" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+<text x="819" y="103" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#17324d">B3 · резерв / состояние</text>
+<path d="M452 200V250" fill="none" stroke="#38536d" stroke-width="1.7"  marker-end="url(#arrow)"/>
+<text x="510" y="228" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#17324d">B6 · запись</text>
+<path d="M332 296H292V379H195" fill="none" stroke="#38536d" stroke-width="1.7"  marker-end="url(#arrow)"/>
+<text x="252" y="369" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#17324d">B6 · чтение</text>
+<path d="M715 308V397" fill="none" stroke="#38536d" stroke-width="1.7"  marker-end="url(#arrow)"/>
+<text x="771" y="371" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#17324d">B4 · событие</text>
+<path d="M630 428H479V495" fill="none" stroke="#38536d" stroke-width="1.7"  marker-end="url(#arrow)"/>
+<text x="551" y="418" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#17324d">B4 · очередь</text>
+<path d="M715 455V495" fill="none" stroke="#38536d" stroke-width="1.7"  marker-end="url(#arrow)"/>
+<text x="772" y="482" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#17324d">B4 · очередь</text>
+<path d="M359 525H190" fill="none" stroke="#38536d" stroke-width="1.7"  marker-end="url(#arrow)"/>
+<text x="277" y="512" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#17324d">B5 · доставка</text>
+<text x="560" y="590" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#17324d">Пунктир обозначает отдельный контур доверия или участника. B1–B6 раскрыты в таблице.</text>
+</svg>
