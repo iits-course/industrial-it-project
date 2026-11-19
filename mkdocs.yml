@@ -41,5 +41,11 @@ nav:
       - Матрица трассировки: quality/10-traceability.md
       - ADR-008 · Синтетические тестовые данные: adr/ADR-008-synthetic-test-data.md
 
+  - Week 11 · SRE & DR:
+      - Overview: sre/index.md
+      - SRE specification: sre/11-sre-specification.md
+      - DR plan: sre/11-dr-plan.md
+      - ADR-009 · DR strategy: adr/ADR-009-disaster-recovery-strategy.md
+
 theme:
   name: mkdocs
