@@ -1,61 +1,63 @@
-@startuml
-title C2 v0.3 · устойчивость РемКонтура (неделя 11, тема 3.3)
-left to right direction
-skinparam shadowing false
+@startuml C2-Resilience
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
 
-rectangle "РемКонтур · основной регион" {
-  rectangle "АРМ сотрудника\nSPA/PWA · IndexedDB\nЛокальная очередь: 4 ч / 500 операций\nЧтение из кэша, назначение онлайн" as arm
-  rectangle "Сервис заявок\nPython, FastAPI · модульный монолит (ADR-001)\nwork-request, dispatching, access-audit\nОдин писатель агрегата заявки" as app
-  database "PostgreSQL OLTP · основной\nЗаявки, история, идемпотентность\nИсходящая очередь и проекция MDM\nHA · один писатель (ADR-002)" as db
-  database "Буфер аудита\nВ той же базе PostgreSQL" as audit_buffer
-  database "PostgreSQL · синхронный резерв\nВторая зона · автопереключение\nHA · RPO 0 при потере зоны" as db_standby
-  rectangle "Отправитель аудита\nПовторы из устойчивого буфера" as audit_writer
-  database "Хранилище аудита\nТолько добавление · отдельный доступ\nЧтение аудируется · RPO 0" as audit
-  rectangle "Отправитель событий\nПовтор из исходящей очереди" as relay
-  queue "RabbitMQ · кворумные очереди\nТри узла · три зоны\nДоставка минимум один раз · DLQ" as broker
-  rectangle "Обработчик уведомлений\nДедупликация входящих · DLQ" as worker
-  rectangle "Адаптер уведомлений · ACL\nПеревод формата · прежний ключ" as notify
-  rectangle "Загрузчик и хранилище аналитики\nПовтор · DLQ · отметка свежести" as analytics
-  rectangle "Адаптер мастер-данных · ACL\nПоследняя корректная проекция\nПредупреждение через 60 мин" as mdm
+title C2 v0.3 · вид устойчивости — РемКонтур
+caption Неделя 11 (тема 3.3). Аннотации устойчивости на внешней границе недели 8. Коды: TO тайм-аут, RT ретрай с тем же ключом, CB circuit breaker, RL rate limit, BH bulkhead, LS load shedding, DLQ dead-letter queue, HA высокая доступность, DR аварийное восстановление. Диаграмма — проектный артефакт; паттерны ещё не настроены в работающей системе.
+
+Person(users, "Операторы, диспетчеры, инженеры", "Роли из устава §5")
+
+System_Boundary(b, "РемКонтур — основной регион") {
+    Container(arm, "АРМ сотрудника", "SPA/PWA, IndexedDB", "Формы и offline-очередь (4 ч / 500 операций). TO, CB, RT, LS")
+    Container(app, "Сервис заявок", "Python, FastAPI, модульный монолит", "work-request, dispatching, access-audit. TO, RT, CB, RL, BH, LS")
+    ContainerDb(db, "PostgreSQL OLTP · основной", "PostgreSQL", "Заявки, история, аудит-буфер, идемпотентность, outbox, проекция MDM. HA")
+    ContainerDb(dbstandby, "PostgreSQL · синхронный standby", "PostgreSQL", "Вторая зона доступности; автоматический failover. HA")
+    ContainerDb(audit, "Аудитохранилище · append-only", "Неизменяемое хранилище", "Синхронная межрегиональная копия; RPO 0. TO, RT")
+    Container(auditwriter, "Аудиторский writer", "Python-воркер", "Отправляет долговременный аудит-буфер. TO, RT")
+    Container(relay, "Outbox Relay", "Python-воркер", "Publisher confirm; повтор из outbox. TO, RT, CB")
+    ContainerQueue(mq, "RabbitMQ", "AMQP, quorum-очереди", "Три узла в трёх зонах; at-least-once. HA, DLQ")
+    Container(notifworker, "Воркер уведомлений", "Python-воркер", "Inbox, ретрай, DLQ; prefetch 20, конкурентность 4")
+    Container(notifadapter, "Адаптер уведомлений · ACL", "Python-модуль", "deliver(), трансляция провайдера. TO, RT, CB, RL, BH")
+    Container(analytics, "Загрузчик + хранилище аналитики + BI", "Контур OLAP", "Только чтение относительно OLTP; повтор и DLQ. RT, DLQ")
+    Container(mda, "Адаптер мастер-данных · ACL", "Python-воркер", "Только чтение EAM и HR. TO, RT, CB, RL, BH")
 }
 
-rectangle "Внешние системы" {
-  rectangle "Корпоративный SSO\nOIDC · кэш JWKS с TTL" as sso
-  rectangle "Сервис Workforce\nСоседняя команда · workforce-v1" as workforce
-  rectangle "EAM · учёт оборудования\nУнаследованная система · чтение" as eam
-  rectangle "HR/IAM · справочник сотрудников\nРоли, участки, статус" as hr
-  rectangle "Провайдер уведомлений\nКонтракт не выбран" as provider
+System_Boundary(dr, "Регион DR · pilot light") {
+    ContainerDb(drreplica, "Межрегиональная реплика PostgreSQL", "PostgreSQL", "Непрерывный WAL; повышение при объявлении. RTO 60 мин, RPO 5 мин")
+    Container(driac, "Платформа pilot light", "IaC, образы, секреты", "Масштабируется при объявлении; DNS TTL 60 с")
+    ContainerDb(draudit, "Неизменяемая аудиторская копия", "Object lock", "Синхронная копия; RPO 0")
 }
 
-rectangle "Регион DR · минимальный резерв (ADR-009)" {
-  database "Межрегиональная реплика PostgreSQL\nRTO 60 мин · RPO 5 мин" as dr_db
-  rectangle "Резервная платформа\nIaC · образы · секреты · TTL DNS 60 с\nМасштабирование при аварии" as dr_platform
-  database "Неизменяемая копия аудита\nБлокировка объектов · RPO 0" as dr_audit
-}
+System_Ext(sso, "Корпоративный SSO", "OIDC, стандарт: без ACL")
+System_Ext(workforce, "Сервис Workforce", "Соседняя команда, workforce-v1: без ACL")
+System_Ext(eam, "EAM / данные оборудования", "Legacy, внутренний")
+System_Ext(hr, "HR / каталог IAM", "Legacy, внутренний")
+System_Ext(provider, "Провайдер уведомлений", "Вендор или корпоративная платформа, не выбран")
 
-arm -[#00838f]-> app : E1 · HTTPS · 10 с / 5 с\nПовтор с тем же ключом · размыкание · лимит
-app -[#00838f]-> db : E2 · SQL · подключение 2 с\nЧтение 1,5 с · запись 2 с · блокировка 1 с
-app -[#00838f]-> sso : E3 · JWKS · 2 с · кэш ключей\nНовые сессии отклоняются при отказе
-app -[#00838f]-> workforce : E4 · REST · 2 с · размыкание\nОтдельный пул: 10 соединений
-app -[#6b7785]-> audit_buffer : E5 · локальная транзакция\nБезопасный отказ при сбое записи
-audit_buffer -[#6b7785]-> audit_writer : устойчивый буфер
-audit_writer -[#00838f]-> audit : E12 · 5 с · повтор из буфера
-db -[#6b7785]-> relay : исходящие события
-relay -[#00838f]-> broker : E6 · подтверждение 5 с\nПовтор · размыкание
-broker -[#6b7785]-> worker : E7 · подтверждение 30 с\nПять попыток · DLQ
-worker -[#00838f]-> notify : E8 · доставка с тем же ключом
-notify -[#00838f]-> provider : E8 · 5 с · размыкание\nЛимит · отдельный пул · DLQ
-broker -[#6b7785]-> analytics : E9 · подтверждение 60 с\nПять попыток · DLQ · свежесть 15 мин
-mdm -[#00838f]-> eam : E10 · чтение · 10 с\nРазмыкание · отдельный пул
-mdm -[#00838f]-> hr : E11 · чтение · 10 с\nРазмыкание · отдельный пул
-mdm -[#6b7785]-> db : проекция мастер-данных
-db -[#8a94a6,dashed]-> db_standby : синхронная репликация
-db -[#8a94a6,dashed]-> dr_db : непрерывный WAL
-audit -[#8a94a6,dashed]-> dr_audit : синхронная копия
-dr_db -[#8a94a6,dashed]-> dr_platform : переключение при аварии
+Rel(users, arm, "Используют систему")
+Rel(arm, app, "E1 · HTTPS: TO 10 с, RT тот же ключ ×3, CB, RL, offline-очередь")
+Rel(app, db, "E2 · SQL: TO 1,5/2 с, RT только при ошибке сериализации, BH 20")
+Rel(app, sso, "E3 · OIDC/JWKS: TO 2 с, RT ×2, CB, кэш ключей")
+Rel(app, workforce, "E4 · REST: TO 2 с, без слепого ретрая, чтение по saga_id, CB, BH 10")
+Rel(app, db, "E5 · аудит-буфер в той же транзакции")
+Rel(db, auditwriter, "E12 · долговременный аудит-буфер")
+Rel(auditwriter, audit, "E12 · TO 5 с, RT из буфера")
+Rel(db, relay, "Чтение outbox")
+Rel(relay, mq, "E6 · AMQP: confirm 5 с, RT, CB, BH")
+Rel(mq, notifworker, "E7 · AMQP: ack 30 с, RT ×5, DLQ")
+Rel(notifworker, notifadapter, "E8 · внутрипроцессный вызов")
+Rel(notifadapter, provider, "E8 · HTTPS: TO 5 с, RT тот же ключ ×5, CB, RL, BH, DLQ")
+Rel(mq, analytics, "E9 · AMQP: ack 60 с, RT ×5, DLQ")
+Rel(mda, eam, "E10 · только чтение: TO 10 с, RT ×3, CB, RL, BH")
+Rel(mda, hr, "E11 · только чтение: TO 10 с, RT ×3, CB, RL, BH")
+Rel(mda, db, "Обновление проекции MDM")
+Rel(dbstandby, drreplica, "Непрерывная репликация WAL", "асинхронная, межрегиональная")
+Rel(audit, draudit, "Синхронная неизменяемая копия", "межрегиональная")
+Rel(drreplica, driac, "Повышение и масштабирование при объявлении", "DR-02")
 
-legend bottom
-Проектная схема. Связи E1–E12 описаны в §6.3 спецификации SRE.
-Бирюзовая линия — вызов, серая — поток данных, пунктир — репликация или восстановление.
+LAYOUT_TOP_DOWN()
+legend right
+  TO тайм-аут · RT ретрай с тем же ключом · CB circuit breaker
+  RL rate limit · BH bulkhead · LS load shedding · DLQ dead-letter queue
+  HA высокая доступность · DR аварийное восстановление
 endlegend
 @enduml
