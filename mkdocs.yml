@@ -47,5 +47,12 @@ nav:
       - DR plan: sre/11-dr-plan.md
       - ADR-009 · DR strategy: adr/ADR-009-disaster-recovery-strategy.md
 
+  - Week 12 · Operations & debt:
+      - Overview: runbooks/index.md
+      - Incident management: runbooks/12-incident-management.md
+      - Runbooks: runbooks/12-runbooks.md
+      - Post-mortem: postmortems/12-incident-review.md
+      - Tech-debt register: tech-debt/12-tech-debt-register.md
+
 theme:
   name: mkdocs
