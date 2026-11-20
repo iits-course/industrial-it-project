@@ -1,225 +1,217 @@
-# Week 11 · SRE specification: reliability, observability and resilience
+# Неделя 11 · Спецификация SRE: надёжность, наблюдаемость и устойчивость
 
-**Status:** design hypothesis v1.0 for the educational architecture. No production telemetry, traffic history or signed service-level agreement exists. The targets, volumes and thresholds below are engineering proposals to be validated in a pilot; they are not measured operational objectives.
+**Статус** — проектная гипотеза v1.0 учебной архитектуры. Промышленной телеметрии, истории трафика и подписанного соглашения об уровне обслуживания пока нет. Цели, объёмы и пороги предстоит проверить на пилоте.
 
-**Basis:** Lecture 11, slides 6–32 and 34–37; [FR/NFR register](../04-requirements.md); [E2E catalogue](../quality/10-e2e-catalog.md); [traceability matrix](../quality/10-traceability.md); [integration architecture](../07-integration-architecture.md); [external environment](../08-external-environment.md); [access and audit](../security/09-access-audit.md); [ADR-004](../adr/ADR-004-message-broker-rabbitmq.md), [ADR-005](../adr/ADR-005-notification-channel-adapter.md), [ADR-006](../adr/ADR-006-external-boundary-acl.md), [ADR-007](../adr/ADR-007-assignment-security.md), [ADR-008](../adr/ADR-008-synthetic-test-data.md) and [ADR-009](../adr/ADR-009-disaster-recovery-strategy.md).
+**Основания** — занятие 11, слайды 6–32 и 34–37, [реестр FR/NFR](../04-requirements.md), [каталог E2E](../quality/10-e2e-catalog.md), [матрица трассировки](../quality/10-traceability.md), [архитектура интеграций](../07-integration-architecture.md), [внешняя среда](../08-external-environment.md), [доступ и аудит](../security/09-access-audit.md), [ADR-004](../adr/ADR-004-message-broker-rabbitmq.md), [ADR-005](../adr/ADR-005-notification-channel-adapter.md), [ADR-006](../adr/ADR-006-external-boundary-acl.md), [ADR-007](../adr/ADR-007-assignment-security.md), [ADR-008](../adr/ADR-008-synthetic-test-data.md) и [ADR-009](../adr/ADR-009-disaster-recovery-strategy.md).
 
-**Evidence labels.** `[D]` — derived from an existing Dossier artefact; `[H]` — design hypothesis introduced here and requiring measurement or approval.
+**Обозначения** — `[D]` означает основание в существующем документе досье, `[H]` — гипотезу, требующую измерения или согласования.
 
-## 1. Scope and method
+## 1. Область и метод
 
-Reliability is treated as an engineering objective, not as an aspiration to avoid all failures. The unit of reliability is a user journey, not a server: an SLO is attached to a business outcome that a named user can observe. A target of 100% is rejected because it is unaffordable, unattainable and would freeze change; the error budget converts the remaining risk into an explicit decision rule.
+Надёжность оценивается по наблюдаемому результату пользовательского сценария. Цель 100% потребовала бы недостижимой надёжности и остановки изменений. Бюджет ошибок задаёт правило принятия оставшегося риска.
 
-The specification covers five service-critical journeys, their SLIs, SLOs, proposed SLAs and error budgets (§2–3); the telemetry needed to calculate them (§4–5); the resilience patterns on the C2 container view (§6); graceful degradation (§7); and the verification programme (§8). The disaster-recovery plan with RTO/RPO and the corresponding decision are separate artefacts: [DR plan](11-dr-plan.md) and [ADR-009](../adr/ADR-009-disaster-recovery-strategy.md).
+Спецификация охватывает пять сценариев и их SLI, SLO, предлагаемые SLA и бюджеты (§2–3), телеметрию (§4–5), механизмы устойчивости на диаграмме C2 (§6), управляемую деградацию (§7) и программу проверок (§8). RTO/RPO и выбор стратегии описаны отдельно в [плане DR](11-dr-plan.md) и [ADR-009](../adr/ADR-009-disaster-recovery-strategy.md).
 
-Out of scope: the internal reliability of EAM, HR, the corporate IdP and the notification provider; security incident response beyond the telemetry needed for investigation; the incident runbook and blameless post-mortem, which belong to Topic 3.4; and cost modelling of downtime, which is not available in the Dossier ([02 §10](../02-capability-value-stream.md)).
+За пределами документа — внутренняя надёжность EAM, HR, корпоративного поставщика удостоверений и провайдера уведомлений, реагирование на инциденты ИБ за пределами нужной для расследования телеметрии, регламент инцидентов и разбор без поиска виноватых из темы 3.4. Стоимость простоя пока не измерена. [Досье, §10](../02-capability-value-stream.md)
 
-The method follows the lecture sequence: select an SLI from the user's perspective, set an SLO, derive the budget, instrument the journey, protect every external edge, define what degrades, and plan recovery. A target without a query, an owner and an alert is not an SLO.
+Порядок работы следует лекции: определить SLI с точки зрения пользователя, задать SLO и бюджет, настроить телеметрию, защитить внешние связи, описать деградацию и восстановление. Для SLO нужны запрос расчёта, владелец и оповещение.
 
-## 2. Service-critical journeys
+## 2. Критические пользовательские сценарии
 
-Five journeys are selected from the E2E catalogue. They cover the write path, the read path, the cross-boundary assignment, asynchronous propagation and the correctness of the maintenance record. Notification delivery is treated as a supporting dependency SLO rather than a sixth user journey, because the assignment remains valid when a notification is delayed ([08 §6](../08-external-environment.md)).
+Пять сценариев взяты из каталога E2E. Они покрывают запись, чтение, назначение через внешнюю границу, асинхронную доставку и корректность истории ремонта. Доставка уведомлений имеет вспомогательный SLO, поскольку задержка уведомления сохраняет силу назначения. [Внешняя среда, §6](../08-external-environment.md)
 
-| ID | Journey | User and outcome | E2E and requirements | Why it is critical | Primary SLI type |
+| ID | Сценарий | Пользователь и результат | E2E и требования | Почему критичен | Тип SLI |
 |---|---|---|---|---|---|
-| P1 | Register a repair request | Operator obtains a confirmed, durable request ID without losing the report | [E2E-01](../quality/10-e2e-catalog.md); FR-01, NFR-01, NFR-02; DQ-01/03/04 | The request is the entry point; a lost report leaves a physical fault unreported and cannot be reconstructed | Availability and durability |
-| P2 | Read the request list, card and history | Operator, dispatcher or engineer sees the current state and responsible person | [E2E-01/04](../quality/10-e2e-catalog.md); FR-03, NFR-03; A-02 | NFR-03 sets p95 ≤ 2 s; slow reads drive users back to phone calls and spreadsheets | Latency |
-| P3 | Assign an engineer | Dispatcher obtains exactly one confirmed assignment | [E2E-02](../quality/10-e2e-catalog.md); FR-04, NFR-04; T-03/05/06; A-03/04/08 | Assignment crosses the Workforce boundary and is the longest synchronous business transaction | Success and consistency |
-| P4 | Propagate the assignment result | Engineer, analyst and manager receive the confirmed fact | [E2E-03](../quality/10-e2e-catalog.md); FR-04; DQ-04/05/06; ADR-004/005 | Asynchronous consumers fail differently from the core; stale analytics hides operational drift | Freshness |
-| P5 | Record the repair result and close | Engineer and dispatcher create a complete, auditable maintenance record | [E2E-04](../quality/10-e2e-catalog.md); FR-05/07; DQ-02; A-06/07 | The record is the durable business and legal evidence of the intervention | Correctness |
+| P1 | Регистрация заявки | Оператор получает подтверждённый ID надёжно сохранённой заявки | [E2E-01](../quality/10-e2e-catalog.md), FR-01, NFR-01/02, DQ-01/03/04 | Утраченное обращение о неисправности нельзя воссоздать | Доступность и сохранность |
+| P2 | Список, карточка и история | Оператор, диспетчер или инженер видит состояние и ответственного | [E2E-01/04](../quality/10-e2e-catalog.md), FR-03, NFR-03, A-02 | NFR-03 задаёт p95 ≤ 2 с. При задержке пользователи возвращаются к звонкам и таблицам | Задержка |
+| P3 | Назначение инженера | Диспетчер получает ровно одно подтверждённое назначение | [E2E-02](../quality/10-e2e-catalog.md), FR-04, NFR-04, T-03/05/06, A-03/04/08 | Самая длинная синхронная бизнес-операция пересекает границу Workforce | Успех и согласованность |
+| P4 | Доставка факта назначения | Инженер, аналитик и руководитель получают подтверждённый факт | [E2E-03](../quality/10-e2e-catalog.md), FR-04, DQ-04/05/06, ADR-004/005 | Асинхронные потребители отказывают независимо от ядра. Устаревшая аналитика скрывает сбои процесса | Свежесть |
+| P5 | Результат ремонта и закрытие | Инженер и диспетчер создают полную аудируемую запись | [E2E-04](../quality/10-e2e-catalog.md), FR-05/07, DQ-02, A-06/07 | Запись служит долговременным деловым и юридическим подтверждением | Корректность |
 
-The journeys are deliberately not collapsed into one "system availability" SLO. A single number would hide the difference between a lost request, a slow card, a delayed notification and an incorrect closure, and would give the team no diagnostic direction.
+Раздельные SLO позволяют отличить потерю заявки, медленную карточку, задержку уведомления и некорректное закрытие.
 
-## 3. SLI, SLO, SLA and error budget
+## 3. SLI, SLO, SLA и бюджет ошибок
 
-### 3.1 Counting rules
+### 3.1 Правила расчёта
 
-An SLI is a ratio of good events to valid events over a defined window. The following rules apply to every SLO in this document.
+SLI — доля успешных событий среди учитываемых за выбранное окно.
 
-| Rule | Definition |
+| Правило | Определение |
 |---|---|
-| Valid event | A request or operation that the system was expected to serve: authenticated, syntactically valid, within the agreed load profile and not excluded by §3.1.1. |
-| Good event | A valid event that meets the outcome and time threshold of its SLO. Partial success, an unknown outcome or a silent fallback is not good. |
-| Window | Rolling 30 days for operational decisions; the calendar month is used only for SLA reporting. |
-| Attribution | Events are attributed to the time of the business fact, not the time of ingestion; late-arriving data may change a closed window once, and the correction is recorded. |
-| Deduplication | Retries with the same idempotency key or event ID count once. A duplicate effect is a guardrail violation (§3.8), not a second good event. |
-| Data source | Server-side telemetry for technical SLIs; reconciled business records for correctness and freshness SLIs. Client-only measurements are diagnostic and do not set the budget. |
-| Ownership | Each SLO has one accountable owner; the owner reviews the query, the budget and the alert monthly. |
+| Учитываемое событие | Ожидаемая операция: аутентифицирована, синтаксически корректна, укладывается в профиль нагрузки и не исключена по §3.1.1 |
+| Успешное событие | Учитываемое событие достигло результата и порога времени своего SLO. Частичный успех, неизвестный исход и скрытый обходной режим не засчитываются |
+| Окно | Скользящие 30 дней для эксплуатации, календарный месяц только для отчёта SLA |
+| Привязка ко времени | По времени бизнес-факта. Запоздавшие данные могут один раз скорректировать закрытое окно с записью исправления |
+| Дедупликация | Повторы с одним ключом идемпотентности или ID события считаются один раз. Дублированный эффект нарушает ограничение §3.8 |
+| Источник | Серверная телеметрия для технических SLI, сверенные бизнес-записи для корректности и свежести. Клиентские измерения используются для диагностики |
+| Владение | Один ответственный за SLO ежемесячно проверяет запрос, бюджет и оповещение |
 
-#### 3.1.1 Exclusions
+#### 3.1.1 Исключения
 
-Excluded from valid events: requests rejected by schema validation or authorization before any business processing; `409`/`412` conflicts caused by a stale client version; `429` responses within the published rate limit; planned maintenance announced at least five business days in advance and limited to the agreed window; and synthetic monitoring traffic. Exclusions are applied by rule, not by operator discretion, and the excluded count is itself monitored to prevent budget manipulation.
+Исключаются запросы, отклонённые проверкой схемы или полномочий до обработки, конфликты `409`/`412` из-за устаревшей версии клиента, `429` в пределах опубликованного правила, плановые работы с уведомлением за пять рабочих дней и в согласованном окне, синтетический мониторинг. Правила применяются одинаково для всех событий, количество исключений контролируется.
 
-A dependency outage is not an exclusion. If Workforce is slow, P3 burns budget; that is the purpose of the budget. The only exception is a declared force-majeure event approved by the business owner and recorded in the reliability log.
+Сбой зависимости расходует бюджет. Например, задержка Workforce расходует P3. Исключение — объявленный форс-мажор, согласованный владельцем процесса и отражённый в журнале надёжности.
 
-### 3.2 SLO catalogue
+### 3.2 Каталог SLO
 
-Monthly volumes are hypotheses `[H]` derived from the load profile `[D]` in [04 §6.5](../04-requirements.md) (up to 200 users, 50 concurrent sessions, 50,000 requests in history, peak 20 reads/s and 5 writes/s). They must be replaced by pilot measurements before the first SLA is signed.
+Месячные объёмы — гипотезы `[H]` на основе профиля `[D]`: до 200 пользователей, 50 одновременных сессий, 50 000 заявок, пик 20 чтений/с и 5 записей/с. До первого SLA их заменяют измерениями пилота. [Требования, §6.5](../04-requirements.md)
 
-| ID | Journey | SLI: good events / valid events | SLO, 30 days | Proposed SLA | Budget, events | Owner |
+| ID | Сценарий | SLI: успешные / учитываемые события | SLO за 30 дней | Предлагаемый SLA | Бюджет, событий | Владелец |
 |---|---|---|---|---|---|---|
-| SLO-01 | P1 Registration | Create commands that reach a confirmed, durable state within 60 s, including a queued operation confirmed within 60 s after connectivity returns / all valid create commands | 99.5% | 99.0% | 60 of 12,000 | Martin |
-| SLO-02 | P2 Read | List, card and history responses completed in ≤ 2 s / all valid read requests | 95.0% | 90.0% | 12,000 of 240,000 | Martin |
-| SLO-03 | P3 Assignment | Assignment sagas reaching one confirmed terminal outcome — `confirmed` with exactly one active assignment, or a correct business rejection with no assignment — within 60 s / all valid assignment commands | 99.0% | 98.0% | 90 of 9,000 | Andrey |
-| SLO-04 | P4 Propagation | Domain events available in the warehouse within 15 min of commit / all committed domain events | 99.0% | 98.0% | 300 of 30,000 | Amir |
-| SLO-05 | P5 Completion | Completion and closure transitions that persist the required result, author, timestamp and audit record / all valid transitions | 99.9% | 99.5% | 11 of 11,000 | Andrey |
+| SLO-01 | P1 Регистрация | Команды с подтверждённой и сохранённой заявкой за 60 с, включая очередь за 60 с после восстановления связи / все учитываемые команды создания | 99.5% | 99.0% | 60 из 12 000 | Martin |
+| SLO-02 | P2 Чтение | Ответы списка, карточки и истории за ≤ 2 с / все учитываемые запросы чтения | 95.0% | 90.0% | 12 000 из 240 000 | Martin |
+| SLO-03 | P3 Назначение | Саги с одним окончательным исходом за 60 с: `confirmed` с одним активным назначением или корректный бизнес-отказ без назначения / все учитываемые команды | 99.0% | 98.0% | 90 из 9 000 | Andrey |
+| SLO-04 | P4 Доставка | Доменные события, доступные в хранилище аналитики за 15 мин с фиксации / все зафиксированные доменные события | 99.0% | 98.0% | 300 из 30 000 | Amir |
+| SLO-05 | P5 Завершение | Переходы выполнения и закрытия с сохранёнными результатом, автором, временем и аудитом / все учитываемые переходы | 99.9% | 99.5% | 11 из 11 000 | Andrey |
 
-The proposed SLA is deliberately looser than the internal SLO by at least one budget step. No SLA has been agreed with a customer; the column records the maximum external promise that the architecture could support without exhausting the internal budget on ordinary variance.
+Предлагаемый SLA мягче внутреннего SLO минимум на один шаг бюджета. Значения отражают предполагаемое внешнее обязательство с запасом на обычные колебания. Согласованного SLA пока нет.
 
-#### SLO-01 · Registration
+#### SLO-01 · Регистрация
 
-Registration is the only journey where a failure destroys information that exists nowhere else. NFR-02 already provides a client-side queue with a four-hour autonomy window and a 60-second synchronisation target after recovery ([04 §6](../04-requirements.md), [Technical Spike](../04-technical-spike.md)). The SLO therefore counts confirmed durable acceptance, not an HTTP `200` alone: an operation that is durably queued and later confirmed is good, while a request that returns success but is lost is a guardrail violation. The 99.5% target is consistent with a single-region pilot-light architecture and is mitigated by the offline queue; 99.9% would require automated multi-zone failover and a mature on-call organisation, which the project does not yet have.
+При потере обращения исходные сведения могут исчезнуть. NFR-02 предусматривает локальную очередь, четыре часа автономности и синхронизацию за 60 с после восстановления связи. Засчитывается подтверждённая сохранность, включая позднее подтверждение записи из очереди. Ответ HTTP `200` без сохранения нарушает ограничение. Цель 99,5% соответствует одному рабочему региону с минимальным резервом и автономной очередью. Для 99,9% потребовались бы автоматическое многозонное переключение и зрелое дежурство. [Требования, §6](../04-requirements.md) · [Технический эксперимент](../04-technical-spike.md)
 
-#### SLO-02 · Read latency
+#### SLO-02 · Задержка чтения
 
-NFR-03 defines p95 ≤ 2 s for the list, card and creation form. The SLO reuses the same threshold but counts the proportion of individual requests below it, because an error budget must be additive in events; p95 remains the diagnostic percentile on the dashboard. The 95% target is the NFR threshold itself, not a relaxation: at least 95% of reads must meet the two-second budget. The proposed SLA of 90% leaves room for client-side and network variance outside the service boundary.
+NFR-03 задаёт p95 ≤ 2 с для списка, карточки и формы создания. Для бюджета считаются отдельные события в пределах двух секунд, а p95 используется для диагностики. Цель 95% сохраняет порог NFR. SLA 90% оставляет запас на клиентские и сетевые колебания за границей сервиса.
 
-#### SLO-03 · Assignment
+#### SLO-03 · Назначение
 
-The assignment saga has a three-second synchronous budget, after which the API returns `202` and a saga location; the terminal outcome is expected within 60 s ([07 §3–4](../07-integration-architecture.md)). A correct business rejection, such as `ENGINEER_UNAVAILABLE`, is a successful outcome of the journey and is not counted as a bad event: the SLI therefore accepts either a confirmed assignment with exactly one active assignment or a correct rejection with no assignment. Bad events are timeouts, unknown outcomes that remain unresolved, duplicate active assignments, and inconsistent state between the saga and the request. The 99.0% target reflects the external Workforce dependency, whose availability is not under our control; the proposed SLA of 98.0% is the lowest value that still preserves a credible service promise.
+Синхронный бюджет саги составляет три секунды. Затем API возвращает `202` со ссылкой, окончательный исход ожидается за 60 с. Корректный отказ `ENGINEER_UNAVAILABLE` засчитывается как успешный результат. Ошибки — таймауты, неразрешённые исходы, дубли активных назначений и расхождение саги с заявкой. Цель 99,0% учитывает внешнюю зависимость Workforce, предлагаемый SLA составляет 98,0%. [Интеграции, §3–4](../07-integration-architecture.md)
 
-#### SLO-04 · Propagation
+#### SLO-04 · Свежесть доставки
 
-DQ-06 requires at least 99% of events in the warehouse within 15 minutes over a daily window ([06](../data/06-oltp-olap-quality-lineage.md)). The SLO adopts the same threshold and measures freshness at event time, not at loader time. The journey is user-visible to analysts and managers, and a stale warehouse hides an assignment backlog; however, the core request process does not depend on it. The 99.0% target is therefore both a data-quality objective and a reliability objective, and the same query can serve both reviews.
+DQ-06 требует ≥ 99% событий в аналитике за 15 мин в суточном окне. Отсчёт ведётся от бизнес-события. Устаревшая витрина скрывает очередь назначений от аналитиков и руководителей. Ядро от неё не зависит. Один запрос обслуживает проверки DQ и SLO. [Качество данных](../data/06-oltp-olap-quality-lineage.md)
 
-#### SLO-05 · Completion correctness
+#### SLO-05 · Корректность завершения
 
-The completion and closure record is the durable evidence of the intervention and is used in audit and legal review ([09 §3](../security/09-access-audit.md)). Correctness is weighted more heavily than availability: a missing or altered result is worse than a delayed closure. The 99.9% target allows 11 bad transitions per month at the assumed volume, while the zero-tolerance guardrails in §3.8 cover the cases that must never occur. A correctness SLO without guardrails would permit a small number of silent data corruptions; the combination is intentional.
+Запись выполнения и закрытия подтверждает ремонт и используется при аудите. Потеря или изменение результата хуже задержки закрытия. При расчётном объёме цель 99,9% допускает 11 неуспешных переходов. Ограничения §3.8 отдельно задают события с нулевой терпимостью. [Доступ и аудит, §3](../security/09-access-audit.md)
 
-### 3.3 Supporting dependency SLOs
+### 3.3 Вспомогательные SLO зависимостей
 
-Supporting SLOs are leading indicators. A breach does not by itself freeze releases, but it explains a user-path burn and is reviewed by the dependency owner.
+Вспомогательные цели дают ранний сигнал для разбора расхода пользовательского бюджета. Владелец зависимости разбирает нарушения. Само отклонение не замораживает релизы.
 
-| ID | Dependency | SLI | SLO, 30 days | Budget | Owner |
+| ID | Зависимость | SLI | SLO за 30 дней | Бюджет | Владелец |
 |---|---|---|---|---|---|
-| SLO-S1 | Outbox publication | Events published with publisher confirm within 5 s of commit / all committed events | 99.5% | 150 of 30,000 | Amir |
-| SLO-S2 | Notification delivery | Notifications accepted by the provider within 60 s / all notifications | 98.0% | 360 of 18,000 | Amir |
-| SLO-S3 | Master-data freshness | Minutes in which the EAM/HR projection age is ≤ 15 min / all minutes in the window | 99.5% | 216 min | Martin |
-| SLO-S4 | Audit buffer | Audit records durably written in the same transaction as the business change and neither lost nor altered / all audit records | 100% guardrail | No budget | ИБ |
+| SLO-S1 | Публикация из исходящей очереди | События с подтверждением брокера за 5 с после фиксации / все зафиксированные | 99.5% | 150 из 30 000 | Amir |
+| SLO-S2 | Уведомления | Принятые провайдером за 60 с / все уведомления | 98.0% | 360 из 18 000 | Amir |
+| SLO-S3 | Свежесть мастер-данных | Минуты с возрастом проекции EAM/HR ≤ 15 мин / все минуты окна | 99.5% | 216 мин | Martin |
+| SLO-S4 | Буфер аудита | Записи, сохранённые в транзакции бизнес-изменения без потерь и правок / все записи | 100%, жёсткое ограничение | Без бюджета | ИБ |
 
-SLO-S4 is intentionally not budgeted. Any confirmed loss or alteration of an audit record is a security incident, not a reliability variance. Shipping delay is a leading indicator (`audit_buffer_oldest_age_seconds`), not the guardrail itself: a delayed record that is still durable is an availability symptom, while a lost record is a security event.
+Для SLO-S4 потеря или правка записи считается инцидентом ИБ. Возраст буфера `audit_buffer_oldest_age_seconds` сигнализирует о задержке доставки сохранённой записи.
 
-### 3.4 The cost of the target
+### 3.4 Стоимость целевого уровня
 
-| Target | Allowed unavailability per 30 days | What the target normally requires | Decision for RemKontur |
+| Цель | Допустимая недоступность за 30 дней | Типичные требования | Решение для РемКонтура |
 |---|---|---|---|
-| 99.0% | 7 h 12 min | One instance, manual recovery, basic monitoring | Too weak for the core write path |
-| 99.5% | 3 h 36 min | Redundancy, monitoring, on-call, tested restore | Selected for P1 availability; P2 uses a 95% latency target at the same two-second threshold |
-| 99.9% | 43 min | Automatic failover without manual steps, mature operations | Selected only for P5 correctness, not for availability |
-| 99.95% | 22 min | Multiple availability zones, automated recovery | Not justified by the current cost model |
-| 99.99% | 4 min 19 s | Multiple regions, very high cost, continuous exercise | Rejected as unaffordable and unnecessary |
+| 99.0% | 7 ч 12 мин | Один экземпляр, ручное восстановление, базовый мониторинг | Недостаточно для записи |
+| 99.5% | 3 ч 36 мин | Резервирование, мониторинг, дежурство, проверка восстановления | Для P1. Для P2 — 95% в пределах 2 с |
+| 99.9% | 43 мин | Автопереключение, зрелая эксплуатация | Только для корректности P5 |
+| 99.95% | 22 мин | Несколько зон, автоматическое восстановление | Текущая модель затрат не обосновывает |
+| 99.99% | 4 мин 19 с | Несколько регионов, высокие затраты, частые учения | Избыточно и слишком дорого |
 
-The table is not a claim that 99.5% is cheap. It states the operational capability that each target implies. The Dossier has no measured cost of downtime ([02 §10](../02-capability-value-stream.md)), so the targets are provisional `[H]`; a business case must replace this reasoning before an SLA is signed. The offline ARM queue is the main reason a short server outage does not have to become a lost report, and it is why P1 can tolerate 3.6 hours of server unavailability without losing the user's work.
+Цели `[H]` предварительные до измерения стоимости простоя и обоснования SLA. Локальная очередь АРМ позволяет пережить краткий сбой сервера без потери обращения. При выбранной цели P1 бюджет недоступности сервера эквивалентен 3,6 часа. [Карта ценности, §10](../02-capability-value-stream.md)
 
-### 3.5 Error-budget calculation
+### 3.5 Расчёт бюджета ошибок
 
-The error budget is the number of bad events that the SLO permits in the window:
+`бюджет = (1 − SLO) × учитываемые события`
 
-`budget = (1 − SLO) × valid events`
-
-Worked examples at the assumed volumes:
-
-| SLO | Calculation | Budget | Mid-window example | Remaining | Posture |
+| SLO | Расчёт | Бюджет | Пример в середине окна | Остаток | Режим |
 |---|---|---|---|---|---|
-| SLO-01 | (1 − 0.995) × 12,000 | 60 | 25 failed registrations after two weeks | 35 (58%) | Normal |
-| SLO-02 | (1 − 0.95) × 240,000 | 12,000 | 4,000 reads over 2 s | 8,000 (67%) | Normal |
-| SLO-03 | (1 − 0.99) × 9,000 | 90 | 70 failed or unresolved sagas | 20 (22%) | Reliability-only |
-| SLO-04 | (1 − 0.99) × 30,000 | 300 | 120 late events | 180 (60%) | Normal |
-| SLO-05 | (1 − 0.999) × 11,000 | 11 | 3 incorrect transitions | 8 (73%) | Normal |
+| SLO-01 | (1 − 0.995) × 12 000 | 60 | 25 неуспешных регистраций за две недели | 35 (58%) | Обычный |
+| SLO-02 | (1 − 0.95) × 240 000 | 12 000 | 4 000 чтений дольше 2 с | 8 000 (67%) | Обычный |
+| SLO-03 | (1 − 0.99) × 9 000 | 90 | 70 сбойных или незавершённых саг | 20 (22%) | Только надёжность |
+| SLO-04 | (1 − 0.99) × 30 000 | 300 | 120 запоздавших событий | 180 (60%) | Обычный |
+| SLO-05 | (1 − 0.999) × 11 000 | 11 | 3 некорректных перехода | 8 (73%) | Обычный |
 
-Budgets are per SLO and are not pooled. A team cannot borrow P2 latency budget to cover P1 losses: the user consequences are different. The budget is calculated from the SLO, not from the SLA, so the internal team always has less room than the external promise.
+Бюджеты ведутся отдельно по SLO. Запас задержки P2 не компенсирует потери P1. Внутренний бюджет рассчитывается от SLO и строже внешнего SLA.
 
-### 3.6 Error-budget policy
+### 3.6 Политика бюджета ошибок
 
-The policy is signed in advance by product, engineering and operations. The number, not the loudest voice, decides the release posture. A single journey can be frozen independently; freezing the whole system because one secondary path is exhausted would create unnecessary delivery risk.
+Продукт, разработка и эксплуатация согласуют правила заранее. Режим выпуска определяется остатком бюджета конкретного сценария.
 
-| Budget remaining | Release posture | Required actions |
+| Остаток | Режим | Действия |
 |---|---|---|
-| More than 50% | Normal | Ordinary release cadence; experiments and non-critical migrations are allowed; reliability work is scheduled but not forced. |
-| 25–50% | Cautious | Risky changes require a canary, a rollback plan and an owner; recent failure causes take priority; reliability work is planned in the next iteration. |
-| 1–25% | Reliability-only | No feature releases on the affected journey; only fixes, tests, observability and operability work; an exception requires written approval from product, engineering and the reliability lead. |
-| 0% | Freeze | All changes on the affected journey stop except emergency fixes; a blameless review is opened; the budget is re-baselined only after corrective actions are accepted. |
+| >50% | Обычный | Обычный темп, эксперименты и некритичные миграции разрешены. Работы по надёжности планируются |
+| 25–50% | Осторожный | Для рискованных изменений нужны пробный выпуск на части трафика, план отката и ответственный. Разбор причин получает приоритет, работы входят в следующую итерацию |
+| 1–25% | Только надёжность | По затронутому сценарию разрешены исправления, тесты, наблюдаемость и эксплуатационные улучшения. Исключение письменно согласуют продукт, разработка и руководитель надёжности |
+| 0% | Заморозка | По сценарию разрешены аварийные исправления. Начинается разбор без поиска виноватых. Бюджет пересматривается после принятия мер |
 
-An exception is time-bound, names the accepted risk and expires automatically. It is recorded in the reliability log with the approvers, the affected SLO and the compensating control. Repeated exceptions on the same SLO trigger a target review rather than another exception.
+Исключение ограничено по времени, называет принятый риск и автоматически истекает. В журнале фиксируются согласующие, SLO и компенсирующая мера. Повторные исключения запускают пересмотр цели.
 
-### 3.7 Burn-rate alerts
+### 3.7 Оповещения о скорости расходования
 
-Alerts are symptom-based: they fire when the budget is being consumed faster than the policy allows, not when a CPU threshold is crossed. A multi-window rule reduces false positives: the long window confirms a real trend, the short window confirms that the problem is still active.
+Длинное окно подтверждает тенденцию, короткое — что сбой продолжается. Оповещения ориентированы на пользовательские симптомы.
 
-| Long window | Short window | Burn rate | Budget consumed | Severity | Action |
+| Длинное окно | Короткое окно | Скорость | Израсходовано | Срочность | Действие |
 |---|---|---|---|---|---|
-| 1 h | 5 min | 14.4× | 2% | Page | On-call opens the journey dashboard, follows the dependency runbook and considers traffic or feature shedding. |
-| 6 h | 30 min | 6× | 5% | Page or urgent ticket | Investigate the dependency and the recent deployment; prepare a rollback. |
-| 3 days | 6 h | 1× | 10% | Ticket | Add to the reliability backlog; review at the weekly operations meeting. |
-| 30 days | — | Budget exhausted | 100% | Freeze | Apply §3.6 and open a review. |
+| 1 ч | 5 мин | 14.4× | 2% | Вызов дежурного | Открыть панель сценария, действовать по регламенту зависимости, оценить сброс нагрузки или отключение функций |
+| 6 ч | 30 мин | 6× | 5% | Вызов или срочная задача | Проверить зависимость и выкладку, подготовить откат |
+| 3 дня | 6 ч | 1× | 10% | Задача | Добавить в план надёжности, обсудить на еженедельной встрече |
+| 30 дней | — | Бюджет исчерпан | 100% | Заморозка | Применить §3.6 и начать разбор |
 
-The 14.4× factor follows from 30 days divided by one hour and multiplied by the 2% allowance; 6× over six hours consumes 5% of the monthly budget. The rule is expressed against the SLO, not against a fixed error count, so it remains valid when traffic grows. Alerts carry the SLO ID, the current burn rate, the remaining budget, the affected journey and a link to the dashboard; they do not carry user identifiers.
+Коэффициент 14.4× получается делением 30 дней на час с умножением на 2%. Расход со скоростью 6× за шесть часов составляет 5% месячного бюджета. Правила зависят от SLO и действуют при росте трафика. Сигнал содержит ID SLO, скорость, остаток, сценарий и ссылку на панель. Пользовательские ID не передаются.
 
-### 3.8 Guardrails
+### 3.8 Жёсткие ограничения
 
-Some events are not budgeted because their expected value is zero. They stop releases and trigger a security or data-integrity review regardless of the remaining budget.
+Следующие события имеют нулевую терпимость. Они останавливают релизы и запускают разбор ИБ или целостности независимо от бюджета.
 
-| ID | Guardrail | Source | Response |
+| ID | Ограничение | Источник | Реакция |
 |---|---|---|---|
-| G1 | No confirmed assignment outside the dispatcher's area or role | T-03, A-03/A-04, [09 §1](../security/09-access-audit.md) | Sev-1; revoke sessions if compromise is suspected; audit review by ИБ. |
-| G2 | No lost or altered audit record | T-10, NFR-04, [09 §3](../security/09-access-audit.md) | Sev-1; stop privileged writes; restore from the immutable copy. |
-| G3 | No duplicate active assignment and no duplicate request for one operation | DQ-04, [07 §3](../07-integration-architecture.md) | Sev-2; reconcile by idempotency key, saga ID and event ID; correct the data. |
-| G4 | No false success shown to the user | NFR-02, [E2E-01](../quality/10-e2e-catalog.md) | Sev-2; the client must show an unknown or queued state, never a confirmed state without a server acknowledgement. |
-| G5 | No cross-area or cross-role data exposure | A-02, [09 §1](../security/09-access-audit.md) | Sev-1; access review and audit correlation. |
+| G1 | Назначения вне роли или области диспетчера отсутствуют | T-03, A-03/A-04, [09 §1](../security/09-access-audit.md) | Sev-1, при подозрении отозвать сессии, проверка аудита ИБ |
+| G2 | Потерь и изменений аудита нет | T-10, NFR-04, [09 §3](../security/09-access-audit.md) | Sev-1, остановить привилегированную запись, восстановить неизменяемую копию |
+| G3 | Нет дублей активного назначения и заявки на операцию | DQ-04, [07 §3](../07-integration-architecture.md) | Sev-2, сверить по ключу идемпотентности, ID саги и события, исправить данные |
+| G4 | Пользователь не видит ложного успеха | NFR-02, [E2E-01](../quality/10-e2e-catalog.md) | Sev-2, до подтверждения сервера показывать очередь либо неизвестный исход |
+| G5 | Нет раскрытия данных другой области и роли | A-02, [09 §1](../security/09-access-audit.md) | Sev-1, проверка доступа и сверка аудита |
 
-A guardrail event consumes engineering attention, not error budget. This distinction prevents a team from "spending" its way out of a security defect.
+Инцидент по жёсткому ограничению разбирается отдельно от бюджета ошибок.
 
-### 3.9 Ownership and review
+### 3.9 Ответственность и пересмотр
 
-| Role | Responsibility |
+| Роль | Ответственность |
 |---|---|
-| Reliability lead (Martin) | Owns this specification, the SLO queries, the budget review and the readiness checklist. |
-| Journey owners | Martin for P1/P2, Andrey for P3/P5, Amir for P4 and the supporting dependency SLOs. |
-| Product owner | Accepts the target, the SLA proposal and any budget exception. |
-| ИБ | Owns the guardrails, the audit SLO and the incident classification for G1/G2/G5. |
-| Operations | Executes the alerts, the degradation modes and the DR plan. |
+| Руководитель надёжности (Martin) | Спецификация, запросы SLO, проверка бюджета и готовности |
+| Владельцы сценариев | Martin — P1/P2, Andrey — P3/P5, Amir — P4 и вспомогательные цели зависимостей |
+| Владелец продукта | Цели, предложение SLA и исключения бюджета |
+| ИБ | Жёсткие ограничения, SLO аудита, классификация G1/G2/G5 |
+| Эксплуатация | Реакция на оповещения, деградация и DR |
 
-The SLO catalogue is reviewed monthly against actual burn and quarterly against business value. A target change is a versioned change to this document with the reason, the new budget and the affected alerts. A target is never changed during an active incident to make the incident disappear.
+Каталог проверяется ежемесячно по фактическому расходу и ежеквартально по бизнес-ценности. Изменение цели версионируется с причиной, новым бюджетом и списком сигналов. Во время активного инцидента цель сохраняется.
 
-## 4. Telemetry
+## 4. Телеметрия
 
-### 4.1 Principles
+### 4.1 Принципы
 
-Monitoring answers known questions through dashboards and thresholds. Observability allows a new question to be asked without deploying new code, because logs, metrics and traces are correlated by one identifier. In a distributed system almost every new incident is initially an unknown question, so the telemetry design is optimised for diagnosis rather than for a fixed list of dashboards.
+Мониторинг отвечает на заранее известные вопросы через панели и пороги. Наблюдаемость позволяет исследовать новые вопросы без выкладки кода, связывая журналы, метрики и трассировки.
 
-The design follows four rules:
+1. Операция имеет один `correlation_id` от АРМ до аудита и потребителей.
+2. Метрики показывают симптом, трассы локализуют его, журналы объясняют причину.
+3. Телеметрия не блокирует транзакцию. Аудит подчиняется отдельному правилу безопасного отказа.
+4. Сигналы не содержат ПДн, секреты и свободный текст заявки.
 
-1. One business operation has one `correlation_id` from the ARM to the audit record and to every consumer.
-2. Metrics answer "what is wrong", traces answer "where", logs answer "why".
-3. Telemetry must never block a business transaction; the audit is not telemetry and follows its own fail-closed rule.
-4. No personal data, secret or free-text request description leaves the service in a telemetry signal.
+### 4.2 Три сигнала
 
-### 4.2 The three signals
-
-| Signal | Role in RemKontur | Primary use | Retention |
+| Сигнал | Роль | Применение | Хранение |
 |---|---|---|---|
-| Logs | Structured events with context: state transition, rejection reason, retry, circuit state | Diagnosis of a specific request or actor; audit is separate | 30 days hot, 90 days cold |
-| Metrics | Numbers over time: rate, errors, duration, saturation, business counters | SLI calculation, dashboards, burn-rate alerts | 30 days raw, 13 months downsampled |
-| Traces | The path of one request across the ARM, API, database, broker and consumers | Localisation of latency and failure; dependency attribution | 7 days, errors 30 days |
+| Журналы | Переходы, причины отказа, повторы и состояния автомата | Диагностика операции и субъекта, аудит отдельно | 30 дней оперативно, 90 дней в архиве |
+| Метрики | Частота, ошибки, длительность, насыщение и бизнес-счётчики | SLI, панели и оповещения | 30 дней исходные, 13 месяцев агрегированные |
+| Трассировки | Путь через АРМ, API, БД, брокер и потребителей | Источник задержки и сбоя | 7 дней, ошибки 30 дней |
 
-A metric says that something is wrong; a trace says where; a log says why. None of the three is sufficient alone.
+### 4.3 Идентификатор корреляции и контекст трассы
 
-### 4.3 Correlation ID and trace context
-
-| Step | Component | Action |
+| Шаг | Компонент | Действие |
 |---|---|---|
-| 1 | ARM | Generates a UUIDv7 `correlation_id` when the user submits an operation, or when an offline operation is created; stores it with the idempotency key and the payload. |
-| 2 | HTTP boundary | Sends `traceparent` (W3C Trace Context) and `X-Correlation-ID`; the server validates the format, creates an ID if absent, and echoes it in the response. |
-| 3 | Repair Request Service | Places the ID in the request context, every structured log record and every span; returns it in error bodies and support headers. |
-| 4 | PostgreSQL | Stores it in request history, the audit buffer and the outbox event, so the database fact and the message can be joined. |
-| 5 | Event contract | Carries `correlation_id` in the event envelope together with `event_id` and `saga_id`; consumers continue the trace with a span link. |
-| 6 | Audit and E2E tests | The audit record contains the ID; E2E oracles filter by it instead of sleeping for a fixed interval. |
+| 1 | АРМ | Создаёт UUIDv7 `correlation_id` при отправке или постановке в локальную очередь. Хранит с ключом идемпотентности и телом |
+| 2 | Граница HTTP | Передаёт `traceparent` (W3C Trace Context) и `X-Correlation-ID`. Сервер проверяет формат, создаёт ID при отсутствии и возвращает его |
+| 3 | Сервис заявок | Помещает ID в контекст, структурированные журналы, интервалы трассы, тело ошибки и заголовки поддержки |
+| 4 | PostgreSQL | Хранит ID в истории, буфере аудита и исходящем событии |
+| 5 | Контракт события | Передаёт `correlation_id` с `event_id` и `saga_id`. Потребитель связывает свой интервал с исходной трассой |
+| 6 | Аудит и E2E | Аудит содержит ID, проверки E2E ждут запись по ID вместо фиксированной паузы |
 
-Rules: a retry reuses the same ID; a new business operation gets a new ID; the ID is not a security token and carries no personal data; a missing ID at an internal boundary is a defect, not a reason to generate a second one silently. The `saga_id` identifies the assignment orchestration, and the `event_id` identifies one message; both are linked to, not substituted for, the correlation ID.
+Повтор сохраняет ID, новая операция получает новый. ID не даёт полномочий и не содержит ПДн. Если ID потерян на внутренней границе, это дефект. `saga_id` идентифицирует сагу, `event_id` — сообщение. Оба связываются с идентификатором корреляции.
 
-### 4.4 Logs
+### 4.4 Журналы
 
-Logs are JSON objects with a stable schema. The following example is illustrative; identifiers are placeholders.
+Журналы — JSON со стабильной схемой. Идентификаторы в примере условные.
 
 ```json
 {
@@ -241,360 +233,356 @@ Logs are JSON objects with a stable schema. The following example is illustrativ
 }
 ```
 
-| Level | When to use | What must be present |
+| Уровень | Когда применять | Обязательные данные |
 |---|---|---|
-| ERROR | An operation failed and requires action | `event`, `correlation_id`, `outcome`, `reason_code`, `dependency` if applicable; no payload and no stack trace with secrets. |
-| WARN | Degradation, retry, circuit open, stale projection | `event`, `correlation_id`, `retry_count`, `circuit_state`, `age_seconds`. |
-| INFO | Business state transition, one record per fact | `event`, `correlation_id`, `request_id` or `saga_id`, `actor_id`, `outcome`. |
-| DEBUG | Diagnostic detail, disabled in production by default | Sampled and time-limited; never contains personal data. |
+| ERROR | Операция завершилась ошибкой и требует реакции | `event`, `correlation_id`, `outcome`, `reason_code`, при необходимости `dependency`. Исключить тело и секреты из стека |
+| WARN | Деградация, повтор, разомкнутая цепь, старая проекция | `event`, `correlation_id`, `retry_count`, `circuit_state`, `age_seconds` |
+| INFO | Переход бизнес-состояния, одна запись на факт | `event`, `correlation_id`, `request_id` или `saga_id`, `actor_id`, `outcome` |
+| DEBUG | Диагностика, по умолчанию отключена в эксплуатации | Выборочная и временная, без ПДн |
 
-Prohibited in logs: names, phone numbers, e-mail addresses, free-text fault descriptions, tokens, cookies, authorization headers, full request or response bodies, and database connection strings. The `actor_id` is a pseudonymous stable identifier, not a login or an e-mail. Redaction is applied in the SDK and again in the collector; a schema test fails the build if a prohibited field appears.
+Исключаются имена, телефоны, адреса почты, описания неисправностей, токены, cookie, заголовки авторизации, полные тела запросов и ответов, строки подключения. `actor_id` — стабильный псевдоним. Очистка выполняется в SDK и сборщике. Проверка схемы останавливает сборку при запрещённом поле. По умолчанию пишется одна INFO-запись на бизнес-факт и одна ERROR или WARN на отклонение, без записи каждого успешного внутреннего шага.
 
-Logging every successful internal step is also prohibited. It increases cost and noise without improving diagnosis; one INFO record per business fact and one ERROR or WARN per abnormal outcome is the default.
+### 4.5 Метрики
 
-### 4.5 Metrics
+Имена стабильны, используют snake_case и суффикс единицы. Метки — ограниченные перечисления. ID заявок и пользователей, адреса почты и свободный текст исключены.
 
-Metric names are stable, use snake_case and carry a unit suffix. Labels are bounded enumerations; request IDs, user IDs, e-mail addresses and free-text values are forbidden as labels.
-
-| Metric | Type | Labels | Purpose | SLO |
+| Метрика | Тип | Метки | Назначение | SLO |
 |---|---|---|---|---|
-| `rr_requests_total` | Counter | `operation`, `outcome` | Request rate and error ratio by operation | SLO-01/02/03/05 |
-| `rr_request_duration_seconds` | Histogram | `operation` | Latency distribution for commands and reads | SLO-02 |
-| `rr_read_duration_seconds` | Histogram | `view` (`list`, `card`, `history`) | NFR-03 p95 per screen | SLO-02 |
-| `assignment_saga_total` | Counter | `state` | Saga outcomes, including `failed_manual_review` | SLO-03 |
-| `assignment_saga_duration_seconds` | Histogram | `outcome` | Time to terminal assignment outcome | SLO-03 |
-| `outbox_events_total` | Counter | `result` | Publish success, retry and failure | SLO-S1 |
-| `outbox_oldest_age_seconds` | Gauge | — | Age of the oldest unpublished event | SLO-S1 |
-| `mq_consumer_lag_seconds` | Gauge | `consumer` | Delay between commit and consumption | SLO-04 |
-| `event_freshness_seconds` | Histogram | `consumer` | Event age at warehouse availability | SLO-04 |
-| `notification_delivery_total` | Counter | `result` | Accepted, retried, rejected, unknown | SLO-S2 |
-| `notification_delivery_duration_seconds` | Histogram | — | Time to provider acceptance | SLO-S2 |
-| `dependency_request_duration_seconds` | Histogram | `dependency`, `operation` | Timeout and latency attribution | All |
-| `dependency_errors_total` | Counter | `dependency`, `reason` | Error budget diagnosis | All |
-| `circuit_breaker_state` | Gauge | `dependency` | 0 closed, 1 half-open, 2 open | All |
-| `db_pool_in_use` | Gauge | `pool` | Saturation and bulkhead health | SLO-02 |
-| `db_pool_wait_seconds` | Histogram | `pool` | Connection starvation | SLO-02 |
-| `audit_buffer_oldest_age_seconds` | Gauge | — | Audit delivery delay | SLO-S4 |
-| `business_requests_registered_total` | Counter | `org_unit` | Business throughput, independent of HTTP | P1 |
-| `business_assignments_confirmed_total` | Counter | `org_unit` | Confirmed assignments per area | P3 |
-| `business_closures_total` | Counter | `org_unit` | Completed maintenance records | P5 |
-| `business_unassigned_requests` | Gauge | `org_unit` | Count of unassigned requests | P3 |
-| `business_oldest_unassigned_age_seconds` | Gauge | `org_unit` | Age of the oldest unassigned request | P3 |
-| `slo_budget_remaining_ratio` | Gauge | `slo` | Derived budget remaining | All |
-| `slo_burn_rate` | Gauge | `slo`, `window` | Derived burn rate for alerts | All |
+| `rr_requests_total` | Счётчик | `operation`, `outcome` | Частота и доля ошибок по операции | SLO-01/02/03/05 |
+| `rr_request_duration_seconds` | Гистограмма | `operation` | Распределение задержки команд и чтения | SLO-02 |
+| `rr_read_duration_seconds` | Гистограмма | `view` (`list`, `card`, `history`) | p95 NFR-03 по экрану | SLO-02 |
+| `assignment_saga_total` | Счётчик | `state` | Исходы саги, включая `failed_manual_review` | SLO-03 |
+| `assignment_saga_duration_seconds` | Гистограмма | `outcome` | Время до окончательного исхода назначения | SLO-03 |
+| `outbox_events_total` | Счётчик | `result` | Успехи, повторы и ошибки публикации | SLO-S1 |
+| `outbox_oldest_age_seconds` | Текущее значение | — | Возраст старейшего неопубликованного события | SLO-S1 |
+| `mq_consumer_lag_seconds` | Текущее значение | `consumer` | Задержка от фиксации до обработки | SLO-04 |
+| `event_freshness_seconds` | Гистограмма | `consumer` | Возраст события при появлении в аналитике | SLO-04 |
+| `notification_delivery_total` | Счётчик | `result` | Принято, повторено, отклонено, неизвестно | SLO-S2 |
+| `notification_delivery_duration_seconds` | Гистограмма | — | Время до приёма провайдером | SLO-S2 |
+| `dependency_request_duration_seconds` | Гистограмма | `dependency`, `operation` | Источник таймаутов и задержек | Все |
+| `dependency_errors_total` | Счётчик | `dependency`, `reason` | Диагностика расхода бюджета | Все |
+| `circuit_breaker_state` | Текущее значение | `dependency` | 0 — замкнут, 1 — пробный режим, 2 — разомкнут | Все |
+| `db_pool_in_use` | Текущее значение | `pool` | Насыщение и состояние изоляции пулов | SLO-02 |
+| `db_pool_wait_seconds` | Гистограмма | `pool` | Ожидание соединения | SLO-02 |
+| `audit_buffer_oldest_age_seconds` | Текущее значение | — | Задержка доставки аудита | SLO-S4 |
+| `business_requests_registered_total` | Счётчик | `org_unit` | Темп регистрации независимо от HTTP | P1 |
+| `business_assignments_confirmed_total` | Счётчик | `org_unit` | Подтверждённые назначения по участку | P3 |
+| `business_closures_total` | Счётчик | `org_unit` | Закрытые записи обслуживания | P5 |
+| `business_unassigned_requests` | Текущее значение | `org_unit` | Заявки без назначения | P3 |
+| `business_oldest_unassigned_age_seconds` | Текущее значение | `org_unit` | Возраст старейшей неназначенной заявки | P3 |
+| `slo_budget_remaining_ratio` | Текущее значение | `slo` | Расчётный остаток бюджета | Все |
+| `slo_burn_rate` | Текущее значение | `slo`, `window` | Расчётная скорость расходования | Все |
 
-Cardinality is controlled in review: `org_unit` is a bounded master-data dimension, not a free-text field; `reason` is an enumeration; route labels use templates such as `/v1/repair-requests/{id}`, not raw paths. A CI check rejects a new label without an approved cardinality note. The derived SLO metrics are calculated by a recording rule, not by application code, so the definition is auditable in one place.
+При ревью проверяется число уникальных меток. `org_unit` берётся из ограниченного справочника, `reason` — из перечисления, маршрут задаётся шаблоном `/v1/repair-requests/{id}`. CI отклоняет новые метки без обоснования кардинальности. Правила записи вычисляют производные метрики SLO централизованно.
 
-The "golden signals" are covered by latency, traffic, errors and saturation; RED is used for request-serving services; USE is used for PostgreSQL, RabbitMQ and the host; business metrics are used because a technically green system with zero registrations is still failing the user ([Lecture 11, slide 18]).
+Четыре основных сигнала — задержка, трафик, ошибки и насыщение. RED применяется для обработки запросов, USE — для PostgreSQL, RabbitMQ и узлов. Бизнес-метрики показывают случаи, когда технические показатели в норме, а регистрации прекратились (занятие 11, слайд 18).
 
-### 4.6 Traces
+### 4.6 Трассировки
 
-A trace is a tree of spans sharing `trace_id`. The minimum span set for the two critical chains is:
+Трасса — дерево интервалов с общим `trace_id`. Минимальный набор для двух критических цепочек:
 
-| Span | Service | Key attributes | Diagnostic question |
+| Интервал | Компонент | Атрибуты | Вопрос |
 |---|---|---|---|
-| `arm.create_request` | ARM | `operation`, `offline`, `queue_depth` | Did the client wait, queue or fail? |
-| `POST /v1/repair-requests` | API | `http.status`, `idempotent_replay`, `correlation_id` | Was the command accepted once? |
-| `auth.verify_token` | API | `issuer`, `result`, `cache_hit` | Was authentication the delay? |
-| `db.insert_request` | API | `db.system`, `db.operation`, `rows` | Was the database the bottleneck? |
-| `outbox.append` | API | `event_type`, `event_id` | Was the event recorded with the fact? |
-| `assignment.command` | API | `saga_id`, `request_id` | Which assignment attempt is this? |
-| `saga.reserve_engineer` | Orchestrator | `saga_id`, `attempt` | Where did the saga wait? |
-| `workforce.reserve` | Client | `http.status`, `timeout`, `circuit_state` | Was Workforce slow or unavailable? |
-| `saga.confirm_assignment` | Orchestrator | `outcome`, `version` | Was the pivot reached once? |
-| `outbox.publish` | Relay | `event_id`, `confirm_latency_ms` | Was the broker the delay? |
-| `notification.consume` | Worker | `event_id`, `attempt` | Was the message redelivered? |
-| `notification.deliver` | Adapter | `provider_status`, `attempt` | Did the provider accept it? |
-| `analytics.consume` | Loader | `event_id`, `warehouse_latency_ms` | How stale is the warehouse? |
+| `arm.create_request` | АРМ | `operation`, `offline`, `queue_depth` | Клиент ждал, поставил в очередь или завершился ошибкой? |
+| `POST /v1/repair-requests` | API | `http.status`, `idempotent_replay`, `correlation_id` | Команда принята один раз? |
+| `auth.verify_token` | API | `issuer`, `result`, `cache_hit` | Задержка на аутентификации? |
+| `db.insert_request` | API | `db.system`, `db.operation`, `rows` | БД стала узким местом? |
+| `outbox.append` | API | `event_type`, `event_id` | Событие записано вместе с фактом? |
+| `assignment.command` | API | `saga_id`, `request_id` | Какая попытка назначения? |
+| `saga.reserve_engineer` | Оркестратор | `saga_id`, `attempt` | На чём ждала сага? |
+| `workforce.reserve` | Клиент | `http.status`, `timeout`, `circuit_state` | Workforce медленный или недоступен? |
+| `saga.confirm_assignment` | Оркестратор | `outcome`, `version` | Поворотный шаг пройден один раз? |
+| `outbox.publish` | Отправитель | `event_id`, `confirm_latency_ms` | Задержал ли брокер? |
+| `notification.consume` | Обработчик | `event_id`, `attempt` | Была повторная доставка? |
+| `notification.deliver` | Адаптер | `provider_status`, `attempt` | Принял ли провайдер? |
+| `analytics.consume` | Загрузчик | `event_id`, `warehouse_latency_ms` | Насколько отстаёт аналитика? |
 
-Trace attributes follow the same privacy rule as logs: no payload, no personal data, no token. Span names are low-cardinality; identifiers are attributes, not span names. Sampling is 100% for writes, errors and assignment sagas, 10% for successful reads, with tail-based retention of every trace slower than two seconds or containing an error. Sampling never applies to the audit record, which is a separate durable store.
+Атрибуты исключают тело, ПДн и токены. Имена интервалов имеют низкую кардинальность, ID передаются как атрибуты. Выборка составляет 100% для записи, ошибок и саг назначения, 10% для успешного чтения. По завершённой трассе сохраняются все ошибки и операции дольше двух секунд. Аудит сохраняется полностью в отдельном хранилище.
 
-### 4.7 Pipeline and failure modes
+### 4.7 Конвейер телеметрии и отказы
 
-The implementation uses OpenTelemetry SDKs and a collector per environment; the backend is not selected in this document. Metrics are exported in an OpenMetrics-compatible format, logs as JSON, traces in OTLP. The collector performs redaction, tail sampling and routing, so application code does not depend on a vendor.
+Проект использует SDK OpenTelemetry и сборщик в каждой среде. Хранилище ещё не выбрано. Метрики передаются в формате, совместимом с OpenMetrics, журналы — в JSON, трассы — в OTLP. Сборщик очищает поля, отбирает завершённые трассы и маршрутизирует сигналы.
 
-| Failure | Behaviour | Protection |
+| Отказ | Поведение | Защита |
 |---|---|---|
-| Collector or backend unavailable | SDK buffers within a bounded queue (for example 10,000 spans or 50 MB); oldest data is dropped first; business traffic continues | Alert on drop ratio and buffer saturation; never block the request path |
-| Clock skew | Durations use monotonic clocks; timestamps are UTC and NTP-synchronised | Reject events more than five minutes in the future; flag negative durations |
-| Cardinality explosion | New labels are rejected in review and by CI | Cardinality budget per metric; drop unknown labels at the collector |
-| Personal data leak | Redaction at SDK and collector; schema test | CI scan of log and span schemas; incident review if a leak is confirmed |
-| Sampling bias | Writes, errors and sagas are always sampled | Documented sampling policy; SLOs use unsampled counters |
-| Telemetry outage during an incident | Local buffers and the audit store remain independent | Operational fallback: database and broker metrics plus the audit trail |
+| Сборщик или хранилище недоступны | Ограниченный буфер SDK, например 10 000 интервалов или 50 МБ. Старые данные отбрасываются первыми, трафик продолжается | Сигнал по доле сброса и заполнению, без блокировки запросов |
+| Расхождение часов | Длительности по монотонным часам, отметки UTC синхронизированы NTP | События более чем на пять минут из будущего отклоняются, отрицательные длительности помечаются |
+| Рост кардинальности | Новые метки проверяются при ревью и в CI | Лимит по метрике, неизвестные метки отбрасывает сборщик |
+| Утечка ПДн | Очистка в SDK и сборщике, тест схемы | Проверка схемы в CI, разбор подтверждённой утечки |
+| Смещение выборки | Записи, ошибки и саги отбираются полностью | Документировать выборку, SLO считать по полным счётчикам |
+| Сбой телеметрии при инциденте | Локальные буферы и аудит независимы | Использовать метрики БД, брокера и журнал аудита |
 
-The telemetry pipeline is not allowed to become a dependency of the business transaction. The audit buffer is the exception in the opposite direction: if the audit record cannot be written, a privileged action must fail rather than proceed unrecorded.
+Телеметрия не блокирует бизнес-операцию. При невозможности записи аудита привилегированная операция отклоняется.
 
-### 4.8 Retention and access
+### 4.8 Хранение и доступ
 
-| Data | Hot | Cold | Reason |
+| Данные | Оперативно | В архиве | Причина |
 |---|---|---|---|
-| Metrics, raw | 30 days | 13 months at 5-minute resolution | SLO windows and quarterly review |
-| Traces | 7 days | 30 days for errors and slow traces | Diagnosis and regression analysis |
-| Logs | 30 days | 90 days | Incident investigation |
-| Audit records | Per legal schedule | Immutable copy | Legal and security evidence; five years is a proposal, not an agreed retention period |
-| SLO reports | 13 months | — | Target review and SLA reporting |
+| Исходные метрики | 30 дней | 13 месяцев с шагом 5 мин | Окна SLO и квартальный пересмотр |
+| Трассы | 7 дней | 30 дней для медленных и ошибочных | Диагностика и регрессии |
+| Журналы | 30 дней | 90 дней | Расследование |
+| Аудит | По правовому регламенту | Неизменяемая копия | Доказательства для ИБ и юристов, пять лет предложено к согласованию |
+| Отчёты SLO | 13 месяцев | — | Пересмотр и отчёт SLA |
 
-Access is role-based: on-call and the reliability lead read all telemetry; developers read their service; ИБ reads audit and security telemetry; business owners read aggregated dashboards without personal data. Access to the audit journal is itself audited. Break-glass access is time-bound and reviewed.
+Дежурный и руководитель надёжности читают всю телеметрию, разработчики — данные своих сервисов, ИБ — аудит и сигналы безопасности, владельцы процессов — агрегаты без ПДн. Чтение аудита само записывается. Аварийный доступ ограничен по времени и проверяется.
 
-### 4.9 Blind spots
+### 4.9 Зоны без наблюдения
 
-The following are not observable with the current design and must be stated rather than hidden: client-side rendering time inside the ARM beyond the measured API call; the internal state of EAM, HR, the IdP and the provider; the physical repair duration; the quality of a free-text fault description; and the behaviour of a user who works around the system by telephone. These gaps are covered by UX research, adapter metrics and business process observation, not by more application logs.
+Остаются время отрисовки АРМ за пределами замера API, состояние EAM, HR, поставщика удостоверений и провайдера, физическое время ремонта, качество свободного описания и работа по телефону в обход системы. Для них применяются UX-исследования, показатели адаптеров и наблюдение за процессом.
 
-## 5. Dashboards
+## 5. Панели мониторинга
 
-### 5.1 Hierarchy
+### 5.1 Уровни
 
-| Level | Audience | Question | Refresh |
+| Уровень | Аудитория | Вопрос | Обновление |
 |---|---|---|---|
-| Business | Process owner, management | Are requests being registered, assigned and closed at the expected rate? | 5 min |
-| Service SLO | Reliability lead, on-call | Is any journey burning its budget? | 1 min |
-| Dependency | On-call, service owners | Which external edge is slow, failing or open-circuit? | 30 s |
-| Delivery | Team | What changed, and did the change correlate with a burn? | On deployment |
+| Бизнес | Владелец процесса, руководители | Заявки регистрируются, назначаются и закрываются в нужном темпе? | 5 мин |
+| SLO сервиса | Руководитель надёжности, дежурный | Где расходуется бюджет? | 1 мин |
+| Зависимости | Дежурный, владельцы сервисов | Какая связь медленная, сбойная или разомкнута? | 30 с |
+| Изменения | Команда | Что изменилось и связано ли это с расходом? | При выкладке |
 
-The main SRE dashboard is a sketch, not a deployed artefact: [dashboard sketch](../diagrams/11-sre-dashboard.svg). It is deliberately organised by question, not by data source.
+Панель спроектирована вокруг вопросов и представлена эскизом.
 
-![SRE dashboard sketch](../diagrams/11-sre-dashboard.svg)
+![Эскиз панели SRE](../diagrams/11-sre-dashboard.svg)
 
-### 5.2 Main dashboard panels
+### 5.2 Основные блоки
 
-| Panel | Question | Content | Threshold and action |
+| Блок | Вопрос | Содержимое | Порог и действие |
 |---|---|---|---|
-| SLO tiles | Is a journey burning budget? | Five tiles: SLO, burn rate, budget remaining, 30-day trend | Red at 14.4×/1 h or budget below 25%; open the journey runbook |
-| Request RED | Is the API healthy? | Rate, error ratio, p50/p95/p99 by operation | p95 above 2 s or error ratio above 1%; check dependency panel |
-| Journey funnel | Where do users stop? | Created, assigned, completed; unassigned backlog and oldest age | Backlog rising for 30 min; check Workforce and dispatcher capacity |
-| Dependency health | Which edge is failing? | Workforce, EAM, HR, provider, SSO: p95, errors, circuit state | Circuit open or p95 above the timeout; follow the degradation table |
-| Outbox and consumers | Is asynchronous propagation healthy? | Oldest outbox age, consumer lag, DLQ depth | Outbox age above 5 s p99 or lag above 15 min; check broker and loader |
-| Business throughput | Is the process actually working? | Registrations, assignments, closures per hour by area | Zero in an area with normal volume; treat as a symptom alert |
-| Change log | What changed? | Deployments, feature flags, configuration changes, incidents | Any burn after a change; compare with the deployment marker |
+| Плитки SLO | Где расходуется бюджет? | Пять плиток: SLO, скорость, остаток, тренд за 30 дней | Красный при 14.4× за 1 ч или остатке <25%, открыть регламент |
+| RED запросов | Здоров ли API? | Частота, ошибки, p50/p95/p99 по операциям | p95 > 2 с или ошибки > 1%, проверить зависимости |
+| Воронка процесса | Где останавливаются пользователи? | Регистрация, назначение, завершение, очередь неназначенных и её возраст | Рост очереди 30 мин, проверить Workforce и нагрузку диспетчеров |
+| Состояние зависимостей | Какая связь отказывает? | Workforce, EAM, HR, провайдер, SSO: p95, ошибки, состояние цепи | Разомкнуто или p95 выше таймаута, открыть таблицу деградации |
+| Очередь и потребители | Успевает ли доставка? | Возраст старейшего события, отставание, глубина DLQ | p99 возраста > 5 с или лаг > 15 мин, проверить брокер и загрузчик |
+| Темп бизнес-операций | Работает ли процесс? | Регистрации, назначения, закрытия в час по участку | Ноль при обычном потоке — оповещение о симптоме |
+| Журнал изменений | Что изменилось? | Выкладки, флаги функций, конфигурация, инциденты | Расход после изменения — сопоставить с отметкой выкладки |
 
-The dashboard does not show every metric. A panel that nobody acts on is removed; a panel without a threshold and an owner is decoration. All panels use UTC and the same time range, and deployment annotations are visible on every time series.
+Блоки без действий удаляются. Остальные имеют порог и владельца, единый диапазон UTC и отметки выкладок на временных рядах.
 
-### 5.3 Alerts and runbooks
+### 5.3 Оповещения и инструкции
 
-Each alert links to the SLO tile, the dependency panel and a runbook section. The runbook itself belongs to Topic 3.4, but the alert must already name the first three checks: the current burn rate, the dependency circuit state and the most recent change. Alerts are routed by journey ownership, not by service name, so the person who receives the page knows which user outcome is at risk.
+Сигнал ведёт к плитке, зависимостям и разделу регламента из темы 3.4. Первые проверки — скорость расходования, состояние цепи зависимости и последнее изменение. Маршрутизация идёт по владельцу пользовательского сценария.
 
-### 5.4 Dashboard hygiene
+### 5.4 Правила оформления
 
-The dashboard uses a maximum of seven panels on the first screen; detailed per-endpoint views are one click away. Units are explicit, colours are reserved for state rather than decoration, and personal data never appears. The same recording rules that feed the dashboard feed the alerts, so a green tile and a firing alert cannot disagree.
+На первом экране максимум семь блоков, детализация операции доступна за один переход. Единицы явные, цвет показывает состояние, ПДн отсутствуют. Панели и сигналы получают значения из одних правил расчёта.
 
-## 6. Resilience patterns on C2
+## 6. Механизмы устойчивости на C2
 
-### 6.1 Cascade anatomy in RemKontur
+### 6.1 Каскадный отказ
 
-A slow Workforce response is the most credible cascade in this system. The sequence is:
+1. Workforce отвечает за 15 с вместо 2 с по контракту.
+2. Назначения занимают обработчики приложения и соединения общего пула.
+3. Очередь растёт, чтение и регистрация ждут свободного обработчика.
+4. API перестаёт отвечать, АРМ показывает ожидание или таймаут.
+5. Диспетчеры всех участков теряют экран назначения и сообщают о падении системы.
 
-1. Workforce answers in 15 s instead of the contractual 2 s.
-2. Each assignment request holds an application worker and a connection from the shared pool.
-3. The queue grows; requests that do not need Workforce, including reads and registrations, wait for a free worker.
-4. The API stops responding; the ARM shows a spinner or a timeout for every operation.
-5. Dispatchers at all sites lose the assignment screen, and the incident is reported as "the system is down" although only one dependency is slow.
+Защита прерывает цепочку на втором шаге. Таймаут дополняется контролем повторов и изоляцией ресурсов.
 
-The purpose of the patterns below is to break the chain at step 2, before the shared resource is exhausted. A timeout alone is not enough if every caller retries; a circuit breaker alone is not enough if the caller has no bulkhead.
+### 6.2 Каталог механизмов
 
-### 6.2 Pattern catalogue
-
-| Pattern | Rule in RemKontur | Protects | Evidence |
+| Механизм | Правило | Что защищает | Основание |
 |---|---|---|---|
-| Timeout | Every external call has a timeout shorter than the caller's remaining budget and shorter than the user-facing NFR. | Caller threads and connection pools | [08 §6](../08-external-environment.md); §6.3 |
-| Retry | Only idempotent operations; same key and body; exponential backoff with full jitter; maximum three automatic attempts; retry budget ≤ 10% of successful calls. | The dependency and the caller | [07 §3](../07-integration-architecture.md) |
-| Circuit breaker | Per dependency and per instance; opens on 50% errors or five consecutive timeouts in 30 s with at least 20 requests; open for 30 s; three half-open probes. | Caller from a dead dependency | §6.3 |
-| Rate limiting | Inbound per authenticated user and per IP; outbound per provider and per legacy system; `429` with `Retry-After`; queue where the contract allows. | Receiver and shared quota | §6.3 |
-| Bulkhead | Separate connection and worker pools for Workforce, EAM, HR, notifications and analytics; a saturated dependency cannot occupy the read/write pool. | Unrelated journeys | §6.3 |
-| Load shedding | Priority classes: P0 create/read/assign/complete, P1 history/export, P2 reports and ad-hoc analytics; P2 is rejected first under saturation. | Core user journeys | §7 |
-| DLQ | After five attempts or one hour, a message moves to a dead-letter queue with its event ID and correlation ID; replay is idempotent. | Consumer progress and diagnosis | [07 §7](../07-integration-architecture.md) |
-| Idempotency | Every command carries a key; every consumer has an inbox; every event has an ID. | Duplicate effects during retries and recovery | [07 §3, §5](../07-integration-architecture.md) |
-| Backpressure | Bounded queues with an explicit `queued` state; no unbounded in-memory growth. | Process stability | NFR-02 |
+| Таймаут | Короче остатка бюджета вызывающей стороны и пользовательского NFR | Потоки и пулы | [08 §6](../08-external-environment.md), §6.3 |
+| Повтор | Только идемпотентные операции с тем же ключом и телом, экспоненциальная задержка с полной случайной разбежкой, максимум три автоматические попытки, бюджет ≤ 10% успешных вызовов | Зависимость и вызывающий сервис | [07 §3](../07-integration-architecture.md) |
+| Автомат размыкания | По зависимости и экземпляру, размыкание при 50% ошибок или пяти таймаутах подряд за 30 с при ≥ 20 запросах, пауза 30 с, три пробных вызова | Вызывающий сервис при отказе зависимости | §6.3 |
+| Ограничение частоты | Входящие по пользователю и IP, исходящие по провайдеру и унаследованной системе, `429` с `Retry-After`, очередь по контракту | Получатель и общая квота | §6.3 |
+| Изоляция ресурсов | Отдельные пулы соединений и обработчиков для Workforce, EAM, HR, уведомлений и аналитики | Независимые сценарии | §6.3 |
+| Сброс нагрузки | P0 — создание, чтение, назначение и выполнение, P1 — история и экспорт, P2 — отчёты и разовая аналитика. При насыщении сначала отклоняется P2 | Критические операции | §7 |
+| DLQ | После пяти попыток или часа сообщение уходит в очередь неразобранных с ID события и корреляции. Повтор идемпотентен | Работа потребителя и диагностика | [07 §7](../07-integration-architecture.md) |
+| Идемпотентность | Ключ у команды, входящая очередь дедупликации у потребителя, ID у события | Защита от повторных эффектов | [07 §3, §5](../07-integration-architecture.md) |
+| Обратное давление | Ограниченные очереди и явное состояние `queued` | Устойчивость процесса | NFR-02 |
 
-The patterns are not independent. A retry without a timeout can hold a thread forever; a breaker without a bulkhead can still leave the caller with no capacity; a DLQ without an idempotent replay can duplicate a notification. The C2 view and the tables below treat them as one design.
+Таймаут, повтор и автомат размыкания работают совместно с изолированными пулами. Повтор из DLQ требует дедупликации эффекта.
 
-### 6.3 C2 resilience map
+### 6.3 Карта устойчивости C2
 
-The C2 v0.3 view adds resilience annotations to the external boundary of week 8. The diagram is a design artefact; the patterns are not yet configured in a running system.
+Вид C2 v0.3 дополняет внешнюю границу недели 8 проектными механизмами.
 
-![C2 v0.3 · resilience view](../diagrams/11-c2-resilience.svg)
+![C2 v0.3 · Устойчивость](../diagrams/11-c2-resilience.svg)
 
-The PlantUML source is [11-c2-resilience.puml](../diagrams/11-c2-resilience.puml). The numbered edges correspond to the tables below.
+Номера связей соответствуют таблицам. [Исходник PlantUML](../diagrams/11-c2-resilience.puml)
 
-#### 6.3.1 Timeouts, retries and idempotency
+#### 6.3.1 Таймауты, повторы и идемпотентность
 
-| Edge | Caller → callee | Timeout | Retry policy | Idempotency key |
+| Связь | Направление | Таймаут | Повторы | Ключ идемпотентности |
 |---|---|---|---|---|
-| E1 | ARM → Repair Request Service | 10 s command, 5 s read | Same key and body; three attempts; 0.5/1/2 s with full jitter; only on timeout, `429` or `5xx` | Operation UUID generated before the first attempt |
-| E2 | Service → PostgreSQL | Connect 2 s; statement 1.5 s read, 2 s write; lock 1 s | Only serialization failure or deadlock; two attempts with jitter | Transaction and request ID |
-| E3 | Service → SSO JWKS | 2 s | Two attempts with 200 ms pause | None (safe GET); cached key set |
-| E4 | Service → Workforce | 2 s | No blind retry; read reservation by `saga_id` before any new attempt; at most three reconciliation reads over 60 s | `saga_id` |
-| E5 | Service → audit buffer | Same local transaction | No network retry inside the transaction; transaction fails if the buffer cannot be written | `audit_event_id` |
-| E6 | Outbox Relay → RabbitMQ | Publisher confirm 5 s | Retry indefinitely with capped backoff; outbox is the source of truth | `event_id` |
-| E7 | RabbitMQ → Notification Worker | Consumer ack 30 s | Five attempts with backoff, then DLQ | `event_id`; inbox deduplication |
-| E8 | Worker → Notification Adapter → provider | 5 s | Same key, maximum five attempts, then DLQ; no new key for a retry | `event_id` / delivery ID |
-| E9 | RabbitMQ → Analytics Loader | Consumer ack 60 s | Five attempts, then DLQ; replay after correction | `event_id`; inbox deduplication |
-| E10 | Master Data Adapter → EAM | 10 s | Three scheduled attempts with backoff; outside the user path | Sync batch ID |
-| E11 | Master Data Adapter → HR | 10 s | Three scheduled attempts with backoff; outside the user path | Sync batch ID |
-| E12 | Audit Writer → Audit Store | 5 s | Retry indefinitely from the durable buffer | `audit_event_id` |
+| E1 | АРМ → сервис заявок | 10 с команда, 5 с чтение | Тот же ключ и тело, три попытки, 0,5/1/2 с с полной случайной разбежкой только при таймауте, `429` или `5xx` | UUID операции до первой попытки |
+| E2 | Сервис → PostgreSQL | Подключение 2 с, чтение 1,5 с, запись 2 с, блокировка 1 с | Две попытки со случайной задержкой только при ошибке сериализации или взаимоблокировке | Транзакция и ID заявки |
+| E3 | Сервис → JWKS SSO | 2 с | Две попытки с паузой 200 мс | Без ключа, безопасный GET и кэш ключей |
+| E4 | Сервис → Workforce | 2 с | Сначала чтение резерва по `saga_id`, до трёх сверок за 60 с | `saga_id` |
+| E5 | Сервис → буфер аудита | Та же локальная транзакция | Без сетевого повтора в транзакции, ошибка записи буфера отменяет транзакцию | `audit_event_id` |
+| E6 | Отправитель → RabbitMQ | Подтверждение 5 с | Без ограничения числа повторов, с пределом задержки, исходящая очередь — источник | `event_id` |
+| E7 | RabbitMQ → обработчик уведомлений | Подтверждение 30 с | Пять попыток с задержкой, затем DLQ | `event_id`, дедупликация входящих |
+| E8 | Обработчик → адаптер → провайдер | 5 с | Тот же ключ, максимум пять попыток, затем DLQ | `event_id` или ID доставки |
+| E9 | RabbitMQ → загрузчик аналитики | Подтверждение 60 с | Пять попыток, затем DLQ, повтор после исправления | `event_id`, дедупликация входящих |
+| E10 | Адаптер мастер-данных → EAM | 10 с | Три плановые попытки с задержкой вне пользовательского пути | ID пакета |
+| E11 | Адаптер мастер-данных → HR | 10 с | Три плановые попытки с задержкой вне пользовательского пути | ID пакета |
+| E12 | Писатель аудита → хранилище | 5 с | Повтор из устойчивого буфера без ограничения числа попыток | `audit_event_id` |
 
-#### 6.3.2 Circuit breakers, rate limits, bulkheads and fallbacks
+#### 6.3.2 Размыкание, ограничения, изоляция и обходные режимы
 
-| Edge | Circuit breaker | Rate limit | Bulkhead | Fallback and degradation |
+| Связь | Автомат размыкания | Ограничение частоты | Изоляция | Обходной режим |
 |---|---|---|---|---|
-| E1 | In the ARM: five consecutive failures or 50% in 30 s; open 30 s; three probes | 20 req/s per session, burst 40 | Offline queue, 500 operations or 4 h | Queue the create operation; show `queued` or `offline`, never a false success |
-| E2 | Not used; database failover is the correct mechanism | Maximum connections in the pool | 20 connections, five reserved for writes | Writes fail fast or wait for failover; reads continue only from a promoted or read replica; no stale write acknowledgement |
-| E3 | 50% in 30 s with at least 10 requests; open 30 s | Per-IdP client limit | Five connections | Use cached JWKS until TTL; new sessions fail closed |
-| E4 | 50% in 30 s with at least 20 requests; open 30 s | Workforce quota; assignment commands per dispatcher | Ten connections | Assignment fails fast and remains retryable; no partial reservation; create, read and completion continue |
-| E5 | Not used; the buffer is local | — | Dedicated writer | Privileged action fails closed if the buffer cannot be written |
-| E6 | 50% in 30 s with at least 20 requests; open 30 s | Publish rate cap | Dedicated channel | Outbox retains events; core continues |
-| E7 | Consumer pauses on a dependency failure | Prefetch 20; concurrency 4 | Dedicated consumer pool | DLQ; assignment remains valid |
-| E8 | 50% in 30 s with at least 20 requests; open 30 s | Provider contract; token bucket | Ten connections | Notifications delayed and queued; no effect on assignment |
-| E9 | On warehouse errors; 50% in 30 s | Replay rate cap | Concurrency 2 | Warehouse marked stale; events retained |
-| E10 | 50% in 30 s with at least 10 requests; open 30 s | Configurable to the EAM limit | Five connections | Last valid projection; freshness banner |
-| E11 | 50% in 30 s with at least 10 requests; open 30 s | Configurable to the HR limit | Five connections | Last valid projection; inactive or unknown employees are not assignable |
-| E12 | Not used; the buffer is durable | Batch rate cap | Dedicated writer | Buffer grows; alert; no loss of confirmed audit records |
+| E1 | В АРМ пять отказов подряд или 50% за 30 с, пауза 30 с, три пробы | 20 запросов/с на сессию, всплеск 40 | Локальная очередь 500 операций или 4 ч | Поставить создание в очередь, показать `queued` или `offline` до подтверждения |
+| E2 | Переключение БД | Максимум соединений | 20, из них пять для записи | Запись отклоняется быстро или ждёт, чтение идёт из повышенной реплики или реплики чтения, без ложного подтверждения |
+| E3 | 50% за 30 с при ≥ 10 запросах, пауза 30 с | Квота клиента поставщика удостоверений | Пять соединений | Кэш JWKS до TTL, безопасный отказ для новых сессий |
+| E4 | 50% за 30 с при ≥ 20 запросах, пауза 30 с | Квота Workforce и команды на диспетчера | Десять соединений | Явный быстрый отказ с возможностью повтора, без частичного резерва, остальные операции продолжаются |
+| E5 | Локальный буфер | — | Выделенный писатель | При сбое буфера привилегированное действие отклоняется |
+| E6 | 50% за 30 с при ≥ 20 запросах, пауза 30 с | Предел публикаций | Выделенный канал | События сохраняются в очереди, ядро работает |
+| E7 | Потребитель приостанавливается при отказе зависимости | Предвыборка 20, параллельность 4 | Отдельный пул | DLQ, назначение действительно |
+| E8 | 50% за 30 с при ≥ 20 запросах, пауза 30 с | Квота договора, алгоритм корзины токенов | Десять соединений | Уведомления ждут в очереди, назначение действительно |
+| E9 | Ошибки хранилища, 50% за 30 с | Предел повторной доставки | Параллельность 2 | Отметка устаревания, события сохранены |
+| E10 | 50% за 30 с при ≥ 10 запросах, пауза 30 с | По квоте EAM | Пять соединений | Последняя корректная проекция с отметкой свежести |
+| E11 | 50% за 30 с при ≥ 10 запросах, пауза 30 с | По квоте HR | Пять соединений | Последняя проекция, неизвестные и неактивные сотрудники недоступны для назначения |
+| E12 | Устойчивый буфер | Ограничение частоты пакетов | Выделенный писатель | Рост буфера и оповещение, подтверждённый аудит сохраняется |
 
-### 6.4 Parameter rationale
+### 6.4 Обоснование параметров
 
-Timeouts are derived from the user budget, not chosen per dependency in isolation. NFR-03 allows two seconds for a read, so a read query that waits three seconds has already failed the journey; the database read timeout is therefore 1.5 s and the API read timeout 5 s, leaving room for authentication and serialization. The Workforce timeout remains 2 s because the saga has a three-second synchronous budget and a 60-second terminal budget ([07 §3](../07-integration-architecture.md)). The provider timeout is 5 s because the notification is asynchronous and a longer wait only occupies a worker. The EAM and HR timeouts are 10 s because those calls are batch and outside the user path.
+Порог чтения по NFR-03 — две секунды. БД ограничивает чтение 1,5 с, клиентский таймаут API — 5 с, оставляя время на аутентификацию и сериализацию. Workforce получает 2 с при синхронном бюджете саги три секунды и конечном 60 с. Провайдер уведомлений получает 5 с на асинхронном пути. Пакетные EAM и HR получают 10 с. [Интеграции, §3](../07-integration-architecture.md)
 
-Retries are capped at three automatic attempts and are owned by one layer only. Nested retries at three levels would produce 27 calls to a slow provider, which is the failure mode the lecture warns about. A retry budget of 10% prevents a retry storm from consuming the capacity needed by first attempts. Full jitter avoids synchronised waves after a dependency recovers.
+Повторы принадлежат одному слою. Три уровня по три попытки дают 27 вызовов. Бюджет 10% сохраняет ресурсы первых попыток, случайные задержки рассеивают одновременные всплески.
 
-Circuit-breaker thresholds require a minimum volume so that a handful of requests cannot open the circuit. The 30-second open period is long enough for a dependency to recover and short enough that the user does not wait indefinitely. Half-open probes are limited to three so that recovery does not create a new surge.
+Порог размыкания требует минимального объёма. Пауза 30 с даёт зависимости время восстановиться. Три пробных вызова ограничивают нагрузку после восстановления.
 
-Rate limits protect the receiver, not the caller. Inbound limits stop one session or one misbehaving client from exhausting the API; outbound limits respect the provider contract and the legacy system's capacity. A `429` is a correct response when the alternative is a queue that eventually fails every request.
+Входящие лимиты защищают API от отдельной сессии, исходящие соблюдают договор и возможности получателя. `429` сохраняет ресурсы при переполнении.
 
-Bulkheads are sized from the load profile: 50 concurrent sessions, 20 reads/s and 5 writes/s. The pool of 20 connections with five reserved for writes prevents a read burst from blocking the write path; the dedicated Workforce pool prevents a slow external service from taking the last connection. The numbers are hypotheses to be tuned after the first load test.
+Размеры пулов рассчитаны на 50 сессий, 20 чтений/с и 5 записей/с. Пять из 20 соединений оставлены записи, Workforce выделен отдельный пул. Значения уточняются нагрузочным тестом.
 
-### 6.5 Rejected anti-patterns
+### 6.5 Отклонённые подходы
 
-| Anti-pattern | Why it is rejected |
+| Подход | Причина |
 |---|---|
-| Retry at every layer | Multiplies load on a failing dependency; one retry owner per call chain. |
-| Unbounded queue | Converts a latency problem into memory or disk exhaustion and hides the failure from the user. |
-| Circuit breaker on the database | Hides replication lag and prevents the correct response, which is failover or read-only mode. |
-| Timeout longer than the caller budget | The caller has already given up; the work continues and consumes capacity for no user. |
-| Silent fallback to stale data | Presents old data as current; freshness must be visible. |
-| Alert on CPU only | A dependency can fail while the CPU is idle; alerts follow user symptoms. |
-| Logging full payloads | Creates a personal-data and secret leak; the audit has a separate minimised schema. |
-| One global SLO | Hides which journey is failing and lets a healthy path mask a broken one. |
+| Повтор на каждом слое | Умножает нагрузку, нужен один ответственный слой |
+| Неограниченная очередь | Исчерпывает память или диск и скрывает сбой |
+| Автомат размыкания БД | Скрывает отставание репликации, мешает переключению или режиму чтения |
+| Таймаут дольше бюджета вызывающего | Работа потребляет ресурсы после ухода пользователя |
+| Незаметная выдача устаревших данных | Свежесть должна быть видна |
+| Сигнал только по CPU | Зависимость может отказать при свободном процессоре |
+| Журналы полных тел | Риск ПДн и секретов, у аудита минимизированная схема |
+| Один общий SLO | Исправный сценарий скрывает сбойный |
 
-### 6.6 Verification
+### 6.6 Проверка
 
-Each pattern has a test that proves the intended behaviour, not merely the configuration. The full matrix is in §8.1. The minimum evidence for the C2 view is: a 15-second dependency delay does not exhaust the shared pool; an open circuit returns a fast, explicit failure; a retry does not create a duplicate; a DLQ message can be replayed without a second effect; and a saturated dependency leaves the other journeys within their SLO.
+Матрица §8.1 проверяет поведение. Задержка 15 с сохраняет общий пул, разомкнутая цепь даёт быстрый явный отказ, повтор и воспроизведение DLQ не дублируют эффекты, насыщение одной зависимости сохраняет SLO других сценариев.
 
-## 7. Graceful degradation
+## 7. Управляемая деградация
 
-### 7.1 Operating modes
+### 7.1 Режимы
 
-| Mode | Trigger | User-visible behaviour | Core invariant |
+| Режим | Триггер | Что видит пользователь | Инвариант |
 |---|---|---|---|
-| M0 Normal | All dependencies within budget | Full function | — |
-| M1 Assignment degraded | Workforce unavailable or circuit open | Create, read and completion continue; assignment returns a clear temporary failure and can be retried | No partial reservation and no duplicate active assignment |
-| M2 Notification or analytics degraded | Provider, broker or warehouse unavailable | Core continues; notifications and dashboards lag with a visible freshness marker | Accepted business facts are not lost |
-| M3 Offline ARM | Network loss between the site and the data centre | Create is queued locally; cached reads are available; assignment, priority and closure are disabled | Queue is bounded and synchronises once, without duplicates |
-| M4 Read-only | PostgreSQL primary unavailable and failover in progress | Reads from the last consistent source; writes wait or are queued | No write is acknowledged before it is durable |
-| M5 Privileged fail-closed | Audit buffer or identity attributes unavailable | Privileged changes are rejected; ordinary reads continue | No privileged change without an audit record |
+| M0 Обычный | Зависимости в бюджете | Полная функциональность | — |
+| M1 Задержка назначения | Workforce недоступен или цепь разомкнута | Регистрация, чтение и завершение работают, назначение возвращает временный отказ с возможностью повтора | Нет частичного резерва и дубля назначения |
+| M2 Задержка уведомлений или аналитики | Недоступен провайдер, брокер либо хранилище | Ядро работает, отставание явно обозначено | Подтверждённые факты сохранены |
+| M3 Автономный АРМ | Обрыв сети между участком и ЦОД | Локальная очередь и кэш, назначение, приоритет и закрытие отключены | Очередь ограничена, синхронизация без дублей |
+| M4 Только чтение | Основная БД недоступна, идёт переключение | Чтение согласованных данных, запись ждёт или ставится в очередь | Подтверждение только после сохранения |
+| M5 Безопасный отказ | Буфер аудита либо атрибуты доступа недоступны | Привилегированные изменения отклоняются, обычное чтение продолжается | Каждое привилегированное изменение аудируется |
 
-### 7.2 Failure table
+### 7.2 Таблица отказов
 
-| Failure | Continues | Degrades | User message | Hard limit | Detection and owner |
+| Отказ | Продолжает работать | Деградирует | Сообщение | Ограничение | Обнаружение и владелец |
 |---|---|---|---|---|---|
-| Workforce unavailable | Registration, card, history, result, closure | Assignment | "Assignment is temporarily unavailable; the request remains unassigned. Retry in a few minutes." | No reservation, no partial assignment, no duplicate | Circuit open, saga failures; Andrey |
-| EAM projection older than 60 min | Known equipment registration, reads, assignment | Freshness of equipment data | "Equipment data as of HH:MM." | Unknown, retired or invalid-reference equipment cannot be used; request is marked as created from stale data | Projection age; Martin |
-| HR projection older than 60 min | Reads, registration, completion | Assignment choice | "Employee data may be outdated; verify the assignee." | Inactive or unknown employee cannot be assigned | Projection age; Martin |
-| SSO unavailable | Existing sessions until token expiry; offline queue | New login | "Sign-in is temporarily unavailable. Your queued work is preserved." | No new privileged session; no unsigned action | IdP errors, JWKS cache; ИБ |
-| Notification provider unavailable | Assignment, card, closure | Notification delivery | "Notification delayed; the assignment is visible in the ARM." | No false "delivered" status | Provider errors, queue age; Amir |
-| RabbitMQ unavailable | Registration, assignment, completion, reads | Analytics and notifications | No user-facing error for the core; dashboards show a lag | Outbox is durable; events are not dropped | Outbox age; Amir |
-| Analytics warehouse unavailable | All core journeys | Dashboards and reports | "Analytics is delayed." | Core does not wait for the warehouse | Loader lag; Amir |
-| PostgreSQL primary unavailable | Reads from a consistent replica where allowed; queued creates | Writes during failover | "Saving is temporarily delayed; your operation is queued." | No write acknowledgement before durability | Failover state; Martin |
-| Audit store unavailable | Reads and ordinary operations | Privileged changes | "This action cannot be completed while the audit service is unavailable." | Privileged action fails closed; no unlogged change | Audit buffer age; ИБ |
-| Site network loss | Offline create and cached reads | Assignment, priority, closure | "Offline. The request will be sent when the connection returns." | Four-hour or 500-operation queue; one confirmation per operation | ARM queue state; Martin |
-| Telemetry backend unavailable | All business journeys | Diagnosis and dashboards | No direct user message | Bounded buffers; audit is independent | Drop ratio; reliability lead |
+| Workforce недоступен | Регистрация, карточка, история, результат, закрытие | Назначение | «Назначение временно недоступно. Заявка остаётся без исполнителя. Повторите через несколько минут» | Без резерва, частичного назначения и дублей | Разомкнутая цепь, сбои саг, Andrey |
+| Проекция EAM старше 60 мин | Регистрация известного оборудования, чтение, назначение | Свежесть оборудования | «Данные оборудования на ЧЧ:ММ» | Неизвестное, выведенное из эксплуатации или с неверной ссылкой недоступно. Заявка помечена | Возраст проекции, Martin |
+| Проекция HR старше 60 мин | Чтение, регистрация, завершение | Выбор исполнителя | «Данные сотрудников могли устареть. Проверьте исполнителя» | Неактивный или неизвестный сотрудник недоступен | Возраст проекции, Martin |
+| SSO недоступен | Сессии до истечения токена, локальная очередь | Новый вход | «Вход временно недоступен. Сохранённые в очереди операции останутся доступны» | Нет новых привилегированных сессий и неподписанных действий | Ошибки поставщика удостоверений, кэш JWKS, ИБ |
+| Провайдер уведомлений недоступен | Назначение, карточка, закрытие | Доставка | «Уведомление задерживается. Назначение видно в АРМ» | Без ложного статуса доставки | Ошибки и возраст очереди, Amir |
+| RabbitMQ недоступен | Регистрация, назначение, завершение, чтение | Аналитика и уведомления | Ошибки в ядре нет, панели показывают задержку | События хранятся в исходящей очереди | Возраст очереди, Amir |
+| Хранилище аналитики недоступно | Все основные сценарии | Панели и отчёты | «Данные аналитики поступают с задержкой» | Ядро не ждёт хранилища | Отставание загрузчика, Amir |
+| Основной PostgreSQL недоступен | Разрешённое чтение с согласованной реплики, очередь создания | Записи при переключении | «Сохранение задерживается. Операция поставлена в очередь» | Подтверждение только после сохранения | Состояние переключения, Martin |
+| Хранилище аудита недоступно | Чтение и обычные операции | Привилегированные изменения | «Действие недоступно, пока не восстановится аудит» | Без привилегированного изменения без записи | Возраст буфера, ИБ |
+| Обрыв сети на участке | Локальное создание и чтение кэша | Назначение, приоритет, закрытие | «Нет связи. Заявка отправится после восстановления» | Четыре часа или 500 операций, одно подтверждение на операцию | Состояние очереди АРМ, Martin |
+| Хранилище телеметрии недоступно | Все бизнес-сценарии | Диагностика и панели | Без отдельного сообщения | Буфер ограничен, аудит независим | Доля сброса, руководитель надёжности |
 
-### 7.3 Rules
+### 7.3 Правила
 
-1. A read may be served from a stale source only if the freshness is visible; a write may never be acknowledged before it is durable.
-2. A business fact that has been accepted must not be lost because a consumer, a notification provider or an analytics system is unavailable.
-3. A privileged action must fail closed if the audit or the identity attributes cannot be verified.
-4. A queue must be bounded and must expose its state; an unbounded queue is a hidden outage.
-5. Degradation is tested, not assumed: each row of §7.2 has a fault-injection test and an expected user message.
-6. Recovery is not complete when the dependency returns; it is complete when the backlog is drained, duplicates are reconciled and the SLO is stable.
+1. Устаревшее чтение сопровождается отметкой свежести. Запись подтверждается после надёжного сохранения.
+2. Принятый бизнес-факт сохраняется при отказе потребителя, уведомлений или аналитики.
+3. При невозможности проверить аудит или атрибуты привилегированное действие отклоняется.
+4. Очередь имеет предел и отображаемое состояние.
+5. Каждая строка §7.2 имеет испытание со сбоем и ожидаемое сообщение.
+6. Восстановление завершено после разбора очереди, сверки дублей и стабилизации SLO.
 
-### 7.4 User communication
+### 7.4 Связь с пользователем
 
-Messages state what still works, what is delayed and what the user should do. They do not expose internal component names, stack traces or correlation IDs to the end user; the correlation ID is available to support through the error reference. A message that says only "Error" is a defect in the degradation design.
+Сообщение называет доступные функции, задержки и действие пользователя. Внутренние компоненты, стеки и идентификаторы корреляции скрываются, поддержка получает ID по номеру ошибки. Сообщение «Ошибка» без пояснения считается дефектом.
 
-## 8. Verification and readiness
+## 8. Проверка и готовность
 
-### 8.1 Test matrix
+### 8.1 Матрица испытаний
 
-| ID | What it proves | Method | Frequency | Evidence |
+| ID | Что доказывает | Метод | Частота | Доказательство |
 |---|---|---|---|---|
-| SRE-T01 | SLO queries and budgets are correct | Seeded event sets with known good and bad counts; compare the calculated budget with the expected value | On every query change | Query test report |
-| SRE-T02 | Correlation ID survives the full chain | E2E-01/02/03 filtered by one `correlation_id`; assert one trace, one audit record and one event per fact | Every build | E2E report |
-| SRE-T03 | Logs contain no prohibited fields | Schema test and redaction test with synthetic personal data | Every build | CI report |
-| SRE-T04 | Metric cardinality is bounded | CI check of label sets and a cardinality budget per metric | Every build | CI report |
-| SRE-T05 | Timeout and circuit breaker work | Inject a 15-second delay and a 5xx from each dependency; assert fast failure and open state | Every release | Fault-injection report |
-| SRE-T06 | Retry does not become a storm | Count calls at three layers under a failing dependency; assert the retry budget | Every release | Load report |
-| SRE-T07 | Bulkhead isolates a slow dependency | Saturate Workforce; assert create and read remain within SLO | Every release | Load report |
-| SRE-T08 | Rate limit returns `429` and `Retry-After` | Burst above the configured limit | Every release | Integration report |
-| SRE-T09 | DLQ replay is idempotent | Move a message to DLQ, replay it, assert one effect | Every release | Integration report |
-| SRE-T10 | Degradation table is accurate | Execute each row of §7.2 and compare the user-visible result | Every release | Test report |
-| SRE-T11 | Load shedding protects P0 | Saturate the API; assert P2 is rejected and P0 still succeeds | Every release | Load report |
-| SRE-T12 | Burn-rate alerts fire correctly | Synthetic burn in staging; assert page, ticket and freeze thresholds | Every quarter | Alert test report |
-| SRE-T13 | DR objectives are achievable | Full DR exercise per [DR plan](11-dr-plan.md) | Every six months | DR report |
+| SRE-T01 | Расчёты SLO и бюджета верны | Набор событий с заданным числом успехов и ошибок, сверка расчёта | При изменении запроса | Отчёт теста запроса |
+| SRE-T02 | ID корреляции проходит всю цепь | E2E-01/02/03 по одному `correlation_id`, проверка одной трассы, записи аудита и события на факт | Каждая сборка | Отчёт E2E |
+| SRE-T03 | Журналы без запрещённых полей | Тест схемы и очистки с синтетическими ПДн | Каждая сборка | Отчёт CI |
+| SRE-T04 | Кардинальность ограничена | Проверка множеств меток и лимита по метрике | Каждая сборка | Отчёт CI |
+| SRE-T05 | Таймаут и размыкание работают | Задержка 15 с и 5xx на зависимости, быстрый отказ и разомкнутое состояние | Каждый релиз | Отчёт испытания сбоя |
+| SRE-T06 | Повторы ограничены | Подсчитать вызовы на трёх слоях при отказе, проверить бюджет | Каждый релиз | Нагрузочный отчёт |
+| SRE-T07 | Пулы изолируют зависимость | Насыщение Workforce при сохранении SLO записи и чтения | Каждый релиз | Нагрузочный отчёт |
+| SRE-T08 | Лимит даёт `429` и `Retry-After` | Всплеск выше настроенного предела | Каждый релиз | Интеграционный отчёт |
+| SRE-T09 | Повтор DLQ идемпотентен | Поместить сообщение в DLQ, повторить, проверить один эффект | Каждый релиз | Интеграционный отчёт |
+| SRE-T10 | Таблица деградации верна | Воспроизвести строки §7.2, сверить результат в АРМ | Каждый релиз | Отчёт тестов |
+| SRE-T11 | Сброс защищает P0 | Насыщение API, P2 отклоняется, P0 успешен | Каждый релиз | Нагрузочный отчёт |
+| SRE-T12 | Оповещения верны | Синтетический расход на стенде, проверка порогов вызова, задачи и заморозки | Ежеквартально | Отчёт теста оповещений |
+| SRE-T13 | Цели DR достижимы | Полные учения по [плану DR](11-dr-plan.md) | Раз в полгода | Отчёт DR |
 
-### 8.2 GameDay scenarios
+### 8.2 Учения со сбоями (GameDay)
 
-| Scenario | Expected automatic action | User impact | Budget burn | Evidence |
+| Сценарий | Ожидаемая реакция | Влияние | Расход | Доказательство |
 |---|---|---|---|---|
-| Workforce answers in 15 s | Timeout at 2 s, circuit opens, assignment fails fast; create and read continue | Assignment unavailable; requests remain unassigned | SLO-03 burn; estimate from the number of attempts | Trace, circuit state, saga outcomes |
-| Notification provider is down | Adapter retries with the same key, then DLQ; assignment stays valid | Notifications delayed; users see the assignment in the ARM | SLO-S2 burn | Queue age, DLQ, delivery status |
-| A token is compromised | Sessions revoked, secrets rotated, audit queried by correlation ID | The compromised user is signed out; no unauthorized assignment | No SLO budget; guardrail G1/G5 review | Audit trail, correlation trace |
-| A data centre is lost | DR plan activates: replica promotion, pilot-light scale-up, DNS switch | Core unavailable for the RTO window; offline ARM queues creation | SLO-01/02/03 burn | DR report, actual RTO/RPO |
-| A table is logically deleted | Detection by audit and reconciliation; PITR restore to an isolated instance | Core may be read-only during recovery; lost facts reconstructed | SLO-01/05 burn | Restore report, reconciliation |
-| Broker is lost | Quorum queue failover; outbox replay; consumers deduplicate | Analytics and notifications delayed; core continues | SLO-04/S1 burn | Outbox age, consumer lag |
+| Workforce отвечает за 15 с | Таймаут 2 с, размыкание, быстрый отказ назначения, чтение и запись работают | Заявки остаются без назначения | SLO-03, оценка по попыткам | Трасса, состояние цепи и саг |
+| Провайдер выключен | Повтор с прежним ключом, затем DLQ | Доставка задержана, назначение видно в АРМ | SLO-S2 | Возраст очереди, DLQ, статус |
+| Токен скомпрометирован | Отзыв сессий, ротация секретов, поиск аудита по ID корреляции | Сессия закрыта, незаконного назначения нет | Разбор G1/G5 вне бюджета | Аудит и трасса |
+| Потерян ЦОД | Повышение реплики, масштабирование резерва, DNS | Ядро недоступно в окне RTO, очередь АРМ работает | SLO-01/02/03 | Отчёт и фактические RTO/RPO |
+| Таблица удалена | Аудит и сверка обнаруживают удаление, PITR в изоляции | Возможно чтение без записи, факты восстанавливаются | SLO-01/05 | Отчёт и сверка |
+| Брокер потерян | Переключение кворума, повтор из очереди и дедупликация | Аналитика и уведомления отстают, ядро работает | SLO-04/S1 | Возраст очереди и отставание |
 
-For every scenario the review records what happened automatically, what the user saw, how much budget was consumed and which runbook step was missing. A GameDay without a written observation is a demonstration, not an exercise.
+Записываются автоматическая реакция, видимый результат, расход бюджета и недостающие шаги регламента.
 
-### 8.3 Readiness checklist
+### 8.3 Готовность
 
-| Item | Status | Location |
+| Пункт | Статус | Где |
 |---|---|---|
-| Five user-path SLOs with formulas, windows, owners and budgets | Designed | §3.2 |
-| Error-budget policy signed by product, engineering and operations | Designed, not signed | §3.6 |
-| Symptom-based burn-rate alerts | Designed, not deployed | §3.7 |
-| Correlation ID from ARM to audit and consumers | Designed, not implemented | §4.3 |
-| Logs, metrics and traces with retention and privacy rules | Designed, not deployed | §4.4–4.8 |
-| Main dashboard with thresholds and actions | Sketched | §5.2 |
-| Resilience patterns on every external edge | Designed | §6.3 |
-| Graceful-degradation table | Designed, not exercised | §7.2 |
-| RTO/RPO, DR strategy and ADR | Designed | [DR plan](11-dr-plan.md), [ADR-009](../adr/ADR-009-disaster-recovery-strategy.md) |
-| Measured traffic volumes and pilot baselines | Missing | Open question Q1 |
-| Signed SLA | Missing | Open question Q2 |
-| Telemetry backend selected and deployed | Missing | Open question Q4 |
-| DR exercise executed | Missing | [DR plan §9](11-dr-plan.md) |
+| Пять SLO с формулами, окнами, владельцами и бюджетами | Спроектировано | §3.2 |
+| Политика согласована продуктом, разработкой и эксплуатацией | Спроектировано, не подписано | §3.6 |
+| Оповещения по расходу | Спроектировано, не развёрнуто | §3.7 |
+| Корреляция от АРМ до аудита и потребителей | Спроектировано, не реализовано | §4.3 |
+| Журналы, метрики, трассы, хранение и приватность | Спроектировано, не развёрнуто | §4.4–4.8 |
+| Главная панель с порогами и действиями | Эскиз | §5.2 |
+| Защита внешних связей | Спроектировано | §6.3 |
+| Таблица деградации | Спроектировано, учения не проведены | §7.2 |
+| RTO/RPO, стратегия и ADR | Спроектировано | [План DR](11-dr-plan.md), [ADR-009](../adr/ADR-009-disaster-recovery-strategy.md) |
+| Фактический трафик и базовые показатели пилота | Отсутствуют | Q1 |
+| Подписанный SLA | Отсутствует | Q2 |
+| Выбранное и развёрнутое хранилище телеметрии | Отсутствует | Q4 |
+| Проведённые учения DR | Отсутствуют | [План DR §9](11-dr-plan.md) |
 
-### 8.4 Open questions
+### 8.4 Открытые вопросы
 
-| ID | Question | Impact |
+| ID | Вопрос | Влияние |
 |---|---|---|
-| Q1 | What are the real monthly volumes for registration, reads, assignment, events and closures? | All budgets and the cost of the target |
-| Q2 | Which external SLA, if any, will be offered, and to whom? | SLO/SLA gap, contractual exposure |
-| Q3 | What is the measured cost of one hour of downtime? | RTO/RPO targets and the DR strategy |
-| Q4 | Which telemetry backend and retention product will be used? | Cost, retention, access control |
-| Q5 | What audit-retention period will ИБ and legal approve? | Storage design and DR copy |
-| Q6 | Is a second region available and funded? | DR strategy and RTO |
-| Q7 | Who owns Workforce availability and its DR? | SLO-03 and the assignment degradation |
-| Q8 | What are the provider's rate limits and delivery guarantees? | SLO-S2 and rate limiting |
-| Q9 | Should users see a service-status page? | Communication and support load |
-| Q10 | Are there data-residency constraints on telemetry and backups? | Backend and DR location |
+| Q1 | Сколько регистраций, чтений, назначений, событий и закрытий в месяц? | Бюджеты и стоимость |
+| Q2 | Какой SLA предложить и кому? | Разрыв SLO/SLA и договорный риск |
+| Q3 | Какова стоимость часа простоя? | RTO/RPO и стратегия DR |
+| Q4 | Какое хранилище телеметрии выбрать? | Стоимость, хранение и доступ |
+| Q5 | Какой срок аудита согласуют ИБ и юристы? | Хранилище и копия DR |
+| Q6 | Доступен и профинансирован ли второй регион? | Стратегия и RTO |
+| Q7 | Кто отвечает за доступность и DR Workforce? | SLO-03 и деградация назначения |
+| Q8 | Каковы лимиты и гарантии провайдера? | SLO-S2 и ограничение частоты |
+| Q9 | Нужна ли пользователям страница состояния? | Коммуникация и нагрузка поддержки |
+| Q10 | Есть ли ограничения на размещение телеметрии и копий? | Размещение хранилищ и DR |
 
-## 9. Traceability to the homework
+## 9. Соответствие заданию
 
-| Homework item | Where it is addressed | Status |
+| Пункт | Где | Статус |
 |---|---|---|
-| SLI and SLO for 3–5 user journeys | §2–3.2, five journeys from the E2E catalogue | Designed |
-| Error budget and budget policy | §3.5–3.7, including worked examples and burn-rate alerts | Designed |
-| Telemetry contour and dashboard sketch | §4–5, [dashboard sketch](../diagrams/11-sre-dashboard.svg) | Designed |
-| Resilience patterns on C2 | §6, [C2 v0.3](../diagrams/11-c2-resilience.svg), [PlantUML source](../diagrams/11-c2-resilience.puml) | Designed |
-| Graceful-degradation table | §7, including operating modes and user messages | Designed |
-| RTO/RPO, DR strategy and ADR | [DR plan](11-dr-plan.md), [ADR-009](../adr/ADR-009-disaster-recovery-strategy.md) | Designed |
+| SLI и SLO для 3–5 сценариев | §2–3.2, пять сценариев E2E | Спроектировано |
+| Бюджет и политика | §3.5–3.7, расчёты и оповещения | Спроектировано |
+| Контур телеметрии и эскиз | §4–5, [эскиз](../diagrams/11-sre-dashboard.svg) | Спроектировано |
+| Механизмы устойчивости C2 | §6, [C2 v0.3](../diagrams/11-c2-resilience.svg), [PlantUML](../diagrams/11-c2-resilience.puml) | Спроектировано |
+| Таблица деградации | §7, режимы и сообщения | Спроектировано |
+| RTO/RPO, DR и ADR | [План DR](11-dr-plan.md), [ADR-009](../adr/ADR-009-disaster-recovery-strategy.md) | Спроектировано |
 
-The specification is complete as a design artefact. It is not evidence that the system meets the targets: no production telemetry, load test or DR exercise has been executed. The first pilot must replace the volume hypotheses, measure the baselines and record the difference between the designed and the observed reliability.
+Достижение целей предстоит подтвердить промышленной телеметрией, нагрузочными испытаниями и учениями. На пилоте измеряются объёмы и исходные показатели, затем фиксируется расхождение между проектной и наблюдаемой надёжностью.
