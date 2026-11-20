@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 620" width="1400" height="620" font-family="Helvetica Neue, Helvetica, Arial, sans-serif">
-<title>Incident lifecycle for RemKontur</title>
-<desc>Five-stage incident lifecycle with entry and exit criteria, the feedback loop into detection and runbooks, and the four incident roles.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 640" width="1400" height="640" font-family="Helvetica Neue, Helvetica, Arial, sans-serif">
+<title>Жизненный цикл инцидента для РемКонтур</title>
+<desc>Пятистадийный жизненный цикл инцидента с условиями входа и выхода, петлёй обратной связи в обнаружение и runbook’и, а также четырьмя ролями.</desc>
 <defs>
 <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
 <path d="M 0 0 L 10 5 L 0 10 z" fill="#5f6b7a"/>
@@ -9,26 +9,27 @@
 <path d="M 0 0 L 10 5 L 0 10 z" fill="#b26a00"/>
 </marker>
 </defs>
-<rect width="1400" height="620" fill="#ffffff"/>
-<text x="24" y="34" font-size="19" font-weight="700" fill="#1f2933">Incident lifecycle — RemKontur (week 12)</text>
-<text x="24" y="55" font-size="12" fill="#5f6b7a">Five stages, one feedback loop. Every stage change, severity change and owner change is written into the timeline with a UTC timestamp. Design hypothesis, not an exercised process.</text>
+<rect width="1400" height="640" fill="#ffffff"/>
+<text x="24" y="34" font-size="19" font-weight="700" fill="#1f2933">Жизненный цикл инцидента — РемКонтур (неделя 12)</text>
+<text x="24" y="55" font-size="12" fill="#5f6b7a">Пять стадий, одна петля обратной связи. Каждая смена стадии, уровня серьёзности и владельца записывается в хронологию с меткой UTC. Проектная гипотеза, процесс не отрабатывался.</text>
 
 <!-- Stage 1 -->
 <g>
 <rect x="40" y="90" width="236" height="240" rx="9" fill="#f8fafc" stroke="#c9d2de" stroke-width="1.3"/>
 <circle cx="62" cy="114" r="13" fill="#1f2933"/>
 <text x="62" y="119" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">1</text>
-<text x="82" y="119" font-size="15" font-weight="700" fill="#1f2933">Detect</text>
-<text x="56" y="146" font-size="9.5" font-weight="700" fill="#8a94a6">ENTRY</text>
-<text x="56" y="162" font-size="10" fill="#3e4c59">Symptom alert, user call or</text>
-<text x="56" y="176" font-size="10" fill="#3e4c59">failed synthetic check</text>
-<text x="56" y="200" font-size="9.5" font-weight="700" fill="#8a94a6">ACTIONS</text>
-<text x="56" y="216" font-size="10" fill="#3e4c59">Validate the signal; open the</text>
-<text x="56" y="230" font-size="10" fill="#3e4c59">channel; start the timeline;</text>
-<text x="56" y="244" font-size="10" fill="#3e4c59">assign a scribe</text>
-<text x="56" y="268" font-size="9.5" font-weight="700" fill="#8a94a6">EXIT</text>
-<text x="56" y="284" font-size="10" fill="#3e4c59">Real user impact confirmed,</text>
-<text x="56" y="298" font-size="10" fill="#3e4c59">not a monitoring artefact</text>
+<text x="82" y="119" font-size="14" font-weight="700" fill="#1f2933">Обнаружение</text>
+<text x="56" y="146" font-size="9.5" font-weight="700" fill="#8a94a6">ВХОД</text>
+<text x="56" y="162" font-size="10" fill="#3e4c59">Алерт по симптому, звонок</text>
+<text x="56" y="176" font-size="10" fill="#3e4c59">пользователя или сбой</text>
+<text x="56" y="190" font-size="10" fill="#3e4c59">синтетической проверки</text>
+<text x="56" y="212" font-size="9.5" font-weight="700" fill="#8a94a6">ДЕЙСТВИЯ</text>
+<text x="56" y="228" font-size="10" fill="#3e4c59">Подтвердить сигнал; открыть</text>
+<text x="56" y="242" font-size="10" fill="#3e4c59">канал; начать хронологию;</text>
+<text x="56" y="256" font-size="10" fill="#3e4c59">назначить секретаря</text>
+<text x="56" y="280" font-size="9.5" font-weight="700" fill="#8a94a6">ВЫХОД</text>
+<text x="56" y="296" font-size="10" fill="#3e4c59">Подтверждено реальное</text>
+<text x="56" y="310" font-size="10" fill="#3e4c59">влияние на пользователей</text>
 </g>
 <line x1="280" y1="210" x2="305" y2="210" stroke="#5f6b7a" stroke-width="1.6" marker-end="url(#arrow)"/>
 
@@ -37,16 +38,17 @@
 <rect x="311" y="90" width="236" height="240" rx="9" fill="#f8fafc" stroke="#c9d2de" stroke-width="1.3"/>
 <circle cx="333" cy="114" r="13" fill="#1f2933"/>
 <text x="333" y="119" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">2</text>
-<text x="353" y="119" font-size="15" font-weight="700" fill="#1f2933">Respond</text>
-<text x="327" y="146" font-size="9.5" font-weight="700" fill="#8a94a6">ENTRY</text>
-<text x="327" y="162" font-size="10" fill="#3e4c59">Impact confirmed</text>
-<text x="327" y="200" font-size="9.5" font-weight="700" fill="#8a94a6">ACTIONS</text>
-<text x="327" y="216" font-size="10" fill="#3e4c59">Set severity; name the IC;</text>
-<text x="327" y="230" font-size="10" fill="#3e4c59">list affected journeys; send</text>
-<text x="327" y="244" font-size="10" fill="#3e4c59">the first update; freeze</text>
-<text x="327" y="258" font-size="10" fill="#3e4c59">risky changes</text>
-<text x="327" y="282" font-size="9.5" font-weight="700" fill="#8a94a6">EXIT</text>
-<text x="327" y="298" font-size="10" fill="#3e4c59">Roles assigned, update sent</text>
+<text x="353" y="119" font-size="14" font-weight="700" fill="#1f2933">Реакция</text>
+<text x="327" y="146" font-size="9.5" font-weight="700" fill="#8a94a6">ВХОД</text>
+<text x="327" y="162" font-size="10" fill="#3e4c59">Влияние подтверждено</text>
+<text x="327" y="196" font-size="9.5" font-weight="700" fill="#8a94a6">ДЕЙСТВИЯ</text>
+<text x="327" y="212" font-size="10" fill="#3e4c59">Назначить уровень; назвать IC;</text>
+<text x="327" y="226" font-size="10" fill="#3e4c59">определить сценарии; отправить</text>
+<text x="327" y="240" font-size="10" fill="#3e4c59">первое обновление; заморозить</text>
+<text x="327" y="254" font-size="10" fill="#3e4c59">рискованные изменения</text>
+<text x="327" y="282" font-size="9.5" font-weight="700" fill="#8a94a6">ВЫХОД</text>
+<text x="327" y="298" font-size="10" fill="#3e4c59">Роли назначены, обновление</text>
+<text x="327" y="312" font-size="10" fill="#3e4c59">отправлено</text>
 </g>
 <line x1="551" y1="210" x2="576" y2="210" stroke="#5f6b7a" stroke-width="1.6" marker-end="url(#arrow)"/>
 
@@ -55,17 +57,17 @@
 <rect x="582" y="90" width="236" height="240" rx="9" fill="#fffaf2" stroke="#e0b877" stroke-width="1.5"/>
 <circle cx="604" cy="114" r="13" fill="#b26a00"/>
 <text x="604" y="119" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">3</text>
-<text x="624" y="119" font-size="15" font-weight="700" fill="#1f2933">Mitigate</text>
-<text x="598" y="146" font-size="9.5" font-weight="700" fill="#8a94a6">ENTRY</text>
-<text x="598" y="162" font-size="10" fill="#3e4c59">Roles assigned</text>
-<text x="598" y="200" font-size="9.5" font-weight="700" fill="#8a94a6">ACTIONS</text>
-<text x="598" y="216" font-size="10" fill="#3e4c59">Roll back, switch a flag,</text>
-<text x="598" y="230" font-size="10" fill="#3e4c59">fail over, degrade, drain or</text>
-<text x="598" y="244" font-size="10" fill="#3e4c59">isolate. Fastest reversible</text>
-<text x="598" y="258" font-size="10" fill="#3e4c59">action first</text>
-<text x="598" y="282" font-size="9.5" font-weight="700" fill="#8a94a6">EXIT</text>
-<text x="598" y="298" font-size="10" fill="#3e4c59">Journey restored, or declared</text>
-<text x="598" y="312" font-size="10" fill="#3e4c59">degradation visible to users</text>
+<text x="624" y="119" font-size="14" font-weight="700" fill="#1f2933">Локализация</text>
+<text x="598" y="146" font-size="9.5" font-weight="700" fill="#8a94a6">ВХОД</text>
+<text x="598" y="162" font-size="10" fill="#3e4c59">Роли назначены</text>
+<text x="598" y="196" font-size="9.5" font-weight="700" fill="#8a94a6">ДЕЙСТВИЯ</text>
+<text x="598" y="212" font-size="10" fill="#3e4c59">Откат, флаг, переключение,</text>
+<text x="598" y="226" font-size="10" fill="#3e4c59">деградация, разгрузка или</text>
+<text x="598" y="240" font-size="10" fill="#3e4c59">изоляция. Сначала самое</text>
+<text x="598" y="254" font-size="10" fill="#3e4c59">быстрое обратимое действие</text>
+<text x="598" y="282" font-size="9.5" font-weight="700" fill="#8a94a6">ВЫХОД</text>
+<text x="598" y="298" font-size="10" fill="#3e4c59">Сценарий восстановлен или</text>
+<text x="598" y="312" font-size="10" fill="#3e4c59">деградация объявлена и видна</text>
 </g>
 <line x1="822" y1="210" x2="847" y2="210" stroke="#5f6b7a" stroke-width="1.6" marker-end="url(#arrow)"/>
 
@@ -74,16 +76,17 @@
 <rect x="853" y="90" width="236" height="240" rx="9" fill="#f8fafc" stroke="#c9d2de" stroke-width="1.3"/>
 <circle cx="875" cy="114" r="13" fill="#1f2933"/>
 <text x="875" y="119" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">4</text>
-<text x="895" y="119" font-size="15" font-weight="700" fill="#1f2933">Resolve</text>
-<text x="869" y="146" font-size="9.5" font-weight="700" fill="#8a94a6">ENTRY</text>
-<text x="869" y="162" font-size="10" fill="#3e4c59">Mitigation works</text>
-<text x="869" y="200" font-size="9.5" font-weight="700" fill="#8a94a6">ACTIONS</text>
-<text x="869" y="216" font-size="10" fill="#3e4c59">Confirm burn below 1×; drain</text>
-<text x="869" y="230" font-size="10" fill="#3e4c59">backlogs; reconcile dupli-</text>
-<text x="869" y="244" font-size="10" fill="#3e4c59">cates; watch a stability</text>
-<text x="869" y="258" font-size="10" fill="#3e4c59">window</text>
-<text x="869" y="282" font-size="9.5" font-weight="700" fill="#8a94a6">EXIT</text>
-<text x="869" y="298" font-size="10" fill="#3e4c59">Metrics stable for 30 min</text>
+<text x="895" y="119" font-size="14" font-weight="700" fill="#1f2933">Завершение</text>
+<text x="869" y="146" font-size="9.5" font-weight="700" fill="#8a94a6">ВХОД</text>
+<text x="869" y="162" font-size="10" fill="#3e4c59">Локализация сработала</text>
+<text x="869" y="196" font-size="9.5" font-weight="700" fill="#8a94a6">ДЕЙСТВИЯ</text>
+<text x="869" y="212" font-size="10" fill="#3e4c59">Подтвердить выгорание ниже 1×;</text>
+<text x="869" y="226" font-size="10" fill="#3e4c59">разгрузить очереди;</text>
+<text x="869" y="240" font-size="10" fill="#3e4c59">сверить дубли; наблюдать</text>
+<text x="869" y="254" font-size="10" fill="#3e4c59">окно стабильности</text>
+<text x="869" y="282" font-size="9.5" font-weight="700" fill="#8a94a6">ВЫХОД</text>
+<text x="869" y="298" font-size="10" fill="#3e4c59">Метрики стабильны 30 мин;</text>
+<text x="869" y="312" font-size="10" fill="#3e4c59">нет необъяснённых дублей</text>
 </g>
 <line x1="1093" y1="210" x2="1118" y2="210" stroke="#5f6b7a" stroke-width="1.6" marker-end="url(#arrow)"/>
 
@@ -92,54 +95,59 @@
 <rect x="1124" y="90" width="236" height="240" rx="9" fill="#f8fafc" stroke="#c9d2de" stroke-width="1.3"/>
 <circle cx="1146" cy="114" r="13" fill="#1f2933"/>
 <text x="1146" y="119" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">5</text>
-<text x="1166" y="119" font-size="15" font-weight="700" fill="#1f2933">Review</text>
-<text x="1140" y="146" font-size="9.5" font-weight="700" fill="#8a94a6">ENTRY</text>
-<text x="1140" y="162" font-size="10" fill="#3e4c59">SEV-1/2 resolved or any</text>
-<text x="1140" y="176" font-size="10" fill="#3e4c59">guardrail incident</text>
-<text x="1140" y="200" font-size="9.5" font-weight="700" fill="#8a94a6">ACTIONS</text>
-<text x="1140" y="216" font-size="10" fill="#3e4c59">Blameless review within five</text>
-<text x="1140" y="230" font-size="10" fill="#3e4c59">business days; actions with</text>
-<text x="1140" y="244" font-size="10" fill="#3e4c59">owner and date; publish</text>
-<text x="1140" y="268" font-size="9.5" font-weight="700" fill="#8a94a6">EXIT</text>
-<text x="1140" y="284" font-size="10" fill="#3e4c59">Actions in backlog; review</text>
-<text x="1140" y="298" font-size="10" fill="#3e4c59">published</text>
+<text x="1166" y="119" font-size="14" font-weight="700" fill="#1f2933">Разбор</text>
+<text x="1140" y="146" font-size="9.5" font-weight="700" fill="#8a94a6">ВХОД</text>
+<text x="1140" y="162" font-size="10" fill="#3e4c59">SEV-1/2 завершён или</text>
+<text x="1140" y="176" font-size="10" fill="#3e4c59">любой guardrail-инцидент</text>
+<text x="1140" y="200" font-size="9.5" font-weight="700" fill="#8a94a6">ДЕЙСТВИЯ</text>
+<text x="1140" y="216" font-size="10" fill="#3e4c59">Разбор без обвинений за пять</text>
+<text x="1140" y="230" font-size="10" fill="#3e4c59">рабочих дней; действия с</text>
+<text x="1140" y="244" font-size="10" fill="#3e4c59">владельцем и сроком;</text>
+<text x="1140" y="258" font-size="10" fill="#3e4c59">опубликовать</text>
+<text x="1140" y="282" font-size="9.5" font-weight="700" fill="#8a94a6">ВЫХОД</text>
+<text x="1140" y="298" font-size="10" fill="#3e4c59">Действия в бэклоге; разбор</text>
+<text x="1140" y="312" font-size="10" fill="#3e4c59">опубликован</text>
 </g>
 
 <!-- Feedback loop -->
 <path d="M 1242 334 L 1242 372 L 158 372 L 158 336" fill="none" stroke="#b26a00" stroke-width="1.7" stroke-dasharray="6 4" marker-end="url(#loop)"/>
-<rect x="520" y="356" width="360" height="32" rx="6" fill="#fffaf2" stroke="#e0b877" stroke-width="1"/>
-<text x="700" y="377" font-size="10.5" font-weight="700" fill="#8a5a00" text-anchor="middle">Every review changes detection, a runbook or the architecture</text>
+<rect x="500" y="356" width="400" height="32" rx="6" fill="#fffaf2" stroke="#e0b877" stroke-width="1"/>
+<text x="700" y="377" font-size="10.5" font-weight="700" fill="#8a5a00" text-anchor="middle">Каждый разбор меняет обнаружение, runbook или архитектуру</text>
 
 <!-- Roles -->
-<text x="40" y="432" font-size="13" font-weight="700" fill="#1f2933">Roles</text>
-<text x="92" y="432" font-size="11" fill="#5f6b7a">One person may hold two roles in a small team; the incident commander and the technical lead must differ as soon as the team size allows.</text>
+<text x="40" y="436" font-size="13" font-weight="700" fill="#1f2933">Роли</text>
+<text x="92" y="436" font-size="11" fill="#5f6b7a">Один человек может совмещать две роли в маленькой команде; руководитель инцидента и технический лидер должны различаться, как только позволяет размер команды.</text>
 
 <g>
-<rect x="40" y="448" width="316" height="72" rx="8" fill="#f8fafc" stroke="#c9d2de" stroke-width="1.2"/>
-<text x="56" y="470" font-size="12" font-weight="700" fill="#1f2933">Incident commander</text>
-<text x="56" y="488" font-size="10" fill="#3e4c59">Declares severity, owns decisions and the timeline,</text>
-<text x="56" y="503" font-size="10" fill="#3e4c59">approves rollback. <tspan font-weight="700" fill="#b26a00">Does not fix the system.</tspan></text>
+<rect x="40" y="452" width="316" height="84" rx="8" fill="#f8fafc" stroke="#c9d2de" stroke-width="1.2"/>
+<text x="56" y="474" font-size="12" font-weight="700" fill="#1f2933">Руководитель инцидента</text>
+<text x="56" y="492" font-size="10" fill="#3e4c59">Объявляет уровень, владеет решениями</text>
+<text x="56" y="506" font-size="10" fill="#3e4c59">и хронологией, утверждает откат.</text>
+<text x="56" y="520" font-size="10" font-weight="700" fill="#b26a00">Не чинит систему.</text>
 </g>
 <g>
-<rect x="372" y="448" width="316" height="72" rx="8" fill="#f8fafc" stroke="#c9d2de" stroke-width="1.2"/>
-<text x="388" y="470" font-size="12" font-weight="700" fill="#1f2933">Technical lead</text>
-<text x="388" y="488" font-size="10" fill="#3e4c59">Diagnoses, directs engineers, executes or supervises</text>
-<text x="388" y="503" font-size="10" fill="#3e4c59">the mitigation; reports the technical state to the IC.</text>
+<rect x="372" y="452" width="316" height="84" rx="8" fill="#f8fafc" stroke="#c9d2de" stroke-width="1.2"/>
+<text x="388" y="474" font-size="12" font-weight="700" fill="#1f2933">Технический лидер</text>
+<text x="388" y="492" font-size="10" fill="#3e4c59">Диагностирует, направляет инженеров,</text>
+<text x="388" y="506" font-size="10" fill="#3e4c59">выполняет или контролирует локализацию;</text>
+<text x="388" y="520" font-size="10" fill="#3e4c59">докладывает IC техническое состояние.</text>
 </g>
 <g>
-<rect x="704" y="448" width="316" height="72" rx="8" fill="#f8fafc" stroke="#c9d2de" stroke-width="1.2"/>
-<text x="720" y="470" font-size="12" font-weight="700" fill="#1f2933">Communications lead</text>
-<text x="720" y="488" font-size="10" fill="#3e4c59">Publishes on schedule; translates technical state into</text>
-<text x="720" y="503" font-size="10" fill="#3e4c59">business impact; owns the single external channel.</text>
+<rect x="704" y="452" width="316" height="84" rx="8" fill="#f8fafc" stroke="#c9d2de" stroke-width="1.2"/>
+<text x="720" y="474" font-size="12" font-weight="700" fill="#1f2933">Коммуникации</text>
+<text x="720" y="492" font-size="10" fill="#3e4c59">Публикует по расписанию; переводит</text>
+<text x="720" y="506" font-size="10" fill="#3e4c59">техническое состояние в бизнес-влияние;</text>
+<text x="720" y="520" font-size="10" fill="#3e4c59">ведёт единый внешний канал.</text>
 </g>
 <g>
-<rect x="1036" y="448" width="324" height="72" rx="8" fill="#f8fafc" stroke="#c9d2de" stroke-width="1.2"/>
-<text x="1052" y="470" font-size="12" font-weight="700" fill="#1f2933">Scribe</text>
-<text x="1052" y="488" font-size="10" fill="#3e4c59">Records UTC timestamps, decisions, actions and</text>
-<text x="1052" y="503" font-size="10" fill="#3e4c59">evidence links in real time. Does not debug.</text>
+<rect x="1036" y="452" width="324" height="84" rx="8" fill="#f8fafc" stroke="#c9d2de" stroke-width="1.2"/>
+<text x="1052" y="474" font-size="12" font-weight="700" fill="#1f2933">Секретарь</text>
+<text x="1052" y="492" font-size="10" fill="#3e4c59">Записывает метки UTC, решения, действия</text>
+<text x="1052" y="506" font-size="10" fill="#3e4c59">и ссылки на доказательства в реальном</text>
+<text x="1052" y="520" font-size="10" fill="#3e4c59">времени. Не занимается отладкой.</text>
 </g>
 
-<text x="40" y="556" font-size="10.5" fill="#5f6b7a">Cadence: SEV-1 every 30 min with a 5-minute acknowledgement; SEV-2 hourly with a 15-minute acknowledgement; SEV-3 when the state changes; SEV-4 as a ticket.</text>
-<text x="40" y="574" font-size="10.5" fill="#5f6b7a">The lifecycle is not a waterfall: mitigation may start before severity is formally assigned, and a failed mitigation returns the incident to stage 3.</text>
-<text x="40" y="592" font-size="10.5" fill="#5f6b7a">Source: docs/runbooks/12-incident-management.md §3–5. Design hypothesis; no incident has been managed under this regulation.</text>
+<text x="40" y="566" font-size="10.5" fill="#5f6b7a">Каденция: SEV-1 каждые 30 мин с подтверждением за 5 минут; SEV-2 ежечасно с подтверждением за 15 минут; SEV-3 при изменении состояния; SEV-4 — задача.</text>
+<text x="40" y="584" font-size="10.5" fill="#5f6b7a">Жизненный цикл — не водопад: локализация может начаться до формального назначения серьёзности, а неудачная локализация возвращает инцидент на стадию 3.</text>
+<text x="40" y="602" font-size="10.5" fill="#5f6b7a">Источник: docs/runbooks/12-incident-management.md §3–5. Проектная гипотеза; ни один инцидент не управлялся по этому регламенту.</text>
 </svg>

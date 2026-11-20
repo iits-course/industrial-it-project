@@ -1,127 +1,127 @@
-# Week 12 · Incident management, runbooks and technical debt: overview
+# Неделя 12 · Инциденты, runbook’и и технический долг: обзор
 
-This section completes the operational part of the Architecture Dossier. Week 11 defined what "reliable" means and how to recover from a regional loss; week 12 defines what people do when the service is unreliable, how they learn from it and what the team knowingly postponed.
+Этот раздел завершает эксплуатационную часть Architecture Dossier. Неделя 11 определила, что значит «надёжно» и как восстанавливаться после потери региона; неделя 12 определяет, что делают люди, когда сервис ненадёжен, как они учатся на этом и что команда сознательно отложила.
 
-The package is a design hypothesis. No incident has been managed under this regulation, no runbook has been executed, no GameDay has taken place and no debt has been repaid. The severity thresholds, response times, principal and interest figures are proposals that the pilot must replace with measurements.
+Комплект — проектная гипотеза. Ни один инцидент не управлялся по этому регламенту, ни один runbook не выполнялся, GameDay не проводился, долг не погашался. Пороги серьёзности, сроки реакции, значения тела долга и процентов — предложения, которые пилот должен заменить измерениями.
 
-## Artifacts
+## Артефакты
 
-| Artifact | Content | Homework item |
+| Артефакт | Содержание | Пункт ДЗ |
 |---|---|---|
-| [Incident management and on-call regulation](12-incident-management.md) | Severity levels mapped to RemKontur, five-stage lifecycle, four roles, communication template and cadence, rotation and handover, guardrail incidents, exercise programme, process metrics | 1 |
-| [Runbook set](12-runbooks.md) | Runbook standard, five procedures with trigger, impact, diagnosis, mitigation, verification, escalation and a last-verified date, quality checklist and maintenance rule | 2 |
-| [Post-mortem INC-2026-04](../postmortems/12-incident-review.md) | Educational SEV-2 incident: impact, sourced timeline, contributing factors, five whys, what worked, nine actions with owner and date, budget consequences, reusable template | 3 |
-| [Technical debt register](../tech-debt/12-tech-debt-register.md) | Definition and metaphor, quadrant, seven debt types, seven entries with principal and interest, prioritisation matrix, business framing, governance, template | 4 |
-| [Incident lifecycle](../diagrams/12-incident-lifecycle.svg) | Five stages with entry and exit criteria, the feedback loop and the four roles | 1–3 |
-| [Debt quadrant and priority](../diagrams/12-debt-quadrant.svg) | Awareness against judgement, and interest against principal with the register entries placed | 4 |
+| [Регламент инцидентов и on-call](12-incident-management.md) | Уровни серьёзности с привязкой к РемКонтур, жизненный цикл из пяти стадий, четыре роли, шаблон и каденция коммуникаций, ротация и передача смены, guardrail-инциденты, программа учений, процессные метрики | 1 |
+| [Набор runbook’ов](12-runbooks.md) | Стандарт runbook’а, пять процедур с триггером, влиянием, диагностикой, локализацией, проверкой, эскалацией и датой последней проверки, чек-лист качества и правило сопровождения | 2 |
+| [Постмортем INC-2026-04](../postmortems/12-incident-review.md) | Учебный SEV-2 инцидент: влияние, источниковая хронология, способствующие факторы, пять «почему», что сработало, девять действий с владельцем и сроком, последствия для бюджета, шаблон | 3 |
+| [Реестр технического долга](../tech-debt/12-tech-debt-register.md) | Определение и метафора долга, квадрант, семь типов долга, семь записей с телом долга и процентами, матрица приоритизации, разговор с бизнесом, governance, шаблон | 4 |
+| [Жизненный цикл инцидента](../diagrams/12-incident-lifecycle.svg) | Пять стадий с условиями входа и выхода, петля обратной связи и четыре роли | 1–3 |
+| [Квадрант долга и приоритет](../diagrams/12-debt-quadrant.svg) | Осознанность против благоразумия и проценты против тела долга с размещёнными записями реестра | 4 |
 
-## Reading order
+## Порядок чтения
 
-1. [Incident management §2–3](12-incident-management.md) — how severity is assigned from user impact and what the five stages require.
-2. [Incident management §4–6](12-incident-management.md) — who does what, what is communicated and when, and what the on-call rotation actually promises.
-3. [Incident management §7–8](12-incident-management.md) — the guardrail incidents that are never "just slow service", and the GameDay matrix.
-4. [Runbooks §1](12-runbooks.md) — the standard every procedure follows, then RB-01 as the most likely first incident.
-5. [Post-mortem](../postmortems/12-incident-review.md) — read the review before the runbooks if you want to see why the runbook steps exist.
-6. [Debt register §2–5](../tech-debt/12-tech-debt-register.md) — the quadrant, the seven types and the repayment decision.
+1. [Регламент инцидентов §2–3](12-incident-management.md) — как уровень серьёзности выводится из влияния на пользователя и что требуют пять стадий.
+2. [Регламент инцидентов §4–6](12-incident-management.md) — кто что делает, что и когда сообщается и что на самом деле обещает on-call-ротация.
+3. [Регламент инцидентов §7–8](12-incident-management.md) — guardrail-инциденты, которые никогда не являются «просто медленным сервисом», и матрица GameDay.
+4. [Runbook’и §1](12-runbooks.md) — стандарт, которому следует каждая процедура, затем RB-01 как наиболее вероятный первый инцидент.
+5. [Постмортем](../postmortems/12-incident-review.md) — прочитайте разбор до runbook’ов, если хотите увидеть, откуда взялись шаги процедур.
+6. [Реестр долга §2–5](../tech-debt/12-tech-debt-register.md) — квадрант, семь типов и решение о погашении.
 
-## Key decisions at a glance
+## Ключевые решения
 
-| Decision | Value | Consequence |
+| Решение | Значение | Последствие |
 |---|---|---|
-| Severity comes from impact, not cause | SEV-1…SEV-4 with RemKontur examples | A failed component with no user effect is not a fire |
-| The incident commander does not fix the system | IC, technical lead, communications lead, scribe | One decision point; debugging does not consume the coordinator |
-| Communication is scheduled | SEV-1 every 30 min, SEV-2 hourly, SEV-3 on change | Silence is treated as a failure of the process |
-| Mitigation before diagnosis | Flag, degrade, fail over, restore, change code — in that order | Rollback is normal, not an admission of failure |
-| Audit fails closed | Privileged action rejected if the record cannot be written | Availability is traded for legal evidence |
-| Every SEV-1/2 gets a blameless review | Within five business days, actions with owner and date | The learning loop is the point of the process |
-| Runbooks are dated and exercised | `Not yet verified` until a GameDay observation exists | An unverified runbook is a hypothesis, not a procedure |
-| Debt is recorded with principal and interest | Seven entries across the seven types | The business conversation is a number, not "we need a rewrite" |
-| High interest and low principal is repaid first | TD-01 and TD-04 before the larger items | Small loans with real interest are the cheapest wins |
+| Серьёзность определяется влиянием, а не причиной | SEV-1…SEV-4 с примерами для РемКонтур | Сбой компонента без влияния на пользователя — не пожар |
+| Руководитель инцидента не чинит систему | IC, технический лидер, коммуникации, секретарь | Одна точка принятия решений; отладка не поглощает координатора |
+| Коммуникация идёт по расписанию | SEV-1 каждые 30 мин, SEV-2 ежечасно, SEV-3 при изменении состояния | Молчание считается сбоем процесса |
+| Сначала локализация, потом диагностика | Флаг, деградация, failover, восстановление, изменение кода — в этом порядке | Откат — норма, а не признание ошибки |
+| Аудит отказывает в закрытом состоянии | Привилегированное действие отклоняется, если запись нельзя надёжно сохранить | Доступность сознательно обменивается на юридическое доказательство |
+| Каждый SEV-1/2 получает разбор без обвинений | В течение пяти рабочих дней, действия с владельцем и сроком | Петля обучения и есть смысл процесса |
+| Runbook’и датированы и отработаны | `Пока не проверен` до появления отчёта GameDay | Непроверенный runbook — гипотеза, а не процедура |
+| Долг фиксируется с телом и процентами | Семь записей по семи типам | Разговор с бизнесом идёт числами, а не «нам нужен рерайт» |
+| Сначала гасится высокий процент при низком теле долга | TD-01 и TD-04 раньше крупных статей | Малые займы с реальными процентами — самые дешёвые победы |
 
-## Practice 3 package
+## Комплект Практики 3
 
-Practice 3 assembles weeks 9–12 into one reviewable package. The parts are not new work; the package is the evidence that the parts fit together.
+Практика 3 собирает недели 9–12 в один проверяемый комплект. Части не являются новой работой; комплект — доказательство того, что части сходятся между собой.
 
-| Part | Content | Artefacts | Week | Status |
+| Часть | Содержание | Артефакты | Неделя | Статус |
 |---|---|---|---|---|
-| 1 | Threat model, DFD, STRIDE, access matrix | [DFD and STRIDE](../security/09-threat-model.md), [access and audit](../security/09-access-audit.md), [ADR-007](../adr/ADR-007-assignment-security.md) | 9 | Designed |
-| 2 | E2E catalogue and traceability | [Quality strategy](../quality/10-quality-strategy.md), [E2E catalogue](../quality/10-e2e-catalog.md), [traceability matrix](../quality/10-traceability.md) | 10 | Designed, not executed |
-| 3 | SLI/SLO, error budget and telemetry | [SRE specification](../sre/11-sre-specification.md), [dashboard sketch](../diagrams/11-sre-dashboard.svg), [C2 resilience view](../diagrams/11-c2-resilience.svg) | 11 | Designed, not measured |
-| 4 | DR plan and runbook | [DR plan](../sre/11-dr-plan.md), [ADR-009](../adr/ADR-009-disaster-recovery-strategy.md), [RB-05](12-runbooks.md), [incident management](12-incident-management.md) | 11–12 | Designed, not exercised |
-| + | GameDay scenarios | [GameDay matrix](12-incident-management.md), [runbook coverage](12-runbooks.md) | 12 | Planned |
+| 1 | Модель угроз, DFD, STRIDE, матрица доступа | [DFD и STRIDE](../security/09-threat-model.md), [доступ и аудит](../security/09-access-audit.md), [ADR-007](../adr/ADR-007-assignment-security.md) | 9 | Спроектировано |
+| 2 | Каталог E2E и трассировка | [Стратегия качества](../quality/10-quality-strategy.md), [каталог E2E](../quality/10-e2e-catalog.md), [матрица трассировки](../quality/10-traceability.md) | 10 | Спроектировано, не выполнялось |
+| 3 | SLI/SLO, бюджет ошибок и телеметрия | [SRE-спецификация](../sre/11-sre-specification.md), [эскиз дашборда](../diagrams/11-sre-dashboard.svg), [C2 resilience view](../diagrams/11-c2-resilience.svg) | 11 | Спроектировано, не измерялось |
+| 4 | План DR и runbook | [План DR](../sre/11-dr-plan.md), [ADR-009](../adr/ADR-009-disaster-recovery-strategy.md), [RB-05](12-runbooks.md), [регламент инцидентов](12-incident-management.md) | 11–12 | Спроектировано, не отрабатывалось |
+| + | Сценарии GameDay | [Матрица GameDay](12-incident-management.md), [покрытие runbook’ов](12-runbooks.md) | 12 | Запланировано |
 
-The package is coherent only if a reader can move from a threat to a test, from a test to an SLO, and from an SLO to a runbook and a recovery objective. The cross-references in the table above are that path.
+Комплект связен только тогда, когда читатель может пройти от угрозы к тесту, от теста к SLO, от SLO к runbook’у и цели восстановления. Перекрёстные ссылки в таблице выше и есть этот путь.
 
-## Homework coverage
+## Покрытие домашнего задания
 
-| Homework item (Lecture 12, slide 36) | Where it is answered | Evidence |
+| Пункт ДЗ (лекция 12, слайд 36) | Где раскрыт | Доказательство |
 |---|---|---|
-| 1 · Severity levels and on-call regulation | [§2, §4, §6](12-incident-management.md) | Severity table, role table, rotation and escalation rules |
-| 2 · 3–5 runbooks including GameDay scenarios | [Runbooks](12-runbooks.md); [§8](12-incident-management.md) | RB-01…RB-05, GameDay matrix with pass criteria |
-| 3 · Educational incident review | [INC-2026-04](../postmortems/12-incident-review.md) | Sourced timeline, five whys, nine actions, template |
-| 4 · Tech-debt register with interest and priorities | [Register](../tech-debt/12-tech-debt-register.md) | TD-01…TD-07, quadrant, priority matrix, business framing |
-| 5 · Assembled Practice 3 package | This page, "Practice 3 package" | Parts 1–4 mapped to artefacts and weeks |
-| 6 · Handover for review before the board | This page, "Review handoff" | Checklist, reviewer questions, sign-off table |
+| 1 · Уровни серьёзности и on-call | [§2, §4, §6](12-incident-management.md) | Таблица уровней, таблица ролей, правила ротации и эскалации |
+| 2 · 3–5 runbook’ов, включая GameDay | [Runbook’и](12-runbooks.md); [§8](12-incident-management.md) | RB-01…RB-05, матрица GameDay с критериями прохождения |
+| 3 · Учебный разбор инцидента | [INC-2026-04](../postmortems/12-incident-review.md) | Источниковая хронология, пять «почему», девять действий, шаблон |
+| 4 · Реестр техдолга с процентами и приоритетами | [Реестр](../tech-debt/12-tech-debt-register.md) | TD-01…TD-07, квадрант, матрица приоритетов, разговор с бизнесом |
+| 5 · Собранный комплект Практики 3 | Эта страница, «Комплект Практики 3» | Части 1–4 сопоставлены с артефактами и неделями |
+| 6 · Передача на ревью до защиты | Эта страница, «Передача на ревью» | Чек-лист, вопросы ревьюеру, таблица подписей |
 
-## Review handoff
+## Передача на ревью
 
-The package goes to the neighbouring team before the board review. The reviewer is asked to challenge the design, not to proofread it. The review is time-boxed to one working day; findings are recorded as issues with a severity of their own.
+Комплект уходит соседней команде до защиты перед комиссией. Ревьюера просят оспаривать решение, а не вычитывать текст. Ревью ограничено одним рабочим днём; замечания фиксируются как задачи со своей серьёзностью.
 
-### Reviewer checklist
+### Чек-лист ревьюера
 
-| # | Check | Pass criterion |
+| № | Проверка | Критерий прохождения |
 |---|---|---|
-| R1 | Severity is defined by user impact | Every SEV level has a RemKontur example and a response time |
-| R2 | Roles are separated | The IC has an explicit non-goal and does not debug |
-| R3 | Communication has a cadence and a template | A responder can fill the template in under five minutes |
-| R4 | On-call promises match the organisation | The unfunded rotation is visible as debt, not hidden in a rota |
-| R5 | Every runbook has a trigger, an impact and numeric verification | No step says "check that it works" without a threshold |
-| R6 | Every mitigation step states the expected result | The responder can tell whether the step worked |
-| R7 | Runbooks are bound to alerts and dated | The alert text links the runbook; the date is present |
-| R8 | The post-mortem is blameless and sourced | No individual is named as a cause; every timeline entry has a source |
-| R9 | Actions have owner, date and type | At least one action improves detection and one improves prevention |
-| R10 | Debt has principal, interest and a decision | Every entry states what happens if it is not repaid |
-| R11 | Priorities follow interest and principal | The ranking is explained, not asserted |
-| R12 | Cross-references resolve | Every link points to an existing artefact and a real section |
+| R1 | Серьёзность определяется влиянием на пользователя | У каждого уровня SEV есть пример для РемКонтур и срок реакции |
+| R2 | Роли разделены | У IC есть явная зона «не делать»; он не отлаживает |
+| R3 | У коммуникации есть каденция и шаблон | Дежурный заполняет шаблон менее чем за пять минут |
+| R4 | Обещания on-call соответствуют организации | Непрофинансированная ротация видна как долг, а не спрятана в графике |
+| R5 | У каждого runbook’а есть триггер, влияние и числовая проверка | Нет шага «проверить, что работает» без порога |
+| R6 | Каждый шаг локализации указывает ожидаемый результат | Дежурный понимает, сработал ли шаг |
+| R7 | Runbook’и привязаны к алертам и датированы | Текст алерта ссылается на runbook; дата присутствует |
+| R8 | Постмортем без обвинений и с источниками | Ни один человек не назван причиной; у каждой записи хронологии есть источник |
+| R9 | У действий есть владелец, срок и тип | Минимум одно действие улучшает обнаружение, одно — предотвращение |
+| R10 | У долга есть тело, проценты и решение | Для каждой записи сказано, что будет, если её не погасить |
+| R11 | Приоритеты следуют процентам и телу долга | Ранжирование объяснено, а не заявлено |
+| R12 | Перекрёстные ссылки разрешаются | Каждая ссылка ведёт на существующий артефакт и реальный раздел |
 
-### Questions for the reviewer
+### Вопросы ревьюеру
 
-1. Which severity example would you rate differently, and what user impact did we miss?
-2. Which runbook step would you not trust at 03:00, and what is missing?
-3. Is the post-mortem genuinely blameless, or does it still imply a person's mistake?
-4. Which debt entry has the wrong interest, and what evidence would correct it?
-5. Is the GameDay scenario set strong enough to find the next failure before a user does?
-6. What would make the board reject this package, and is that objection answerable?
+1. Какой пример серьёзности вы оценили бы иначе и какое влияние на пользователя мы упустили?
+2. Какому шагу runbook’а вы бы не доверились в 03:00 и чего в нём не хватает?
+3. Постмортем действительно без обвинений или всё ещё подразумевает чью-то ошибку?
+4. У какой записи долга неверные проценты и какие данные это исправят?
+5. Достаточно ли силён набор сценариев GameDay, чтобы найти следующий сбой раньше пользователя?
+6. Что заставило бы комиссию отклонить комплект и есть ли ответ на это возражение?
 
-### Findings and sign-off
+### Замечания и подписи
 
-| Finding | Severity | Owner | Response | Status |
+| Замечание | Серьёзность | Владелец | Ответ | Статус |
 |---|---|---|---|---|
-| To be completed by the reviewer | — | — | — | Open |
+| Заполняется ревьюером | — | — | — | Открыто |
 
-| Role | Name | Decision | Date |
+| Роль | Имя | Решение | Дата |
 |---|---|---|---|
-| Author (incident management and runbooks) | Martin | Ready for review | 2026-11-20 |
-| Author (post-mortem) | Andrey | Ready for review | 2026-11-20 |
-| Author (debt register and SRE) | Amir | Ready for review | 2026-11-20 |
-| Reviewer, neighbouring team | — | — | — |
-| Business owner | — | — | — |
+| Автор (регламент инцидентов и runbook’и) | Martin | Готов к ревью | 2026-11-20 |
+| Автор (постмортем) | Andrey | Готов к ревью | 2026-11-20 |
+| Автор (реестр долга и SRE) | Amir | Готов к ревью | 2026-11-20 |
+| Ревьюер, соседняя команда | — | — | — |
+| Владелец бизнеса | — | — | — |
 
-## Status and evidence
+## Статус и доказательность
 
-| Area | Designed | Implemented | Verified |
+| Область | Спроектировано | Реализовано | Проверено |
 |---|---|---|---|
-| Severity levels and lifecycle | Yes | No | No |
-| Roles and communication | Yes | No | No |
-| On-call rotation | Designed | Not staffed | No |
-| Runbooks RB-01…RB-05 | Yes | No | Not exercised |
-| Post-mortem and template | Yes, simulated | No | No |
-| Debt register | Yes | Partly contained | No |
-| GameDay programme | Planned | No | No |
-| Practice 3 package | Assembled | — | In review |
+| Уровни серьёзности и жизненный цикл | Да | Нет | Нет |
+| Роли и коммуникации | Да | Нет | Нет |
+| On-call-ротация | Спроектирована | Не укомплектована | Нет |
+| Runbook’и RB-01…RB-05 | Да | Нет | Не отрабатывались |
+| Постмортем и шаблон | Да, симуляция | Нет | Нет |
+| Реестр долга | Да | Частично удерживается | Нет |
+| Программа GameDay | Запланирована | Нет | Нет |
+| Комплект Практики 3 | Собран | — | На ревью |
 
-The distinction matters for the board: a designed process can be approved as a plan, but it cannot be presented as evidence that the organisation already operates it. The missing items are listed in [§10](12-incident-management.md) and in the [debt register §4](../tech-debt/12-tech-debt-register.md).
+Различие важно для комиссии: спроектированный процесс можно утвердить как план, но нельзя предъявить как доказательство того, что организация уже его выполняет. Недостающие элементы перечислены в [§10](12-incident-management.md) и в [реестре долга §4](../tech-debt/12-tech-debt-register.md).
 
-## Relation to earlier weeks
+## Связь с предыдущими неделями
 
-The severity table reuses the user journeys from the [E2E catalogue](../quality/10-e2e-catalog.md) and the SLOs from the [SRE specification](../sre/11-sre-specification.md); it does not invent a second definition of impact. The runbooks reuse the dependency timeouts and failure behaviour from the [external environment](../08-external-environment.md), the audit fail-closed rule from [access and audit](../security/09-access-audit.md) and the recovery scenarios from the [DR plan](../sre/11-dr-plan.md). The post-mortem consumes the SLO budget and the retry rule; the debt register records what the review could not fix immediately. No new ADR is introduced in week 12: the decisions it depends on are [ADR-002](../adr/ADR-002-assignment-saga-orchestration.md), [ADR-005](../adr/ADR-005-notification-channel-adapter.md), [ADR-006](../adr/ADR-006-external-boundary-acl.md), [ADR-007](../adr/ADR-007-assignment-security.md) and [ADR-009](../adr/ADR-009-disaster-recovery-strategy.md).
+Таблица серьёзности переиспользует пользовательские сценарии из [каталога E2E](../quality/10-e2e-catalog.md) и SLO из [SRE-спецификации](../sre/11-sre-specification.md); она не вводит второе определение влияния. Runbook’и переиспользуют тайм-ауты и поведение зависимостей из [внешней среды](../08-external-environment.md), правило fail-closed из [доступа и аудита](../security/09-access-audit.md) и сценарии восстановления из [плана DR](../sre/11-dr-plan.md). Постмортем расходует бюджет SLO и правило ретраев; реестр долга фиксирует то, что разбор не смог исправить сразу. Новых ADR на неделе 12 нет: решения, от которых она зависит, — [ADR-002](../adr/ADR-002-assignment-saga-orchestration.md), [ADR-005](../adr/ADR-005-notification-channel-adapter.md), [ADR-006](../adr/ADR-006-external-boundary-acl.md), [ADR-007](../adr/ADR-007-assignment-security.md) и [ADR-009](../adr/ADR-009-disaster-recovery-strategy.md).

@@ -1,20 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 800" width="1400" height="800" font-family="Helvetica Neue, Helvetica, Arial, sans-serif">
-<title>Technical debt quadrant and prioritisation for RemKontur</title>
-<desc>Two-by-two quadrant of awareness against judgement with the seven register entries, and a priority matrix of interest against principal.</desc>
+<title>Квадрант технического долга и приоритизация для РемКонтур</title>
+<desc>Квадрант «осознанность против суждения» с семью записями реестра и матрица приоритетов «проценты против тела долга».</desc>
 <rect width="1400" height="800" fill="#ffffff"/>
-<text x="24" y="34" font-size="19" font-weight="700" fill="#1f2933">Technical debt: quadrant and priority — RemKontur (week 12)</text>
-<text x="24" y="55" font-size="12" fill="#5f6b7a">Entries TD-01…TD-07 from docs/tech-debt/12-tech-debt-register.md. Principal and interest are estimates, not accounting values.</text>
+<text x="24" y="34" font-size="19" font-weight="700" fill="#1f2933">Технический долг: квадрант и приоритет — РемКонтур (неделя 12)</text>
+<text x="24" y="55" font-size="12" fill="#5f6b7a">Записи TD-01…TD-07 из docs/tech-debt/12-tech-debt-register.md. Тело долга и проценты — оценки, а не бухгалтерские значения.</text>
 
 <!-- ============ LEFT: QUADRANT ============ -->
-<text x="60" y="92" font-size="14" font-weight="700" fill="#1f2933">1 · Was the debt taken deliberately, and was it prudent?</text>
+<text x="60" y="92" font-size="14" font-weight="700" fill="#1f2933">1 · Взят ли долг осознанно и был ли он благоразумным?</text>
 
 <rect x="60" y="110" width="560" height="560" rx="6" fill="#ffffff" stroke="#c9d2de" stroke-width="1.4"/>
 
 <!-- Q1 deliberate prudent -->
 <rect x="60" y="110" width="280" height="280" fill="#f3faf6"/>
-<text x="76" y="140" font-size="12.5" font-weight="700" fill="#1b7f4b">Deliberate &amp; prudent</text>
-<text x="76" y="159" font-size="9.5" fill="#5f6b7a">Taken with a known trade-off,</text>
-<text x="76" y="172" font-size="9.5" fill="#5f6b7a">a review date and an owner.</text>
+<text x="76" y="140" font-size="12.5" font-weight="700" fill="#1b7f4b">Осознанный и благоразумный</text>
+<text x="76" y="159" font-size="9.5" fill="#5f6b7a">Взят с известным компромиссом,</text>
+<text x="76" y="172" font-size="9.5" fill="#5f6b7a">датой пересмотра и владельцем.</text>
 <g font-size="10" font-weight="700" fill="#1b7f4b">
 <rect x="76" y="190" width="58" height="22" rx="5" fill="#e2f2e9" stroke="#9ccdb2"/>
 <text x="105" y="205" text-anchor="middle">TD-02</text>
@@ -27,118 +27,119 @@
 <rect x="140" y="218" width="58" height="22" rx="5" fill="#e2f2e9" stroke="#9ccdb2"/>
 <text x="169" y="233" text-anchor="middle">TD-07</text>
 </g>
-<text x="76" y="268" font-size="9.5" fill="#3e4c59">Contained or scheduled, with a</text>
-<text x="76" y="281" font-size="9.5" fill="#3e4c59">named owner and a review date.</text>
-<text x="76" y="304" font-size="9" font-style="italic" fill="#5f6b7a">Manageable directly.</text>
+<text x="76" y="268" font-size="9.5" fill="#3e4c59">Сдерживается или планируется,</text>
+<text x="76" y="281" font-size="9.5" fill="#3e4c59">с владельцем и датой пересмотра.</text>
+<text x="76" y="304" font-size="9" font-style="italic" fill="#5f6b7a">Управляется напрямую.</text>
 
 <!-- Q2 deliberate reckless -->
 <rect x="340" y="110" width="280" height="280" fill="#fdf5f5"/>
-<text x="356" y="140" font-size="12.5" font-weight="700" fill="#a13b3b">Deliberate &amp; reckless</text>
-<text x="356" y="159" font-size="9.5" fill="#5f6b7a">Time saved now, with no plan,</text>
-<text x="356" y="172" font-size="9.5" fill="#5f6b7a">no owner and no review date.</text>
-<text x="356" y="200" font-size="10.5" font-weight="700" fill="#3e4c59">None recorded in this register.</text>
-<text x="356" y="226" font-size="9.5" font-style="italic" fill="#5f6b7a">Example that would belong here:</text>
-<text x="356" y="240" font-size="9.5" font-style="italic" fill="#5f6b7a">one shared database for all</text>
-<text x="356" y="253" font-size="9.5" font-style="italic" fill="#5f6b7a">services, no exit plan.</text>
-<text x="356" y="290" font-size="9" fill="#a13b3b">Convert to prudent by adding an</text>
-<text x="356" y="303" font-size="9" fill="#a13b3b">owner, a containment and a date.</text>
+<text x="356" y="140" font-size="12.5" font-weight="700" fill="#a13b3b">Осознанный и безрассудный</text>
+<text x="356" y="159" font-size="9.5" fill="#5f6b7a">Экономия времени сейчас, без</text>
+<text x="356" y="172" font-size="9.5" fill="#5f6b7a">плана, владельца и даты.</text>
+<text x="356" y="200" font-size="10.5" font-weight="700" fill="#3e4c59">В этом реестре не зафиксирован.</text>
+<text x="356" y="226" font-size="9.5" font-style="italic" fill="#5f6b7a">Пример, который был бы здесь:</text>
+<text x="356" y="240" font-size="9.5" font-style="italic" fill="#5f6b7a">общая база для всех сервисов</text>
+<text x="356" y="253" font-size="9.5" font-style="italic" fill="#5f6b7a">без плана выхода.</text>
+<text x="356" y="290" font-size="9" fill="#a13b3b">Сделать благоразумным: добавить</text>
+<text x="356" y="303" font-size="9" fill="#a13b3b">владельца, сдерживание и дату.</text>
 
 <!-- Q3 inadvertent prudent -->
 <rect x="60" y="390" width="280" height="280" fill="#f7fbfd"/>
-<text x="76" y="420" font-size="12.5" font-weight="700" fill="#1f5f8b">Inadvertent &amp; prudent</text>
-<text x="76" y="439" font-size="9.5" fill="#5f6b7a">Discovered later; the team now</text>
-<text x="76" y="452" font-size="9.5" fill="#5f6b7a">knows the better design.</text>
+<text x="76" y="420" font-size="12.5" font-weight="700" fill="#1f5f8b">Неосознанный и благоразумный</text>
+<text x="76" y="439" font-size="9.5" fill="#5f6b7a">Обнаружен позже; команда теперь</text>
+<text x="76" y="452" font-size="9.5" fill="#5f6b7a">знает, как надо было.</text>
 <g font-size="10" font-weight="700" fill="#1f5f8b">
 <rect x="76" y="470" width="58" height="22" rx="5" fill="#e3eef6" stroke="#a9c8dd"/>
 <text x="105" y="485" text-anchor="middle">TD-01</text>
 <rect x="140" y="470" width="58" height="22" rx="5" fill="#e3eef6" stroke="#a9c8dd"/>
 <text x="169" y="485" text-anchor="middle">TD-04</text>
 </g>
-<text x="76" y="518" font-size="9.5" fill="#3e4c59">Found through an incident, a review</text>
-<text x="76" y="531" font-size="9.5" fill="#3e4c59">or an architecture analysis.</text>
-<text x="76" y="556" font-size="9" font-style="italic" fill="#5f6b7a">The post-mortem feeds this cell.</text>
+<text x="76" y="518" font-size="9.5" fill="#3e4c59">Найден через инцидент, разбор</text>
+<text x="76" y="531" font-size="9.5" fill="#3e4c59">или архитектурный анализ.</text>
+<text x="76" y="556" font-size="9" font-style="italic" fill="#5f6b7a">Постмортем питает эту ячейку.</text>
 
 <!-- Q4 inadvertent reckless -->
 <rect x="340" y="390" width="280" height="280" fill="#fdf9f2"/>
-<text x="356" y="420" font-size="12.5" font-weight="700" fill="#8a5a00">Inadvertent &amp; reckless</text>
-<text x="356" y="439" font-size="9.5" fill="#5f6b7a">Nobody knew the boundary</text>
-<text x="356" y="452" font-size="9.5" fill="#5f6b7a">existed.</text>
-<text x="356" y="480" font-size="10.5" font-weight="700" fill="#3e4c59">None recorded in this register.</text>
-<text x="356" y="506" font-size="9.5" font-style="italic" fill="#5f6b7a">Example that would belong here:</text>
-<text x="356" y="520" font-size="9.5" font-style="italic" fill="#5f6b7a">dispatch logic spread across three</text>
-<text x="356" y="533" font-size="9.5" font-style="italic" fill="#5f6b7a">services with no owner.</text>
-<text x="356" y="570" font-size="9" fill="#8a5a00">The most expensive cell: invisible</text>
-<text x="356" y="583" font-size="9" fill="#8a5a00">until it causes an incident.</text>
+<text x="356" y="420" font-size="12.5" font-weight="700" fill="#8a5a00">Неосознанный и безрассудный</text>
+<text x="356" y="439" font-size="9.5" fill="#5f6b7a">Никто не знал, что граница</text>
+<text x="356" y="452" font-size="9.5" fill="#5f6b7a">существует.</text>
+<text x="356" y="480" font-size="10.5" font-weight="700" fill="#3e4c59">В этом реестре не зафиксирован.</text>
+<text x="356" y="506" font-size="9.5" font-style="italic" fill="#5f6b7a">Пример, который был бы здесь:</text>
+<text x="356" y="520" font-size="9.5" font-style="italic" fill="#5f6b7a">логика диспетчеризации в трёх</text>
+<text x="356" y="533" font-size="9.5" font-style="italic" fill="#5f6b7a">сервисах без владельца.</text>
+<text x="356" y="570" font-size="9" fill="#8a5a00">Самая дорогая ячейка: невидима</text>
+<text x="356" y="583" font-size="9" fill="#8a5a00">до инцидента.</text>
 
 <!-- grid -->
 <line x1="340" y1="110" x2="340" y2="670" stroke="#c9d2de" stroke-width="1.4"/>
 <line x1="60" y1="390" x2="620" y2="390" stroke="#c9d2de" stroke-width="1.4"/>
 
 <!-- axis labels -->
-<text x="60" y="692" font-size="10.5" font-weight="700" fill="#3e4c59">← Prudent</text>
-<text x="620" y="692" font-size="10.5" font-weight="700" fill="#3e4c59" text-anchor="end">Reckless →</text>
-<text x="60" y="708" font-size="9.5" fill="#8a94a6">Judgement: was it the right thing to do?</text>
-<text x="34" y="250" font-size="10.5" font-weight="700" fill="#3e4c59" transform="rotate(-90 34 250)">Deliberate ↑</text>
-<text x="34" y="560" font-size="10.5" font-weight="700" fill="#3e4c59" transform="rotate(-90 34 560)">Inadvertent ↓</text>
+<text x="60" y="692" font-size="10.5" font-weight="700" fill="#3e4c59">← Благоразумно</text>
+<text x="620" y="692" font-size="10.5" font-weight="700" fill="#3e4c59" text-anchor="end">Безрассудно →</text>
+<text x="60" y="708" font-size="9.5" fill="#8a94a6">Суждение: было ли это правильным?</text>
+<text x="34" y="250" font-size="10.5" font-weight="700" fill="#3e4c59" transform="rotate(-90 34 250)">Осознанно ↑</text>
+<text x="34" y="560" font-size="10.5" font-weight="700" fill="#3e4c59" transform="rotate(-90 34 560)">Неосознанно ↓</text>
 
 <!-- ============ RIGHT: PRIORITY ============ -->
-<text x="720" y="92" font-size="14" font-weight="700" fill="#1f2933">2 · What to repay first: interest against principal</text>
+<text x="720" y="92" font-size="14" font-weight="700" fill="#1f2933">2 · Что погашать первым: проценты против тела долга</text>
 
 <!-- matrix frame -->
 <rect x="780" y="200" width="552" height="392" rx="6" fill="#ffffff" stroke="#c9d2de" stroke-width="1.4"/>
 
 <!-- top-left: high interest, low principal -->
 <rect x="780" y="200" width="270" height="190" fill="#fdf5f5"/>
-<text x="796" y="228" font-size="12.5" font-weight="700" fill="#a13b3b">Repay now</text>
-<text x="796" y="246" font-size="9.5" fill="#5f6b7a">High interest, low principal</text>
-<text x="796" y="270" font-size="10.5" fill="#3e4c59">TD-01 · retry ownership</text>
-<text x="796" y="286" font-size="9.5" fill="#5f6b7a">2 weeks · incident amplifier</text>
-<text x="796" y="310" font-size="10.5" fill="#3e4c59">TD-04 · offline bound</text>
-<text x="796" y="326" font-size="9.5" fill="#5f6b7a">2 weeks · core journey risk</text>
-<text x="796" y="356" font-size="9" font-style="italic" fill="#a13b3b">Small loan, real interest.</text>
+<text x="796" y="228" font-size="12.5" font-weight="700" fill="#a13b3b">Погасить сейчас</text>
+<text x="796" y="246" font-size="9.5" fill="#5f6b7a">Высокие проценты, низкое тело</text>
+<text x="796" y="270" font-size="10.5" fill="#3e4c59">TD-01 · владение ретраями</text>
+<text x="796" y="286" font-size="9.5" fill="#5f6b7a">2 недели · усилитель инцидентов</text>
+<text x="796" y="310" font-size="10.5" fill="#3e4c59">TD-04 · граница offline</text>
+<text x="796" y="326" font-size="9.5" fill="#5f6b7a">2 недели · риск основного сценария</text>
+<text x="796" y="356" font-size="9" font-style="italic" fill="#a13b3b">Малый заём, реальные проценты.</text>
 
 <!-- top-right: high interest, high principal -->
 <rect x="1062" y="200" width="270" height="190" fill="#fdf9f2"/>
-<text x="1078" y="228" font-size="12.5" font-weight="700" fill="#8a5a00">Plan in parts</text>
-<text x="1078" y="246" font-size="9.5" fill="#5f6b7a">High interest, high principal</text>
-<text x="1078" y="270" font-size="10.5" fill="#3e4c59">TD-05 · on-call staffing</text>
-<text x="1078" y="286" font-size="10.5" fill="#3e4c59">TD-02 · Workforce contract</text>
-<text x="1078" y="302" font-size="10.5" fill="#3e4c59">TD-06 · telemetry backend</text>
-<text x="1078" y="326" font-size="9.5" fill="#5f6b7a">Split into reversible slices; fund</text>
-<text x="1078" y="340" font-size="9.5" fill="#5f6b7a">a slice in every cycle.</text>
-<text x="1078" y="366" font-size="9" font-style="italic" fill="#8a5a00">No big-bang rewrite.</text>
+<text x="1078" y="228" font-size="12.5" font-weight="700" fill="#8a5a00">Планировать частями</text>
+<text x="1078" y="246" font-size="9.5" fill="#5f6b7a">Высокие проценты, высокое тело</text>
+<text x="1078" y="270" font-size="10.5" fill="#3e4c59">TD-05 · on-call и штат</text>
+<text x="1078" y="286" font-size="10.5" fill="#3e4c59">TD-02 · контракт Workforce</text>
+<text x="1078" y="302" font-size="10.5" fill="#3e4c59">TD-06 · бэкенд телеметрии</text>
+<text x="1078" y="326" font-size="9.5" fill="#5f6b7a">Дробить на обратимые срезы;</text>
+<text x="1078" y="340" font-size="9.5" fill="#5f6b7a">финансировать срез в каждом цикле.</text>
+<text x="1078" y="366" font-size="9" font-style="italic" fill="#8a5a00">Без большого рерайта.</text>
 
 <!-- bottom-left: low interest, low principal -->
 <rect x="780" y="402" width="270" height="190" fill="#f7fbfd"/>
-<text x="796" y="430" font-size="12.5" font-weight="700" fill="#1f5f8b">Boy-scout rule</text>
-<text x="796" y="448" font-size="9.5" fill="#5f6b7a">Low interest, low principal</text>
-<text x="796" y="472" font-size="10.5" fill="#3e4c59">TD-07 · audit retention</text>
-<text x="796" y="488" font-size="9.5" fill="#5f6b7a">1 week · legal review</text>
-<text x="796" y="518" font-size="9.5" fill="#5f6b7a">Repay while working in the area;</text>
-<text x="796" y="532" font-size="9.5" fill="#5f6b7a">do not create a project for it.</text>
+<text x="796" y="430" font-size="12.5" font-weight="700" fill="#1f5f8b">Правило бойскаута</text>
+<text x="796" y="448" font-size="9.5" fill="#5f6b7a">Низкие проценты, низкое тело</text>
+<text x="796" y="472" font-size="10.5" fill="#3e4c59">TD-07 · хранение аудита</text>
+<text x="796" y="488" font-size="9.5" fill="#5f6b7a">1 неделя · юридическое ревью</text>
+<text x="796" y="518" font-size="9.5" fill="#5f6b7a">Погасить попутно, работая</text>
+<text x="796" y="532" font-size="9.5" fill="#5f6b7a">в этой области; не создавать</text>
+<text x="796" y="546" font-size="9.5" fill="#5f6b7a">отдельный проект.</text>
 
 <!-- bottom-right: low interest, high principal -->
 <rect x="1062" y="402" width="270" height="190" fill="#f4f6f9"/>
-<text x="1078" y="430" font-size="12.5" font-weight="700" fill="#3e4c59">Accept and record</text>
-<text x="1078" y="448" font-size="9.5" fill="#5f6b7a">Low interest, high principal</text>
-<text x="1078" y="472" font-size="10.5" fill="#3e4c59">TD-03 · provider selection</text>
-<text x="1078" y="488" font-size="9.5" fill="#5f6b7a">4 weeks · contained by adapter</text>
-<text x="1078" y="518" font-size="9.5" fill="#5f6b7a">Accept explicitly with an owner, a</text>
-<text x="1078" y="532" font-size="9.5" fill="#5f6b7a">review date and a containment.</text>
+<text x="1078" y="430" font-size="12.5" font-weight="700" fill="#3e4c59">Принять и записать</text>
+<text x="1078" y="448" font-size="9.5" fill="#5f6b7a">Низкие проценты, высокое тело</text>
+<text x="1078" y="472" font-size="10.5" fill="#3e4c59">TD-03 · выбор провайдера</text>
+<text x="1078" y="488" font-size="9.5" fill="#5f6b7a">4 недели · сдерживается адаптером</text>
+<text x="1078" y="518" font-size="9.5" fill="#5f6b7a">Принять явно с владельцем,</text>
+<text x="1078" y="532" font-size="9.5" fill="#5f6b7a">датой пересмотра и сдерживанием.</text>
 
 <!-- matrix grid -->
 <line x1="1050" y1="200" x2="1050" y2="592" stroke="#ffffff" stroke-width="4"/>
 <line x1="780" y1="390" x2="1332" y2="390" stroke="#ffffff" stroke-width="4"/>
 
 <!-- priority axis labels -->
-<text x="915" y="618" font-size="10.5" font-weight="700" fill="#3e4c59" text-anchor="middle">← Low principal</text>
-<text x="1197" y="618" font-size="10.5" font-weight="700" fill="#3e4c59" text-anchor="middle">High principal →</text>
-<text x="756" y="396" font-size="10.5" font-weight="700" fill="#3e4c59" transform="rotate(-90 756 396)">Interest: high ↑</text>
+<text x="915" y="618" font-size="10.5" font-weight="700" fill="#3e4c59" text-anchor="middle">← Низкое тело долга</text>
+<text x="1197" y="618" font-size="10.5" font-weight="700" fill="#3e4c59" text-anchor="middle">Высокое тело долга →</text>
+<text x="756" y="396" font-size="10.5" font-weight="700" fill="#3e4c59" transform="rotate(-90 756 396)">Проценты: высокие ↑</text>
 
 <!-- notes -->
-<text x="720" y="660" font-size="10.5" fill="#3e4c59">Decision rules: repay high-interest, low-principal debt immediately; split high-principal debt into reversible parts;</text>
-<text x="720" y="676" font-size="10.5" fill="#3e4c59">repay low-principal debt while working in the area; accept high-principal, low-interest debt explicitly and re-review it monthly.</text>
-<text x="720" y="698" font-size="10" fill="#8a94a6">An item accepted for two review cycles without a change in interest is either mispriced or invisible — reopen it.</text>
+<text x="720" y="656" font-size="10.5" fill="#3e4c59">Правила решений: высокие проценты и низкое тело — погасить сейчас; высокое тело — дробить на обратимые части;</text>
+<text x="720" y="672" font-size="10.5" fill="#3e4c59">низкое тело — погасить попутно; низкие проценты и высокое тело — принять явно и пересматривать ежемесячно.</text>
+<text x="720" y="694" font-size="10" fill="#8a94a6">Статья, принятая два цикла без изменения процентов, оценена неверно или невидима — откройте её заново.</text>
 
-<text x="24" y="748" font-size="10" fill="#8a94a6">Source: docs/tech-debt/12-tech-debt-register.md §2 and §5. Interest is measured in hours per month, incidents per quarter and release delay; all figures are hypotheses.</text>
+<text x="24" y="748" font-size="10" fill="#8a94a6">Источник: docs/tech-debt/12-tech-debt-register.md §2 и §5. Проценты измеряются в часах в месяц, инцидентах в квартал и задержке релизов; все цифры — гипотезы.</text>
 </svg>

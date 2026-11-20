@@ -1,304 +1,304 @@
-# Week 12 · Incident runbooks
+# Неделя 12 · Runbook’и инцидентов
 
-**Status:** design hypothesis v1.0. The procedures are written against the target architecture and have not been executed against a running system. Each runbook is dated `Not yet verified` and must be exercised in a GameDay before it is treated as operational.
+**Статус:** проектная гипотеза v1.0. Процедуры написаны под целевую архитектуру и не выполнялись на работающей системе. У каждого runbook’а стоит дата `Пока не проверен`, и он должен быть отработан на GameDay, прежде чем считаться эксплуатационным.
 
-**Basis:** Lecture 12, slides 14–17 and 32–33; [incident management](12-incident-management.md); [SRE specification](../sre/11-sre-specification.md); [DR plan](../sre/11-dr-plan.md); [E2E catalogue](../quality/10-e2e-catalog.md); [external environment](../08-external-environment.md); [access and audit](../security/09-access-audit.md); [ADR-002](../adr/ADR-002-assignment-saga-orchestration.md), [ADR-005](../adr/ADR-005-notification-channel-adapter.md), [ADR-007](../adr/ADR-007-assignment-security.md) and [ADR-009](../adr/ADR-009-disaster-recovery-strategy.md).
+**Основание:** лекция 12, слайды 14–17 и 32–33; [регламент инцидентов](12-incident-management.md); [SRE-спецификация](../sre/11-sre-specification.md); [план DR](../sre/11-dr-plan.md); [каталог E2E](../quality/10-e2e-catalog.md); [внешняя среда](../08-external-environment.md); [доступ и аудит](../security/09-access-audit.md); [ADR-002](../adr/ADR-002-assignment-saga-orchestration.md), [ADR-005](../adr/ADR-005-notification-channel-adapter.md), [ADR-007](../adr/ADR-007-assignment-security.md) и [ADR-009](../adr/ADR-009-disaster-recovery-strategy.md).
 
-**Evidence labels.** `[D]` — derived from an existing Dossier artefact; `[H]` — design hypothesis introduced here and requiring measurement or approval.
+**Метки доказательности.** `[D]` — выведено из существующего артефакта Досье; `[H]` — проектная гипотеза, введённая здесь и требующая измерения или согласования.
 
-## 1. Runbook standard
+## 1. Стандарт runbook’а
 
-A runbook is a step-by-step instruction for one type of failure, written for a tired person at 03:00 who sees the system for the first time ([Lecture 12, slide 15]). It is bound to an alert, not stored in a wiki that nobody opens. Every step states the expected result, so the responder can tell whether the step worked before moving on.
+Runbook — пошаговая инструкция для одного типа сбоя, написанная для уставшего человека в 03:00, который видит систему впервые (лекция 12, слайд 15). Он привязан к алерту, а не лежит в вики, которую никто не открывает. Каждый шаг указывает ожидаемый результат, чтобы дежурный понимал, сработал ли шаг, прежде чем идти дальше.
 
-| Section | Required content |
+| Раздел | Обязательное содержание |
 |---|---|
-| Name and trigger | The alert or user symptom that starts the runbook |
-| Impact | Which journeys and users are affected, and which still work |
-| Diagnose | Dashboards, traces, queries and status pages to check, with the interpretation |
-| Mitigate | Ordered, reversible actions, each with an expected result |
-| Verify | Numeric exit criteria that prove restoration |
-| Escalate | Conditions, contacts and the time box |
-| Owner and verification | The team accountable and the date of the last exercise |
-| Do not | Actions that create a second incident |
+| Название и триггер | Алерт или пользовательский симптом, запускающий runbook |
+| Влияние | Какие сценарии и пользователи затронуты, а что продолжает работать |
+| Диагностика | Дашборды, трейсы, запросы и статус-страницы с интерпретацией |
+| Локализация | Упорядоченные обратимые действия, каждое с ожидаемым результатом |
+| Проверка | Числовые критерии выхода, доказывающие восстановление |
+| Эскалация | Условия, контакты и временное окно |
+| Владелец и проверка | Команда, отвечающая за процедуру, и дата последней отработки |
+| Чего не делать | Действия, создающие второй инцидент |
 
-A repeated step is a candidate for automation; a good runbook becomes shorter over time. A runbook without a verification date is a guess ([Lecture 12, slide 16]).
+Повторяющийся шаг — кандидат на автоматизацию; хороший runbook со временем становится короче. Runbook без даты проверки — догадка (лекция 12, слайд 16).
 
-### 1.1 Coverage
+### 1.1 Покрытие
 
-| ID | Scenario | Journey and SLO | Default severity | GameDay | Owner | Last verified |
+| ID | Сценарий | Сценарий и SLO | Серьёзность по умолчанию | GameDay | Владелец | Последняя проверка |
 |---|---|---|---|---|---|---|
-| RB-01 | Workforce slow, unavailable or inconsistent | P3 / SLO-03 | SEV-2 | Slow Workforce | Andrey | Not yet verified |
-| RB-02 | Notification provider degraded or DLQ growing | Notification delivery / SLO-S2 | SEV-2 | Slow notification provider | Amir | Not yet verified |
-| RB-03 | Site connectivity loss and offline ARM | P1 / SLO-01, NFR-02 | SEV-2 | Loss of site connectivity | Martin | Not yet verified |
-| RB-04 | Compromised service credentials | All journeys; guardrail | SEV-1 | Compromised service keys | ИБ with Amir | Not yet verified |
-| RB-05 | Loss of the primary region | All journeys / DR-02 | SEV-1 | Loss of the primary region | Martin with Amir | Not yet verified |
+| RB-01 | Workforce медленный, недоступный или несогласованный | P3 / SLO-03 | SEV-2 | Медленный Workforce | Andrey | Пока не проверен |
+| RB-02 | Провайдер уведомлений деградировал или растёт DLQ | Доставка уведомлений / SLO-S2 | SEV-2 | Медленный провайдер уведомлений | Amir | Пока не проверен |
+| RB-03 | Потеря связи с площадкой и offline-АРМ | P1 / SLO-01, NFR-02 | SEV-2 | Потеря связи с площадкой | Martin | Пока не проверен |
+| RB-04 | Компрометация сервисных учётных данных | Все сценарии; guardrail | SEV-1 | Компрометация сервисных ключей | ИБ с Amir | Пока не проверен |
+| RB-05 | Потеря основного региона | Все сценарии / DR-02 | SEV-1 | Потеря основного региона | Martin с Amir | Пока не проверен |
 
-Audit-store failure is a guardrail procedure, not a sixth runbook: it is specified in [incident management §7.1](12-incident-management.md) and [DR-06](../sre/11-dr-plan.md).
+Отказ аудитохранилища — guardrail-процедура, а не шестой runbook: она описана в [регламенте инцидентов §7.1](12-incident-management.md) и [DR-06](../sre/11-dr-plan.md).
 
-## 2. RB-01 · Workforce slow, unavailable or inconsistent
+## 2. RB-01 · Workforce медленный, недоступный или несогласованный
 
-**Owner:** Andrey · **Last verified:** Not yet verified · **GameDay:** Slow Workforce
+**Владелец:** Andrey · **Последняя проверка:** Пока не проверен · **GameDay:** Медленный Workforce
 
-**Trigger.** `slo_burn_rate{slo="SLO-03"}` above 6× for 30 min or 14.4× for 5 min; `dependency_request_duration_seconds{dependency="workforce"}` p95 above 2 s; `assignment_saga_total{state="failed_manual_review"}` increasing; the Workforce circuit open; dispatchers report that assignment does not complete.
+**Триггер.** `slo_burn_rate{slo="SLO-03"}` выше 6× в течение 30 мин или 14,4× в течение 5 мин; `dependency_request_duration_seconds{dependency="workforce"}` p95 выше 2 с; растёт `assignment_saga_total{state="failed_manual_review"}`; circuit breaker Workforce открыт; диспетчеры сообщают, что назначение не завершается.
 
-**Impact.** New assignments fail or remain unresolved. Registration, reads, completion and closure continue. No request is lost, but a request may stay unassigned longer than the dispatch target. A duplicate active assignment is a guardrail violation, not an ordinary degradation.
+**Влияние.** Новые назначения не проходят или остаются незавершёнными. Регистрация, чтения, выполнение и закрытие продолжаются. Ни одна заявка не теряется, но заявка может оставаться неназначенной дольше цели диспетчеризации. Дубль активного назначения — нарушение guardrail, а не обычная деградация.
 
-### 2.1 Diagnose
+### 2.1 Диагностика
 
-| Signal | Where | Expected in a healthy system | Interpretation |
+| Сигнал | Где | Ожидание в здоровой системе | Интерпретация |
 |---|---|---|---|
-| Workforce latency and error rate | Dependency dashboard; `dependency_request_duration_seconds{dependency="workforce"}` | p95 below 0.8 s; error rate below 1% | A latency rise with a low error rate is the slow-provider pattern |
-| Circuit state | `circuit_breaker_state{dependency="workforce"}` | 0 (closed) | 1 half-open or 2 open means the client is already protecting itself |
-| Saga outcomes | `assignment_saga_total{state}` | Mostly `confirmed`; few `rejected`; no `failed_manual_review` | Growing `pending` means the orchestrator is waiting; growing `failed_manual_review` means compensation is stuck |
-| Reservation consistency | Workforce reservation by `saga_id` | Zero or one reservation per saga | Two reservations for one saga is a duplicate-risk signal |
-| Database pool | `db_pool_in_use`, `db_pool_wait_seconds` | Below 20 connections; low wait | A saturated pool means the problem is local, not only external |
-| Provider status | Workforce status page or owner channel | No announced incident | Confirms whether the cause is external |
+| Задержка и ошибки Workforce | Дашборд зависимостей; `dependency_request_duration_seconds{dependency="workforce"}` | p95 ниже 0,8 с; ошибки ниже 1% | Рост задержки при низкой доле ошибок — паттерн медленного провайдера |
+| Состояние circuit breaker | `circuit_breaker_state{dependency="workforce"}` | 0 (закрыт) | 1 (half-open) или 2 (открыт) означают, что клиент уже защищается |
+| Исходы саг | `assignment_saga_total{state}` | Преимущественно `confirmed`; немного `rejected`; нет `failed_manual_review` | Рост `pending` означает, что оркестратор ждёт; рост `failed_manual_review` — что компенсация застряла |
+| Согласованность резервов | Резерв Workforce по `saga_id` | Ноль или один резерв на сагу | Два резерва на одну сагу — сигнал риска дубля |
+| Пул базы | `db_pool_in_use`, `db_pool_wait_seconds` | Меньше 20 соединений; низкое ожидание | Исчерпанный пул означает локальную проблему, а не только внешнюю |
+| Статус провайдера | Статус-страница Workforce или канал владельца | Объявленного инцидента нет | Подтверждает внешнюю причину |
 
-### 2.2 Mitigate
+### 2.2 Локализация
 
-1. **Confirm the circuit state before changing anything.** If the circuit is open, the assignment path is already failing fast; do not disable it. Expected result: the failure is bounded and no new reservation is being created.
-2. **Disable client-side retries for assignment.** The ARM must not retry an assignment command; the orchestrator is the single retry owner ([SRE §6.4](../sre/11-sre-specification.md)). Expected result: request volume to Workforce stops growing.
-3. **Keep the request unassigned and show the degradation message.** Do not write an assignment manually into the database. Expected result: the dispatcher sees "Assignment is temporarily unavailable; the request remains unassigned" and can continue other work.
-4. **Reconcile reservations by `saga_id`.** For every saga in `pending` or `failed_manual_review`, read the reservation by saga ID before any new attempt. Expected result: a reservation that already exists is confirmed, not reserved twice.
-5. **Cancel orphan reservations by `saga_id`.** If the saga is rejected and a reservation exists, cancel it with the same key. Expected result: Workforce holds no reservation for a rejected saga.
-6. **Drain the manual-review queue.** Assign a named reviewer to every `failed_manual_review` saga; record the decision in the audit trail. Expected result: no saga older than 30 min remains unexplained.
-7. **Re-enable normal assignment only after three successful half-open probes.** Expected result: the circuit closes and confirmed assignments resume.
+1. **Сначала подтвердите состояние circuit breaker, ничего не меняя.** Если цепь открыта, путь назначения уже быстро падает; не отключайте её. Ожидаемый результат: сбой ограничен, новые резервы не создаются.
+2. **Отключите клиентские ретраи назначения.** АРМ не должен повторять команду назначения; единственный владелец ретраев — оркестратор ([SRE §6.4](../sre/11-sre-specification.md)). Ожидаемый результат: объём запросов к Workforce перестаёт расти.
+3. **Оставьте заявку неназначенной и покажите сообщение о деградации.** Не записывайте назначение в базу вручную. Ожидаемый результат: диспетчер видит «Назначение временно недоступно; заявка остаётся неназначенной» и может продолжать другую работу.
+4. **Сверьте резервы по `saga_id`.** Для каждой саги в `pending` или `failed_manual_review` прочитайте резерв по ID саги до новой попытки. Ожидаемый результат: существующий резерв подтверждается, а не создаётся второй.
+5. **Отмените осиротевшие резервы по `saga_id`.** Если сага отклонена, а резерв существует, отмените его тем же ключом. Ожидаемый результат: у Workforce нет резерва по отклонённой саге.
+6. **Разберите очередь ручной проверки.** Назначьте именованного проверяющего на каждую сагу `failed_manual_review`; зафиксируйте решение в аудиторском следе. Ожидаемый результат: не остаётся необъяснённых саг старше 30 мин.
+7. **Включайте обычное назначение только после трёх успешных half-open проб.** Ожидаемый результат: цепь закрывается, подтверждённые назначения возобновляются.
 
-### 2.3 Verify
+### 2.3 Проверка
 
-| Check | Pass criterion |
+| Проверка | Критерий прохождения |
 |---|---|
-| Assignment outcomes | 20 consecutive confirmed or correctly rejected sagas |
-| Unresolved sagas | No saga older than 30 min without an owner |
-| Duplicate reservations | Zero reservations duplicated by `saga_id` |
-| Active assignments | Exactly one active assignment per request |
-| SLO burn | `slo_burn_rate{slo="SLO-03"}` below 1× for 15 min |
-| Core journeys | Registration, read and closure remain within their SLOs |
+| Исходы назначения | 20 подряд подтверждённых или корректно отклонённых саг |
+| Незавершённые саги | Нет саг старше 30 мин без владельца |
+| Дубли резервов | Ноль резервов, продублированных по `saga_id` |
+| Активные назначения | Ровно одно активное назначение на заявку |
+| Выгорание SLO | `slo_burn_rate{slo="SLO-03"}` ниже 1× в течение 15 мин |
+| Основные сценарии | Регистрация, чтение и закрытие остаются в своих SLO |
 
-### 2.4 Escalate
+### 2.4 Эскалация
 
-If there is no improvement 30 min after step 2, raise to SEV-1 and contact the Workforce owner. If the failure is region-wide and other dependencies also fail, switch to [RB-05](12-runbooks.md). If a duplicate active assignment is confirmed, treat it as SEV-1 and open a guardrail review.
+Если через 30 мин после шага 2 улучшения нет, повысьте уровень до SEV-1 и свяжитесь с владельцем Workforce. Если сбой региональный и другие зависимости тоже падают, переходите к [RB-05](12-runbooks.md). Если подтверждён дубль активного назначения, это SEV-1 и запуск guardrail-разбора.
 
-### 2.5 Do not
+### 2.5 Чего не делать
 
-- Retry an assignment with a new idempotency key; it creates a second reservation.
-- Edit the assignment table or the saga state directly.
-- Mark a request as assigned because the dispatcher "knows" the engineer.
-- Cancel a reservation without the `saga_id` that created it.
+- Повторять назначение с новым ключом идемпотентности: это создаёт второй резерв.
+- Редактировать таблицу назначений или состояние саги напрямую.
+- Помечать заявку назначенной, потому что диспетчер «знает» инженера.
+- Отменять резерв без `saga_id`, которым он создан.
 
-## 3. RB-02 · Notification provider degraded or DLQ growing
+## 3. RB-02 · Провайдер уведомлений деградировал или растёт DLQ
 
-**Owner:** Amir · **Last verified:** Not yet verified · **GameDay:** Slow notification provider
+**Владелец:** Amir · **Последняя проверка:** Пока не проверен · **GameDay:** Медленный провайдер уведомлений
 
-**Trigger.** `notification_delivery_total{result="unknown"}` above 5% for 10 min; DLQ depth above zero; oldest undelivered notification older than 15 min; provider `5xx` or timeout rate rising; the provider circuit open.
+**Триггер.** `notification_delivery_total{result="unknown"}` выше 5% в течение 10 мин; глубина DLQ больше нуля; самое старое недоставленное уведомление старше 15 мин; растёт доля `5xx` или тайм-аутов провайдера; circuit breaker провайдера открыт.
 
-**Impact.** Assignment and closure remain valid; only the notification is delayed or lost. Users see the assignment in the ARM. A false "delivered" status is a defect; a delayed notification is an accepted degradation ([SRE §7.2](../sre/11-sre-specification.md)).
+**Влияние.** Назначение и закрытие остаются валидными; задерживается или теряется только уведомление. Пользователи видят назначение в АРМ. Ложный статус «доставлено» — дефект; задержанное уведомление — принятая деградация ([SRE §7.2](../sre/11-sre-specification.md)).
 
-### 3.1 Diagnose
+### 3.1 Диагностика
 
-| Signal | Where | Expected in a healthy system | Interpretation |
+| Сигнал | Где | Ожидание в здоровой системе | Интерпретация |
 |---|---|---|---|
-| Delivery result mix | `notification_delivery_total{result}` | Mostly `accepted`; `unknown` below 1% | A rising `unknown` means the provider did not confirm |
-| Delivery latency | `notification_delivery_duration_seconds` | p95 below 2 s | A latency rise precedes timeouts |
-| DLQ depth | Broker management console | 0 | Any message in DLQ has exhausted five attempts |
-| Circuit state | `circuit_breaker_state{dependency="notification_provider"}` | 0 (closed) | Open means the adapter is already failing fast |
-| Provider status | Provider status page or contract channel | No incident | Confirms external cause |
-| Token bucket | Adapter metrics | Within contract | A rate-limit rejection is not a provider outage |
+| Состав результатов доставки | `notification_delivery_total{result}` | Преимущественно `accepted`; `unknown` ниже 1% | Рост `unknown` означает, что провайдер не подтвердил доставку |
+| Задержка доставки | `notification_delivery_duration_seconds` | p95 ниже 2 с | Рост задержки предшествует тайм-аутам |
+| Глубина DLQ | Консоль управления брокером | 0 | Любое сообщение в DLQ исчерпало пять попыток |
+| Состояние circuit breaker | `circuit_breaker_state{dependency="notification_provider"}` | 0 (закрыт) | Открыт — адаптер уже быстро падает |
+| Статус провайдера | Статус-страница провайдера или канал по контракту | Инцидента нет | Подтверждает внешнюю причину |
+| Токен-бакет | Метрики адаптера | В пределах контракта | Отказ по rate limit — не отказ провайдера |
 
-### 3.2 Mitigate
+### 3.2 Локализация
 
-1. **Do not create a new event key for a retry.** The adapter retries with the same key; a new key duplicates the notification ([ADR-005](../adr/ADR-005-notification-channel-adapter.md)). Expected result: one delivery per event.
-2. **Enable the secondary channel flag** if the primary provider is unavailable and the contract allows it. Expected result: delivery resumes through the secondary channel with the same event ID.
-3. **Leave the queue bounded and visible.** Do not delete messages to reduce the DLQ depth. Expected result: the backlog is measurable and recoverable.
-4. **Show "Notification delayed" in the ARM.** The assignment is valid; the user must not be told that delivery failed permanently. Expected result: support calls decrease and no manual re-notification is attempted.
-5. **Replay the DLQ after the provider recovers**, one message at a time, with deduplication by `event_id`. Expected result: one effect per event; no duplicate notification.
-6. **Record the delivery status honestly.** A notification whose outcome is unknown stays `unknown`; it is not marked `delivered` by hand.
+1. **Не создавайте новый ключ события для повтора.** Адаптер повторяет с тем же ключом; новый ключ дублирует уведомление ([ADR-005](../adr/ADR-005-notification-channel-adapter.md)). Ожидаемый результат: одна доставка на событие.
+2. **Включите флаг вторичного канала**, если основной провайдер недоступен и контракт это допускает. Ожидаемый результат: доставка возобновляется через вторичный канал с тем же ID события.
+3. **Оставьте очередь ограниченной и видимой.** Не удаляйте сообщения, чтобы уменьшить DLQ. Ожидаемый результат: бэклог измерим и восстановим.
+4. **Покажите в АРМ «Уведомление задерживается».** Назначение валидно; пользователю нельзя говорить, что доставка окончательно провалилась. Ожидаемый результат: меньше обращений в поддержку и никаких ручных повторных уведомлений.
+5. **Разберите DLQ после восстановления провайдера**, по одному сообщению, с дедупликацией по `event_id`. Ожидаемый результат: один эффект на событие, без дублей уведомления.
+6. **Фиксируйте статус доставки честно.** Уведомление с неизвестным исходом остаётся `unknown`; его нельзя вручную помечать `delivered`.
 
-### 3.3 Verify
+### 3.3 Проверка
 
-| Check | Pass criterion |
+| Проверка | Критерий прохождения |
 |---|---|
-| Delivery success | Above 99% for 10 min |
-| DLQ | Empty and stable |
-| Oldest undelivered | Below 5 min |
-| Duplicate deliveries | Zero for the incident window |
-| Assignment and closure | Unaffected; SLO-03 and SLO-05 stable |
+| Успешность доставки | Выше 99% в течение 10 мин |
+| DLQ | Пуста и стабильна |
+| Самое старое недоставленное | Меньше 5 мин |
+| Дубли доставки | Ноль за окно инцидента |
+| Назначение и закрытие | Не затронуты; SLO-03 и SLO-05 стабильны |
 
-### 3.4 Escalate
+### 3.4 Эскалация
 
-If delivery is still below 99% after 30 min, raise to SEV-1, contact the provider and publish a business update. If the provider contract has no secondary channel, record the gap as a tech-debt item ([TD-03](../tech-debt/12-tech-debt-register.md)).
+Если через 30 мин доставка всё ещё ниже 99%, повысьте уровень до SEV-1, свяжитесь с провайдером и опубликуйте сообщение для бизнеса. Если в контракте провайдера нет вторичного канала, зафиксируйте разрыв как статью техдолга ([TD-03](../tech-debt/12-tech-debt-register.md)).
 
-### 3.5 Do not
+### 3.5 Чего не делать
 
-- Delete or purge the DLQ to make the dashboard green.
-- Send the same notification manually outside the adapter; it bypasses deduplication and audit.
-- Switch provider without preserving the event-to-delivery mapping.
-- Mark a message as delivered without a provider acknowledgement.
+- Удалять или очищать DLQ, чтобы дашборд позеленел.
+- Отправлять уведомление вручную в обход адаптера: это обходит дедупликацию и аудит.
+- Менять провайдера без сохранения соответствия «событие → доставка».
+- Помечать сообщение доставленным без подтверждения провайдера.
 
-## 4. RB-03 · Site connectivity loss and offline ARM
+## 4. RB-03 · Потеря связи с площадкой и offline-АРМ
 
-**Owner:** Martin · **Last verified:** Not yet verified · **GameDay:** Loss of site connectivity
+**Владелец:** Martin · **Последняя проверка:** Пока не проверен · **GameDay:** Потеря связи с площадкой
 
-**Trigger.** Site heartbeat missing; API unreachable from more than one site; ARM sync queue growing; users report that the form does not send; `business_requests_registered_total` drops to zero in an area with normal volume.
+**Триггер.** Пропал heartbeat площадки; API недоступен более чем с одной площадки; растёт очередь синхронизации АРМ; пользователи сообщают, что форма не отправляется; `business_requests_registered_total` падает до нуля в участке с обычным объёмом.
 
-**Impact.** Registration continues locally within the offline window (up to 4 h or 500 operations, [NFR-02](../04-requirements.md)). Reads come from the local cache. Assignment, priority change and closure are disabled because they require a current server state. After reconnection, queued operations synchronise once, without duplicates.
+**Влияние.** Регистрация продолжается локально в пределах offline-окна (до 4 ч или 500 операций, [NFR-02](../04-requirements.md)). Чтения идут из локального кэша. Назначение, изменение приоритета и закрытие отключены, потому что требуют актуального серверного состояния. После переподключения очередь синхронизируется один раз, без дублей.
 
-### 4.1 Diagnose
+### 4.1 Диагностика
 
-| Signal | Where | Expected in a healthy system | Interpretation |
+| Сигнал | Где | Ожидание в здоровой системе | Интерпретация |
 |---|---|---|---|
-| Site heartbeat | Network monitoring | Present | Missing heartbeat with working users is a monitoring gap |
-| ARM queue depth and age | ARM diagnostics; `arm_queue_depth`, `arm_queue_oldest_age_seconds` | Near zero | A growing queue means the site is offline or the API is rejecting |
-| API reachability | Synthetic check from the site network | 200 within 2 s | A regional failure affects many sites; a single site is a local network issue |
-| Authentication | SSO and token expiry | Valid session | An expired token can look like a network failure |
-| Server error rate | `rr_requests_total{outcome="error"}` | Below 1% | A server-side error is not an offline event |
+| Heartbeat площадки | Сетевой мониторинг | Присутствует | Отсутствие heartbeat при работающих пользователях — пробел мониторинга |
+| Глубина и возраст очереди АРМ | Диагностика АРМ; `arm_queue_depth`, `arm_queue_oldest_age_seconds` | Близко к нулю | Растущая очередь означает, что площадка offline или API отклоняет запросы |
+| Доступность API | Синтетическая проверка из сети площадки | 200 за 2 с | Региональный сбой затрагивает много площадок; одна площадка — локальная сеть |
+| Аутентификация | SSO и срок жизни токена | Валидная сессия | Истёкший токен может выглядеть как сетевой сбой |
+| Доля ошибок сервера | `rr_requests_total{outcome="error"}` | Ниже 1% | Серверная ошибка — не offline-событие |
 
-### 4.2 Mitigate
+### 4.2 Локализация
 
-1. **Confirm offline mode is active and bounded.** The ARM must show "Offline. The request will be sent when the connection returns." Expected result: the user knows the operation is queued, not lost.
-2. **Protect the queue bound.** Do not raise the 500-operation or 4-hour limit during the incident; an unbounded queue is a hidden outage ([SRE §7.3](../sre/11-sre-specification.md)). Expected result: the oldest queued operation is visible and below the limit.
-3. **Disable assignment, priority and closure in the affected sites.** These actions require a current server state and must fail explicitly. Expected result: no conflicting offline change.
-4. **Tell users what still works.** Create and cached reads are available; the rest waits. Expected result: users do not switch to paper or telephone, which would create a second, invisible record.
-5. **Prepare the reconnect path.** Stagger reconnection with jitter and a rate limit so that all sites do not replay at once. Expected result: the API is not overwhelmed by the reconnect storm.
-6. **After reconnection, confirm one operation per idempotency key.** Reconcile the queue against the server records. Expected result: one request per queued operation; no duplicate.
+1. **Подтвердите, что offline-режим активен и ограничен.** АРМ должен показывать «Нет связи. Заявка будет отправлена после восстановления соединения». Ожидаемый результат: пользователь понимает, что операция в очереди, а не потеряна.
+2. **Защитите границу очереди.** Не повышайте лимит 500 операций или 4 часа во время инцидента; неограниченная очередь — скрытый простой ([SRE §7.3](../sre/11-sre-specification.md)). Ожидаемый результат: самая старая операция в очереди видна и не выходит за лимит.
+3. **Отключите назначение, приоритет и закрытие на затронутых площадках.** Эти действия требуют актуального серверного состояния и должны явно падать. Ожидаемый результат: нет конфликтующих offline-изменений.
+4. **Скажите пользователям, что работает.** Создание и чтения из кэша доступны; остальное ждёт. Ожидаемый результат: пользователи не переходят на бумагу или телефон, создавая вторую невидимую запись.
+5. **Подготовьте путь переподключения.** Разнесите переподключение джиттером и ограничением скорости, чтобы все площадки не воспроизвели очередь одновременно. Ожидаемый результат: API не перегружен штормом переподключения.
+6. **После переподключения подтвердите одну операцию на ключ идемпотентности.** Сверьте очередь с серверными записями. Ожидаемый результат: одна заявка на операцию в очереди, без дублей.
 
-### 4.3 Verify
+### 4.3 Проверка
 
-| Check | Pass criterion |
+| Проверка | Критерий прохождения |
 |---|---|
-| Queue drain | Typical site queue drained within 60 s after reconnect ([NFR-02](../04-requirements.md)) |
-| Lost operations | Zero |
-| Duplicate requests | Zero for the incident window |
-| Oldest queued operation | Below 4 h during the offline period |
-| Server error rate | Back to baseline after the drain |
+| Разгрузка очереди | Очередь типовой площадки разгружается за 60 с после переподключения ([NFR-02](../04-requirements.md)) |
+| Потерянные операции | Ноль |
+| Дубли заявок | Ноль за окно инцидента |
+| Самая старая операция в очереди | Меньше 4 ч в течение offline-периода |
+| Доля ошибок сервера | Возвращается к базовой после разгрузки |
 
-### 4.4 Escalate
+### 4.4 Эскалация
 
-If a site is offline for more than 4 h, or the queue approaches 500 operations, raise to SEV-2 and involve the network owner. If any queued operation cannot be confirmed after reconnection, raise to SEV-1: a lost report is the failure the offline design exists to prevent.
+Если площадка offline более 4 ч или очередь приближается к 500 операциям, повысьте уровень до SEV-2 и привлеките владельца сети. Если после переподключения какая-то операция не подтверждается, повысьте до SEV-1: потерянное обращение — именно тот сбой, который призван предотвратить offline-дизайн.
 
-### 4.5 Do not
+### 4.5 Чего не делать
 
-- Extend the offline window without a measured storage and conflict analysis.
-- Edit IndexedDB or the local queue by hand.
-- Replay a queued operation with a new key.
-- Tell users that an offline create is "registered" before the server confirms it.
+- Расширять offline-окно без измеренного анализа хранения и конфликтов.
+- Редактировать IndexedDB или локальную очередь вручную.
+- Воспроизводить операцию из очереди с новым ключом.
+- Говорить пользователям, что offline-создание «зарегистрировано», до серверного подтверждения.
 
-## 5. RB-04 · Compromised service credentials
+## 5. RB-04 · Компрометация сервисных учётных данных
 
-**Owner:** ИБ with Amir · **Last verified:** Not yet verified · **GameDay:** Compromised service keys
+**Владелец:** ИБ с Amir · **Последняя проверка:** Пока не проверен · **GameDay:** Компрометация сервисных ключей
 
-**Trigger.** Secret-scanning alert; anomalous Workforce or provider calls from an unexpected source; a spike in `401`/`403`; an audit anomaly; a notification from ИБ; a credential found in a repository, log or image.
+**Триггер.** Алерт сканирования секретов; аномальные вызовы Workforce или провайдера из неожиданного источника; всплеск `401`/`403`; аудиторская аномалия; уведомление ИБ; учётные данные найдены в репозитории, логе или образе.
 
-**Impact.** The compromised credential may allow unauthorised reservations, notifications or audit reads, depending on its scope. Availability may be unaffected, which makes this incident easy to under-rate: it is SEV-1 until ИБ establishes the blast radius.
+**Влияние.** Скомпрометированные учётные данные могут позволить несанкционированные резервы, уведомления или чтение аудита — в зависимости от области действия. Доступность может не пострадать, что делает инцидент легко недооценённым: это SEV-1, пока ИБ не установит радиус поражения.
 
-### 5.1 Diagnose
+### 5.1 Диагностика
 
-| Signal | Where | Expected in a healthy system | Interpretation |
+| Сигнал | Где | Ожидание в здоровой системе | Интерпретация |
 |---|---|---|---|
-| Credential identity and scope | Secret store; access-audit A-08/A-10 | Least privilege, one purpose | A shared or broad scope enlarges the blast radius |
-| Last use and source | Adapter logs, gateway logs | Known hosts and schedule | An unexpected source confirms misuse |
-| Assignment anomalies | Reservations by `saga_id`; duplicate active assignments | One reservation per saga | Unauthorised reservations may become assignments |
-| Notification anomalies | `notification_delivery_total`; provider records | One delivery per event | Bulk or unexpected messages indicate misuse |
-| Audit access | Audit store read log | Only named investigations | A read outside an investigation is a signal |
-| Audit chain | Hash chain verification | Continuous | A gap means evidence may be lost |
+| Идентичность и область учётных данных | Хранилище секретов; аудит доступа A-08/A-10 | Минимальные права, одно назначение | Общая или широкая область увеличивает радиус поражения |
+| Последнее использование и источник | Логи адаптера и шлюза | Известные хосты и расписание | Неожиданный источник подтверждает злоупотребление |
+| Аномалии назначений | Резервы по `saga_id`; дубли активных назначений | Один резерв на сагу | Несанкционированные резервы могут стать назначениями |
+| Аномалии уведомлений | `notification_delivery_total`; записи провайдера | Одна доставка на событие | Массовые или неожиданные сообщения указывают на злоупотребление |
+| Доступ к аудиту | Лог чтения аудитохранилища | Только именованные расследования | Чтение вне расследования — сигнал |
+| Аудиторская цепочка | Проверка хеш-цепочки | Непрерывна | Разрыв означает возможную потерю доказательств |
 
-### 5.2 Mitigate
+### 5.2 Локализация
 
-1. **Revoke the credential first, analyse second.** Revoke the client or rotate the secret in the secret store. Expected result: the old credential is rejected within the token lifetime.
-2. **Disable the affected integration flag if revocation is not immediate.** Expected result: the adapter stops calling the dependency; the core journeys continue with the documented degradation.
-3. **Preserve evidence before cleanup.** Export the relevant logs, audit records and gateway entries by `correlation_id`; do not delete or rotate the logs. Expected result: the investigation has a defensible timeline.
-4. **Rotate every secret that could have been exposed**, including adjacent adapters that shared a store or a deployment identity. Expected result: no credential from the exposed set remains valid.
-5. **Force re-authentication of affected human sessions** if a user credential is implicated. Expected result: stolen sessions cannot continue.
-6. **Verify the blast radius with the audit trail.** Compare reservations, assignments, notifications and audit reads against the expected business volume for the exposure window. Expected result: every unexplained action has an owner or is contained.
-7. **Notify ИБ and the incident commander.** If personal data or legal evidence is involved, follow [DR-04](../sre/11-dr-plan.md).
+1. **Сначала отзовите учётные данные, потом анализируйте.** Отзовите клиентские учётные данные или ротируйте секрет в хранилище. Ожидаемый результат: старые учётные данные отклоняются в пределах срока жизни токена.
+2. **Отключите флаг затронутой интеграции, если отзыв не мгновенный.** Ожидаемый результат: адаптер перестаёт вызывать зависимость; основные сценарии продолжаются в объявленной деградации.
+3. **Сохраните доказательства до очистки.** Выгрузите логи, аудиторские записи и записи шлюза по `correlation_id`; не удаляйте и не ротируйте логи. Ожидаемый результат: у расследования есть защитимая хронология.
+4. **Ротируйте все секреты, которые могли быть раскрыты**, включая соседние адаптеры с общим хранилищем или идентичностью развёртывания. Ожидаемый результат: в раскрытом наборе не остаётся валидных учётных данных.
+5. **Принудительно переаутентифицируйте затронутые человеческие сессии**, если замешаны пользовательские учётные данные. Ожидаемый результат: украденные сессии не продолжаются.
+6. **Проверьте радиус поражения по аудиторскому следу.** Сравните резервы, назначения, уведомления и чтения аудита с ожидаемым бизнес-объёмом за окно экспозиции. Ожидаемый результат: у каждого необъяснённого действия есть владелец либо оно локализовано.
+7. **Уведомите ИБ и руководителя инцидента.** Если затронуты персональные данные или юридические доказательства, следуйте [DR-04](../sre/11-dr-plan.md).
 
-### 5.3 Verify
+### 5.3 Проверка
 
-| Check | Pass criterion |
+| Проверка | Критерий прохождения |
 |---|---|
-| Old credential | Rejected on every endpoint |
-| New credential | Works only from the expected host and scope |
-| Unauthorised actions | None after the revocation timestamp |
-| Audit chain | Intact and verified |
-| Business state | No duplicate active assignment or unexplained notification |
-| Secret inventory | No remaining copy of the exposed secret |
+| Старые учётные данные | Отклонены на всех эндпоинтах |
+| Новые учётные данные | Работают только с ожидаемого хоста и в ожидаемой области |
+| Несанкционированные действия | Отсутствуют после метки времени отзыва |
+| Аудиторская цепочка | Цела и проверена |
+| Бизнес-состояние | Нет дубля активного назначения или необъяснённого уведомления |
+| Инвентарь секретов | Не осталось ни одной копии раскрытого секрета |
 
-### 5.4 Escalate
+### 5.4 Эскалация
 
-This runbook starts at SEV-1. Escalate to the security lead and the business owner immediately; if data exfiltration or destructive activity is suspected, move to [DR-04](../sre/11-dr-plan.md). The closure requires ИБ sign-off, not only an engineering confirmation.
+Runbook начинается с SEV-1. Немедленно эскалируйте руководителю по безопасности и владельцу бизнеса; если подозревается эксфильтрация данных или разрушительная активность, переходите к [DR-04](../sre/11-dr-plan.md). Закрытие требует подписи ИБ, а не только подтверждения инженерии.
 
-### 5.5 Do not
+### 5.5 Чего не делать
 
-- Wait for confirmation before revoking a credential that is known to be exposed.
-- Delete logs, audit records or the compromised host to "clean up".
-- Rotate the secret and keep the old one active "for rollback".
-- Reuse the same credential across adapters after the incident.
+- Ждать подтверждения, прежде чем отозвать заведомо раскрытые учётные данные.
+- Удалять логи, аудиторские записи или скомпрометированный хост, чтобы «прибраться».
+- Ротировать секрет и оставлять старый активным «для отката».
+- Переиспользовать одни учётные данные между адаптерами после инцидента.
 
-## 6. RB-05 · Loss of the primary region
+## 6. RB-05 · Потеря основного региона
 
-**Owner:** Martin with Amir · **Last verified:** Not yet verified · **GameDay:** Loss of the primary region
+**Владелец:** Martin с Amir · **Последняя проверка:** Пока не проверен · **GameDay:** Потеря основного региона
 
-**Trigger.** At least two independent signals: the region endpoint is unavailable; PostgreSQL, RabbitMQ and object storage are unreachable; multiple services fail at once; the failure persists beyond five minutes. A single service failure is not a regional loss.
+**Триггер.** Минимум два независимых сигнала: эндпоинт региона недоступен; PostgreSQL, RabbitMQ и объектное хранилище недостижимы; несколько сервисов падают одновременно; сбой длится дольше пяти минут. Отказ одного сервиса — не потеря региона.
 
-**Impact.** Core journeys are unavailable until the DR plan completes. The offline ARM queues new registrations within its 4-hour window. The recovery objectives are RTO 60 min and RPO 5 min for the core data, and RPO 0 for the audit trail ([ADR-009](../adr/ADR-009-disaster-recovery-strategy.md)).
+**Влияние.** Основные сценарии недоступны до завершения плана DR. Offline-АРМ ставит новые регистрации в очередь в пределах четырёхчасового окна. Цели восстановления: RTO 60 мин и RPO 5 мин для основных данных, RPO 0 для аудиторского следа ([ADR-009](../adr/ADR-009-disaster-recovery-strategy.md)).
 
-### 6.1 Diagnose
+### 6.1 Диагностика
 
-| Signal | Where | Expected in a healthy system | Interpretation |
+| Сигнал | Где | Ожидание в здоровой системе | Интерпретация |
 |---|---|---|---|
-| Region health | Provider status; synthetic checks from two networks | Available | Two independent failures confirm a regional event |
-| Database and broker | Connection errors; replication lag | Reachable; lag below 5 min | A reachable replica changes the recovery path |
-| Cross-region replica lag | Replication dashboard; last applied LSN | Below 5 min | Above 5 min means an RPO breach must be declared |
-| Audit copy | Object-store health; hash chain | Synchronous and intact | The audit copy is the recovery source of record |
-| DNS TTL | DNS configuration | 60 s | A long TTL delays the switch |
-| Backups | Object storage; restore test record | Available and verified | An unverified backup is not a recovery option |
+| Здоровье региона | Статус провайдера; синтетические проверки из двух сетей | Доступен | Два независимых отказа подтверждают региональное событие |
+| База и брокер | Ошибки соединения; задержка репликации | Доступны; задержка ниже 5 мин | Доступная реплика меняет путь восстановления |
+| Задержка межрегиональной реплики | Дашборд репликации; последний применённый LSN | Ниже 5 мин | Выше 5 мин — нужно объявить нарушение RPO |
+| Аудиторская копия | Здоровье объектного хранилища; хеш-цепочка | Синхронна и цела | Аудиторская копия — источник восстановления по умолчанию |
+| TTL DNS | Конфигурация DNS | 60 с | Долгий TTL задерживает переключение |
+| Резервные копии | Объектное хранилище; запись теста восстановления | Доступны и проверены | Непроверенная резервная копия — не вариант восстановления |
 
-### 6.2 Mitigate
+### 6.2 Локализация
 
-Follow the phased playbook in [DR plan §6.1](../sre/11-dr-plan.md). The time boxes are targets for a trained team, not a promise.
+Следуйте поэтапному playbook из [плана DR §6.1](../sre/11-dr-plan.md). Временные окна — цели для обученной команды, а не обещание.
 
-1. **Detect and declare (0–10 min).** The incident commander confirms a regional event with two independent signals, declares DR, notifies the business owner and ИБ, freezes deployments and assigns roles. Expected result: the declaration is recorded with time and scope.
-2. **Verify the replica (10–15 min).** Read the lag and the last applied LSN; verify backup availability and DNS TTL. Expected result: lag ≤ 5 min, or an explicit RPO breach is declared.
-3. **Promote the data tier (15–25 min).** Promote the replica, open it for writes, validate schema version, extensions and roles, and confirm the audit copy. Expected result: the database accepts writes and integrity checks pass.
-4. **Restore the platform (25–40 min).** Scale the application, relay, workers and adapters; restore configuration and secrets; declare broker queues; switch DNS. Expected result: health checks pass and internal calls succeed.
-5. **Validate (40–55 min).** Run the smoke path create → read → assign → complete → close; verify the correlation trace, outbox publication, notification and audit write; run reconciliation counts. Expected result: gates G1–G5 pass.
-6. **Announce and stabilise (55–60 min and the first 24 h).** Announce with known limitations; keep analytics disabled; drain the outbox; reconcile the ARM queue; monitor duplicates and lag. Expected result: no unexplained duplicate or missing fact.
+1. **Обнаружить и объявить (0–10 мин).** Руководитель инцидента подтверждает региональное событие двумя независимыми сигналами, объявляет DR, уведомляет владельца бизнеса и ИБ, замораживает развёртывания и назначает роли. Ожидаемый результат: объявление записано со временем и областью.
+2. **Проверить реплику (10–15 мин).** Прочитайте задержку и последний применённый LSN; проверьте доступность резервных копий и TTL DNS. Ожидаемый результат: задержка ≤ 5 мин либо явно объявлено нарушение RPO.
+3. **Повысить уровень данных (15–25 мин).** Повысьте реплику, откройте её для записи, проверьте версию схемы, расширения и роли, подтвердите аудиторскую копию. Ожидаемый результат: база принимает записи, проверки целостности проходят.
+4. **Восстановить платформу (25–40 мин).** Масштабируйте приложение, relay, воркеры и адаптеры; восстановите конфигурацию и секреты; объявите очереди брокера; переключите DNS. Ожидаемый результат: проверки здоровья проходят, внутренние вызовы работают.
+5. **Проверить (40–55 мин).** Прогоните smoke-путь создание → чтение → назначение → выполнение → закрытие; проверьте корреляционный трейс, публикацию outbox, уведомление и аудиторскую запись; выполните сверочные подсчёты. Ожидаемый результат: ворота G1–G5 пройдены.
+6. **Объявить и стабилизировать (55–60 мин и первые 24 ч).** Объявите с известными ограничениями; держите аналитику отключённой; разгрузите outbox; сверьте очередь АРМ; наблюдайте дубли и задержку. Ожидаемый результат: нет необъяснённых дублей или пропавших фактов.
 
-### 6.3 Verify
+### 6.3 Проверка
 
-| Gate | Check | Pass criterion |
+| Ворота | Проверка | Критерий прохождения |
 |---|---|---|
-| G1 Data integrity | Schema version, row counts, checksums, referential integrity, audit chain, no duplicate active assignment | All pass; last applied LSN recorded |
-| G2 Functional smoke | Create, read, assign, complete, close, correlation trace, outbox, notification, audit | All pass |
-| G3 Reconciliation | Request, history, audit and event counts agree; outbox drained; consumer lag ≤ 15 min | All pass |
-| G4 Security | Access checks; privileged writes audited; secrets rotated if compromise is suspected | ИБ sign-off |
-| G5 Business acceptance | The process owner confirms that dispatch can work with the known limitations | Written acceptance |
+| G1 Целостность данных | Версия схемы, число строк, контрольные суммы, ссылочная целостность, аудиторская цепочка, отсутствие дубля активного назначения | Всё проходит; последний применённый LSN записан |
+| G2 Функциональный smoke | Создание, чтение, назначение, выполнение, закрытие, корреляционный трейс, outbox, уведомление, аудит | Всё проходит |
+| G3 Сверка | Числа заявок, истории, аудита и событий согласуются; outbox разгружен; задержка потребителей ≤ 15 мин | Всё проходит |
+| G4 Безопасность | Проверки доступа; привилегированные записи аудируются; секреты ротированы при подозрении на компрометацию | Подпись ИБ |
+| G5 Приёмка бизнесом | Владелец процесса подтверждает, что диспетчеризация может работать с известными ограничениями | Письменная приёмка |
 
-### 6.4 Escalate
+### 6.4 Эскалация
 
-The incident commander declares DR and owns the timeline. The business owner accepts any RPO breach and the restored service. ИБ owns the decision to restore after a compromise. If the replica lag exceeds five minutes, the incident is still recoverable, but the business owner decides whether to accept the loss or wait for a backup restore; the decision and the lost interval are recorded.
+Руководитель инцидента объявляет DR и владеет хронологией. Владелец бизнеса принимает нарушение RPO и восстановленный сервис. ИБ владеет решением о восстановлении после компрометации. Если задержка реплики превышает пять минут, инцидент всё ещё восстановим, но владелец бизнеса решает, принять потерю или ждать восстановления из резервной копии; решение и потерянный интервал записываются.
 
-### 6.5 Do not
+### 6.5 Чего не делать
 
-- Promote the replica without checking the lag and the last applied LSN.
-- Switch DNS before the validation gates pass.
-- Reopen writes before the audit copy is verified.
-- Restore over the live database during a logical-corruption incident; use an isolated instance.
-- Announce recovery while the outbox or the ARM queue is still unexplained.
+- Повышать реплику без проверки задержки и последнего применённого LSN.
+- Переключать DNS до прохождения ворот проверки.
+- Открывать записи до проверки аудиторской копии.
+- Восстанавливать поверх живой базы при логическом повреждении; используйте изолированный экземпляр.
+- Объявлять восстановление, пока outbox или очередь АРМ не объяснены.
 
-## 7. Runbook quality checklist
+## 7. Чек-лист качества runbook’а
 
-| Check | Evidence |
+| Проверка | Доказательство |
 |---|---|
-| Bound to a specific alert or symptom | The alert text contains the runbook link |
-| Impact states what still works | The degradation table row is referenced |
-| Every mitigation step has an expected result | The step text contains "Expected result" |
-| Verification is numeric | A threshold and a time window |
-| Escalation has a condition, a contact and a time box | Named role and team |
-| Owner and last verification date are present | The table in §1.1 |
-| The procedure has been exercised | GameDay report with the observed deviations |
-| The procedure is shorter than the previous version, or the reason is recorded | Change history |
+| Привязан к конкретному алерту или симптому | Текст алерта содержит ссылку на runbook |
+| Влияние указывает, что продолжает работать | Ссылка на строку таблицы деградации |
+| У каждого шага локализации есть ожидаемый результат | Текст шага содержит «Ожидаемый результат» |
+| Проверка числовая | Порог и временное окно |
+| У эскалации есть условие, контакт и временное окно | Названная роль и команда |
+| Владелец и дата последней проверки присутствуют | Таблица в §1.1 |
+| Процедура отработана | Отчёт GameDay с наблюдёнными отклонениями |
+| Процедура короче предыдущей версии либо причина записана | История изменений |
 
-## 8. Maintenance
+## 8. Сопровождение
 
-Runbooks are reviewed quarterly and after every SEV-1/2 incident, every GameDay and every architecture change that touches an external edge. A review that finds nothing is recorded as a review; a runbook that has not been reviewed for two quarters is removed from the alert links until it is verified. The runbook set is the operational counterpart of the [C2 resilience view](../diagrams/11-c2-resilience.svg): every edge E1–E12 with a pattern code must appear in at least one diagnosis table.
+Runbook’и пересматриваются ежеквартально и после каждого SEV-1/2, каждого GameDay и каждого архитектурного изменения, затрагивающего внешнюю границу. Проверка, ничего не нашедшая, фиксируется как проверка; runbook, не проверявшийся два квартала, снимается со ссылок в алертах до подтверждения. Набор runbook’ов — эксплуатационный аналог [C2 resilience view](../diagrams/11-c2-resilience.svg): каждое ребро E1–E12 с кодом паттерна должно встречаться хотя бы в одной таблице диагностики.
