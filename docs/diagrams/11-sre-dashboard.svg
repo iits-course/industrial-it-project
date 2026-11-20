@@ -1,228 +1,228 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 860" width="1400" height="860" font-family="Helvetica Neue, Helvetica, Arial, sans-serif">
-<title>SRE dashboard sketch for RemKontur</title>
-<desc>Panel layout for SLO burn, API RED metrics, journey funnel, dependency health, outbox and consumer lag, business throughput and change annotations.</desc>
+<title>Эскиз панели SRE РемКонтура</title>
+<desc>Панели расхода SLO, RED API, воронки, состояния зависимостей, очередей, темпа операций и изменений.</desc>
 <rect width="1400" height="860" fill="#ffffff"/>
-<text x="24" y="32" font-size="19" font-weight="700" fill="#1f2933">SRE dashboard sketch — RemKontur (week 11)</text>
-<text x="24" y="52" font-size="12" fill="#5f6b7a">One screen, organised by question. Thresholds and actions are defined in the SRE specification §5.2. This is a design sketch, not a deployed dashboard.</text>
+<text x="24" y="32" font-size="19" font-weight="700" fill="#1f2933">Эскиз панели SRE · РемКонтур (неделя 11)</text>
+<text x="24" y="52" font-size="12" fill="#5f6b7a">Панели сгруппированы по вопросам. Пороги и действия описаны в §5.2 спецификации SRE. На схеме показаны условные данные.</text>
 
-<!-- SLO tiles -->
+<!-- Плитки SLO -->
 <g>
 <rect x="24" y="76" width="260" height="150" rx="9" fill="#f8fafc" stroke="#c9d2de" stroke-width="1.2"/>
-<text x="38" y="100" font-size="13" font-weight="700" fill="#1f2933">P1 · Registration</text>
-<text x="38" y="126" font-size="22" font-weight="700" fill="#1f2933">99.5%</text>
-<text x="120" y="126" font-size="11" fill="#5f6b7a">SLO · 30 days</text>
-<text x="38" y="146" font-size="11" fill="#5f6b7a">Budget 58% · burn 0.4×</text>
+<text x="38" y="100" font-size="13" font-weight="700" fill="#1f2933">P1 · Регистрация</text>
+<text x="38" y="126" font-size="22" font-weight="700" fill="#1f2933">99,5%</text>
+<text x="120" y="126" font-size="11" fill="#5f6b7a">SLO · 30 дней</text>
+<text x="38" y="146" font-size="11" fill="#5f6b7a">Остаток 58% · расход 0,4×</text>
 <rect x="38" y="158" width="232" height="10" rx="5" fill="#e6ebf2"/>
 <rect x="38" y="158" width="135" height="10" rx="5" fill="#1b7f4b"/>
 <circle cx="46" cy="190" r="5" fill="#1b7f4b"/>
-<text x="58" y="194" font-size="11" font-weight="700" fill="#1b7f4b">Normal posture</text>
-<text x="38" y="214" font-size="10" fill="#8a94a6">12,000 valid · 60 budget</text>
+<text x="58" y="194" font-size="11" font-weight="700" fill="#1b7f4b">Обычный режим</text>
+<text x="38" y="214" font-size="10" fill="#8a94a6">12 000 учтено · бюджет 60</text>
 </g>
 
 <g>
 <rect x="294" y="76" width="260" height="150" rx="9" fill="#f8fafc" stroke="#c9d2de" stroke-width="1.2"/>
-<text x="308" y="100" font-size="13" font-weight="700" fill="#1f2933">P2 · Read latency</text>
-<text x="308" y="126" font-size="22" font-weight="700" fill="#1f2933">95.0%</text>
-<text x="390" y="126" font-size="11" fill="#5f6b7a">≤ 2 s · 30 days</text>
-<text x="308" y="146" font-size="11" fill="#5f6b7a">Budget 67% · burn 0.8×</text>
+<text x="308" y="100" font-size="13" font-weight="700" fill="#1f2933">P2 · Задержка чтения</text>
+<text x="308" y="126" font-size="22" font-weight="700" fill="#1f2933">95,0%</text>
+<text x="390" y="126" font-size="11" fill="#5f6b7a">≤ 2 с · 30 дней</text>
+<text x="308" y="146" font-size="11" fill="#5f6b7a">Остаток 67% · расход 0,8×</text>
 <rect x="308" y="158" width="232" height="10" rx="5" fill="#e6ebf2"/>
 <rect x="308" y="158" width="155" height="10" rx="5" fill="#1b7f4b"/>
 <circle cx="316" cy="190" r="5" fill="#1b7f4b"/>
-<text x="328" y="194" font-size="11" font-weight="700" fill="#1b7f4b">Normal posture</text>
-<text x="308" y="214" font-size="10" fill="#8a94a6">240,000 reads · 12,000 budget</text>
+<text x="328" y="194" font-size="11" font-weight="700" fill="#1b7f4b">Обычный режим</text>
+<text x="308" y="214" font-size="10" fill="#8a94a6">240 000 чтений · бюджет 12 000</text>
 </g>
 
 <g>
 <rect x="564" y="76" width="260" height="150" rx="9" fill="#fffaf2" stroke="#e0b877" stroke-width="1.2"/>
-<text x="578" y="100" font-size="13" font-weight="700" fill="#1f2933">P3 · Assignment</text>
-<text x="578" y="126" font-size="22" font-weight="700" fill="#1f2933">99.0%</text>
-<text x="660" y="126" font-size="11" fill="#5f6b7a">terminal ≤ 60 s</text>
-<text x="578" y="146" font-size="11" fill="#5f6b7a">Budget 22% · burn 3.1×</text>
+<text x="578" y="100" font-size="13" font-weight="700" fill="#1f2933">P3 · Назначение</text>
+<text x="578" y="126" font-size="22" font-weight="700" fill="#1f2933">99,0%</text>
+<text x="660" y="126" font-size="11" fill="#5f6b7a">Исход ≤ 60 с</text>
+<text x="578" y="146" font-size="11" fill="#5f6b7a">Остаток 22% · расход 3,1×</text>
 <rect x="578" y="158" width="232" height="10" rx="5" fill="#f1e4cf"/>
 <rect x="578" y="158" width="51" height="10" rx="5" fill="#b26a00"/>
 <circle cx="586" cy="190" r="5" fill="#b26a00"/>
-<text x="598" y="194" font-size="11" font-weight="700" fill="#b26a00">Reliability-only</text>
-<text x="578" y="214" font-size="10" fill="#8a94a6">9,000 sagas · 90 budget</text>
+<text x="598" y="194" font-size="11" font-weight="700" fill="#b26a00">Только надёжность</text>
+<text x="578" y="214" font-size="10" fill="#8a94a6">9 000 саг · бюджет 90</text>
 </g>
 
 <g>
 <rect x="834" y="76" width="260" height="150" rx="9" fill="#f8fafc" stroke="#c9d2de" stroke-width="1.2"/>
-<text x="848" y="100" font-size="13" font-weight="700" fill="#1f2933">P4 · Propagation</text>
-<text x="848" y="126" font-size="22" font-weight="700" fill="#1f2933">99.0%</text>
-<text x="930" y="126" font-size="11" fill="#5f6b7a">≤ 15 min</text>
-<text x="848" y="146" font-size="11" fill="#5f6b7a">Budget 60% · burn 1.2×</text>
+<text x="848" y="100" font-size="13" font-weight="700" fill="#1f2933">P4 · Доставка</text>
+<text x="848" y="126" font-size="22" font-weight="700" fill="#1f2933">99,0%</text>
+<text x="930" y="126" font-size="11" fill="#5f6b7a">≤ 15 мин</text>
+<text x="848" y="146" font-size="11" fill="#5f6b7a">Остаток 60% · расход 1,2×</text>
 <rect x="848" y="158" width="232" height="10" rx="5" fill="#e6ebf2"/>
 <rect x="848" y="158" width="139" height="10" rx="5" fill="#1b7f4b"/>
 <circle cx="856" cy="190" r="5" fill="#1b7f4b"/>
-<text x="868" y="194" font-size="11" font-weight="700" fill="#1b7f4b">Normal posture</text>
-<text x="848" y="214" font-size="10" fill="#8a94a6">30,000 events · 300 budget</text>
+<text x="868" y="194" font-size="11" font-weight="700" fill="#1b7f4b">Обычный режим</text>
+<text x="848" y="214" font-size="10" fill="#8a94a6">30 000 событий · бюджет 300</text>
 </g>
 
 <g>
 <rect x="1104" y="76" width="260" height="150" rx="9" fill="#f8fafc" stroke="#c9d2de" stroke-width="1.2"/>
-<text x="1118" y="100" font-size="13" font-weight="700" fill="#1f2933">P5 · Completion</text>
-<text x="1118" y="126" font-size="22" font-weight="700" fill="#1f2933">99.9%</text>
-<text x="1200" y="126" font-size="11" fill="#5f6b7a">correctness</text>
-<text x="1118" y="146" font-size="11" fill="#5f6b7a">Budget 73% · burn 0.3×</text>
+<text x="1118" y="100" font-size="13" font-weight="700" fill="#1f2933">P5 · Завершение</text>
+<text x="1118" y="126" font-size="22" font-weight="700" fill="#1f2933">99,9%</text>
+<text x="1200" y="126" font-size="11" fill="#5f6b7a">Корректность</text>
+<text x="1118" y="146" font-size="11" fill="#5f6b7a">Остаток 73% · расход 0,3×</text>
 <rect x="1118" y="158" width="232" height="10" rx="5" fill="#e6ebf2"/>
 <rect x="1118" y="158" width="169" height="10" rx="5" fill="#1b7f4b"/>
 <circle cx="1126" cy="190" r="5" fill="#1b7f4b"/>
-<text x="1138" y="194" font-size="11" font-weight="700" fill="#1b7f4b">Normal posture</text>
-<text x="1118" y="214" font-size="10" fill="#8a94a6">11,000 transitions · 11 budget</text>
+<text x="1138" y="194" font-size="11" font-weight="700" fill="#1b7f4b">Обычный режим</text>
+<text x="1118" y="214" font-size="10" fill="#8a94a6">11 000 переходов · бюджет 11</text>
 </g>
 
-<!-- API RED -->
+<!-- RED API -->
 <g>
 <rect x="24" y="246" width="440" height="230" rx="9" fill="#ffffff" stroke="#c9d2de" stroke-width="1.2"/>
-<text x="40" y="272" font-size="13" font-weight="700" fill="#1f2933">API RED · last 6 hours</text>
+<text x="40" y="272" font-size="13" font-weight="700" fill="#1f2933">RED API · последние 6 ч</text>
 <rect x="40" y="284" width="130" height="46" rx="6" fill="#f4f6f9"/>
-<text x="50" y="302" font-size="10" fill="#5f6b7a">Rate</text>
-<text x="50" y="320" font-size="16" font-weight="700" fill="#1f2933">18.4 req/s</text>
+<text x="50" y="302" font-size="10" fill="#5f6b7a">Частота</text>
+<text x="50" y="320" font-size="16" font-weight="700" fill="#1f2933">18,4 запр./с</text>
 <rect x="180" y="284" width="130" height="46" rx="6" fill="#f4f6f9"/>
-<text x="190" y="302" font-size="10" fill="#5f6b7a">Errors</text>
-<text x="190" y="320" font-size="16" font-weight="700" fill="#1b7f4b">0.4%</text>
+<text x="190" y="302" font-size="10" fill="#5f6b7a">Ошибки</text>
+<text x="190" y="320" font-size="16" font-weight="700" fill="#1b7f4b">0,4%</text>
 <rect x="320" y="284" width="128" height="46" rx="6" fill="#f4f6f9"/>
 <text x="330" y="302" font-size="10" fill="#5f6b7a">p95</text>
-<text x="330" y="320" font-size="16" font-weight="700" fill="#1f2933">1.2 s</text>
+<text x="330" y="320" font-size="16" font-weight="700" fill="#1f2933">1,2 с</text>
 <line x1="52" y1="430" x2="432" y2="430" stroke="#c9d2de" stroke-width="1"/>
 <line x1="52" y1="350" x2="52" y2="430" stroke="#c9d2de" stroke-width="1"/>
 <line x1="52" y1="390" x2="432" y2="390" stroke="#eef1f5" stroke-width="1"/>
 <line x1="52" y1="410" x2="432" y2="410" stroke="#eef1f5" stroke-width="1"/>
-<text x="30" y="354" font-size="9" fill="#8a94a6">2 s</text>
-<text x="30" y="414" font-size="9" fill="#8a94a6">1 s</text>
+<text x="30" y="354" font-size="9" fill="#8a94a6">2 с</text>
+<text x="30" y="414" font-size="9" fill="#8a94a6">1 с</text>
 <polyline points="52,398 90,394 128,402 166,388 204,392 242,384 280,396 318,386 356,390 394,382 432,388" fill="none" stroke="#2b6cdf" stroke-width="2"/>
 <line x1="52" y1="390" x2="432" y2="390" stroke="#b26a00" stroke-width="1" stroke-dasharray="4 3"/>
-<text x="52" y="448" font-size="10" fill="#5f6b7a">p95 threshold 2 s · error budget burn follows the SLO tiles</text>
+<text x="52" y="448" font-size="10" fill="#5f6b7a">Порог p95 — 2 с · расход бюджета виден на плитках SLO</text>
 </g>
 
-<!-- Journey funnel -->
+<!-- Раздел схемы -->
 <g>
 <rect x="484" y="246" width="440" height="230" rx="9" fill="#ffffff" stroke="#c9d2de" stroke-width="1.2"/>
-<text x="500" y="272" font-size="13" font-weight="700" fill="#1f2933">Journey funnel · per hour</text>
-<text x="500" y="300" font-size="11" fill="#5f6b7a">Registered</text>
+<text x="500" y="272" font-size="13" font-weight="700" fill="#1f2933">Воронка · за час</text>
+<text x="500" y="300" font-size="11" fill="#5f6b7a">Регистрация</text>
 <rect x="590" y="290" width="270" height="14" rx="4" fill="#e6ebf2"/>
 <rect x="590" y="290" width="250" height="14" rx="4" fill="#2b6cdf"/>
 <text x="848" y="302" font-size="11" font-weight="700" fill="#1f2933">412</text>
-<text x="500" y="334" font-size="11" fill="#5f6b7a">Assigned</text>
+<text x="500" y="334" font-size="11" fill="#5f6b7a">Назначение</text>
 <rect x="590" y="324" width="270" height="14" rx="4" fill="#e6ebf2"/>
 <rect x="590" y="324" width="232" height="14" rx="4" fill="#1b7f4b"/>
 <text x="830" y="336" font-size="11" font-weight="700" fill="#1f2933">388</text>
-<text x="500" y="368" font-size="11" fill="#5f6b7a">Completed</text>
+<text x="500" y="368" font-size="11" fill="#5f6b7a">Завершение</text>
 <rect x="590" y="358" width="270" height="14" rx="4" fill="#e6ebf2"/>
 <rect x="590" y="358" width="210" height="14" rx="4" fill="#00838f"/>
 <text x="808" y="370" font-size="11" font-weight="700" fill="#1f2933">355</text>
 <rect x="500" y="394" width="392" height="58" rx="6" fill="#fffaf2"/>
-<text x="512" y="414" font-size="11" fill="#5f6b7a">Unassigned backlog</text>
-<text x="512" y="436" font-size="16" font-weight="700" fill="#b26a00">23 requests · oldest 41 min</text>
+<text x="512" y="414" font-size="11" fill="#5f6b7a">Без назначения</text>
+<text x="512" y="436" font-size="16" font-weight="700" fill="#b26a00">23 заявки · старейшая 41 мин</text>
 </g>
 
-<!-- Dependencies -->
+<!-- Раздел схемы -->
 <g>
 <rect x="944" y="246" width="420" height="230" rx="9" fill="#ffffff" stroke="#c9d2de" stroke-width="1.2"/>
-<text x="960" y="272" font-size="13" font-weight="700" fill="#1f2933">Dependency health</text>
-<text x="960" y="296" font-size="9.5" fill="#8a94a6">DEPENDENCY</text>
+<text x="960" y="272" font-size="13" font-weight="700" fill="#1f2933">Состояние зависимостей</text>
+<text x="960" y="296" font-size="9.5" fill="#8a94a6">ЗАВИСИМОСТЬ</text>
 <text x="1110" y="296" font-size="9.5" fill="#8a94a6">p95</text>
-<text x="1180" y="296" font-size="9.5" fill="#8a94a6">ERRORS</text>
-<text x="1260" y="296" font-size="9.5" fill="#8a94a6">CIRCUIT</text>
+<text x="1180" y="296" font-size="9.5" fill="#8a94a6">ОШИБКИ</text>
+<text x="1260" y="296" font-size="9.5" fill="#8a94a6">ЦЕПЬ</text>
 
 <circle cx="966" cy="320" r="5" fill="#1b7f4b"/>
 <text x="978" y="324" font-size="11" fill="#1f2933">Workforce</text>
-<text x="1110" y="324" font-size="11" fill="#1f2933">1.4 s</text>
-<text x="1180" y="324" font-size="11" fill="#1b7f4b">0.6%</text>
-<text x="1260" y="324" font-size="10" fill="#1b7f4b">closed</text>
+<text x="1110" y="324" font-size="11" fill="#1f2933">1,4 с</text>
+<text x="1180" y="324" font-size="11" fill="#1b7f4b">0,6%</text>
+<text x="1260" y="324" font-size="10" fill="#1b7f4b">замкнута</text>
 
 <circle cx="966" cy="350" r="5" fill="#1b7f4b"/>
-<text x="978" y="354" font-size="11" fill="#1f2933">EAM adapter</text>
-<text x="1110" y="354" font-size="11" fill="#1f2933">8.2 s</text>
-<text x="1180" y="354" font-size="11" fill="#1b7f4b">0.0%</text>
-<text x="1260" y="354" font-size="10" fill="#1b7f4b">closed</text>
+<text x="978" y="354" font-size="11" fill="#1f2933">Адаптер EAM</text>
+<text x="1110" y="354" font-size="11" fill="#1f2933">8,2 с</text>
+<text x="1180" y="354" font-size="11" fill="#1b7f4b">0,0%</text>
+<text x="1260" y="354" font-size="10" fill="#1b7f4b">замкнута</text>
 
 <circle cx="966" cy="380" r="5" fill="#b26a00"/>
-<text x="978" y="384" font-size="11" fill="#1f2933">HR adapter</text>
-<text x="1110" y="384" font-size="11" fill="#b26a00">10.0 s</text>
-<text x="1180" y="384" font-size="11" fill="#b26a00">4.1%</text>
-<text x="1260" y="384" font-size="10" fill="#b26a00">half-open</text>
+<text x="978" y="384" font-size="11" fill="#1f2933">Адаптер HR</text>
+<text x="1110" y="384" font-size="11" fill="#b26a00">10,0 с</text>
+<text x="1180" y="384" font-size="11" fill="#b26a00">4,1%</text>
+<text x="1260" y="384" font-size="10" fill="#b26a00">проба</text>
 
 <circle cx="966" cy="410" r="5" fill="#1b7f4b"/>
-<text x="978" y="414" font-size="11" fill="#1f2933">Notification</text>
-<text x="1110" y="414" font-size="11" fill="#1f2933">0.9 s</text>
-<text x="1180" y="414" font-size="11" fill="#1b7f4b">0.2%</text>
-<text x="1260" y="414" font-size="10" fill="#1b7f4b">closed</text>
+<text x="978" y="414" font-size="11" fill="#1f2933">Уведомления</text>
+<text x="1110" y="414" font-size="11" fill="#1f2933">0,9 с</text>
+<text x="1180" y="414" font-size="11" fill="#1b7f4b">0,2%</text>
+<text x="1260" y="414" font-size="10" fill="#1b7f4b">замкнута</text>
 
 <circle cx="966" cy="440" r="5" fill="#1b7f4b"/>
 <text x="978" y="444" font-size="11" fill="#1f2933">SSO / JWKS</text>
-<text x="1110" y="444" font-size="11" fill="#1f2933">0.2 s</text>
-<text x="1180" y="444" font-size="11" fill="#1b7f4b">0.0%</text>
-<text x="1260" y="444" font-size="10" fill="#1b7f4b">cached</text>
+<text x="1110" y="444" font-size="11" fill="#1f2933">0,2 с</text>
+<text x="1180" y="444" font-size="11" fill="#1b7f4b">0,0%</text>
+<text x="1260" y="444" font-size="10" fill="#1b7f4b">кэш</text>
 </g>
 
-<!-- Outbox and consumers -->
+<!-- Раздел схемы -->
 <g>
 <rect x="24" y="496" width="440" height="230" rx="9" fill="#ffffff" stroke="#c9d2de" stroke-width="1.2"/>
-<text x="40" y="522" font-size="13" font-weight="700" fill="#1f2933">Outbox and consumers</text>
+<text x="40" y="522" font-size="13" font-weight="700" fill="#1f2933">Исходящая очередь и потребители</text>
 <rect x="40" y="536" width="130" height="46" rx="6" fill="#f4f6f9"/>
-<text x="50" y="554" font-size="10" fill="#5f6b7a">Oldest outbox</text>
-<text x="50" y="572" font-size="16" font-weight="700" fill="#1f2933">1.2 s</text>
+<text x="50" y="554" font-size="10" fill="#5f6b7a">Возраст очереди</text>
+<text x="50" y="572" font-size="16" font-weight="700" fill="#1f2933">1,2 с</text>
 <rect x="180" y="536" width="130" height="46" rx="6" fill="#f4f6f9"/>
-<text x="190" y="554" font-size="10" fill="#5f6b7a">Consumer lag</text>
-<text x="190" y="572" font-size="16" font-weight="700" fill="#1b7f4b">42 s</text>
+<text x="190" y="554" font-size="10" fill="#5f6b7a">Отставание</text>
+<text x="190" y="572" font-size="16" font-weight="700" fill="#1b7f4b">42 с</text>
 <rect x="320" y="536" width="128" height="46" rx="6" fill="#f4f6f9"/>
-<text x="330" y="554" font-size="10" fill="#5f6b7a">DLQ depth</text>
+<text x="330" y="554" font-size="10" fill="#5f6b7a">В DLQ</text>
 <text x="330" y="572" font-size="16" font-weight="700" fill="#1f2933">0</text>
 <line x1="52" y1="680" x2="432" y2="680" stroke="#c9d2de" stroke-width="1"/>
 <line x1="52" y1="600" x2="52" y2="680" stroke="#c9d2de" stroke-width="1"/>
 <line x1="52" y1="640" x2="432" y2="640" stroke="#eef1f5" stroke-width="1"/>
-<text x="30" y="604" font-size="9" fill="#8a94a6">5 s</text>
-<text x="30" y="644" font-size="9" fill="#8a94a6">0 s</text>
+<text x="30" y="604" font-size="9" fill="#8a94a6">5 с</text>
+<text x="30" y="644" font-size="9" fill="#8a94a6">0 с</text>
 <polyline points="52,660 90,664 128,658 166,662 204,656 242,660 280,654 318,658 356,650 394,656 432,652" fill="none" stroke="#00838f" stroke-width="2"/>
 <line x1="52" y1="600" x2="432" y2="600" stroke="#b26a00" stroke-width="1" stroke-dasharray="4 3"/>
-<text x="52" y="698" font-size="10" fill="#5f6b7a">p99 publish target 5 s · lag target 15 min · DLQ must remain empty</text>
+<text x="52" y="698" font-size="10" fill="#5f6b7a">Публикация p99 — 5 с · отставание — 15 мин · DLQ пуста</text>
 </g>
 
-<!-- Business throughput -->
+<!-- Раздел схемы -->
 <g>
 <rect x="484" y="496" width="440" height="230" rx="9" fill="#ffffff" stroke="#c9d2de" stroke-width="1.2"/>
-<text x="500" y="522" font-size="13" font-weight="700" fill="#1f2933">Business throughput · per hour</text>
-<text x="500" y="554" font-size="10" fill="#5f6b7a">REGISTERED</text>
+<text x="500" y="522" font-size="13" font-weight="700" fill="#1f2933">Темп операций · за час</text>
+<text x="500" y="554" font-size="10" fill="#5f6b7a">РЕГИСТРАЦИЯ</text>
 <text x="500" y="576" font-size="20" font-weight="700" fill="#1f2933">412</text>
-<text x="640" y="554" font-size="10" fill="#5f6b7a">ASSIGNED</text>
+<text x="640" y="554" font-size="10" fill="#5f6b7a">НАЗНАЧЕНИЕ</text>
 <text x="640" y="576" font-size="20" font-weight="700" fill="#1f2933">388</text>
-<text x="780" y="554" font-size="10" fill="#5f6b7a">CLOSED</text>
+<text x="780" y="554" font-size="10" fill="#5f6b7a">ЗАКРЫТИЕ</text>
 <text x="780" y="576" font-size="20" font-weight="700" fill="#1f2933">355</text>
 <line x1="500" y1="684" x2="908" y2="684" stroke="#c9d2de" stroke-width="1"/>
 <rect x="520" y="640" width="46" height="44" rx="4" fill="#2b6cdf"/>
 <rect x="586" y="650" width="46" height="34" rx="4" fill="#1b7f4b"/>
 <rect x="652" y="658" width="46" height="26" rx="4" fill="#00838f"/>
-<text x="520" y="700" font-size="10" fill="#5f6b7a">Area A</text>
+<text x="520" y="700" font-size="10" fill="#5f6b7a">Участок А</text>
 <rect x="720" y="630" width="46" height="54" rx="4" fill="#2b6cdf"/>
 <rect x="786" y="646" width="46" height="38" rx="4" fill="#1b7f4b"/>
 <rect x="852" y="654" width="46" height="30" rx="4" fill="#00838f"/>
-<text x="720" y="700" font-size="10" fill="#5f6b7a">Area B</text>
-<text x="500" y="718" font-size="10" fill="#8a94a6">Zero in an area with normal volume is a symptom alert, not a dashboard curiosity.</text>
+<text x="720" y="700" font-size="10" fill="#5f6b7a">Участок Б</text>
+<text x="500" y="718" font-size="10" fill="#8a94a6">Нулевой поток при обычном объёме на участке — повод для оповещения.</text>
 </g>
 
-<!-- Change log -->
+<!-- Раздел схемы -->
 <g>
 <rect x="944" y="496" width="420" height="230" rx="9" fill="#ffffff" stroke="#c9d2de" stroke-width="1.2"/>
-<text x="960" y="522" font-size="13" font-weight="700" fill="#1f2933">Changes and incidents</text>
+<text x="960" y="522" font-size="13" font-weight="700" fill="#1f2933">Изменения и инциденты</text>
 <line x1="970" y1="590" x2="1340" y2="590" stroke="#c9d2de" stroke-width="2"/>
 <circle cx="1000" cy="590" r="6" fill="#2b6cdf"/>
 <text x="988" y="574" font-size="10" fill="#1f2933">09:10</text>
-<text x="980" y="614" font-size="10" fill="#5f6b7a">deploy 1.4.2</text>
+<text x="980" y="614" font-size="10" fill="#5f6b7a">релиз 1.4.2</text>
 <circle cx="1080" cy="590" r="6" fill="#2b6cdf"/>
 <text x="1068" y="574" font-size="10" fill="#1f2933">11:40</text>
-<text x="1060" y="614" font-size="10" fill="#5f6b7a">config</text>
+<text x="1060" y="614" font-size="10" fill="#5f6b7a">настройки</text>
 <circle cx="1170" cy="590" r="6" fill="#b26a00"/>
 <text x="1158" y="574" font-size="10" fill="#1f2933">14:05</text>
-<text x="1148" y="614" font-size="10" fill="#b26a00">HR slow</text>
+<text x="1148" y="614" font-size="10" fill="#b26a00">задержка HR</text>
 <circle cx="1260" cy="590" r="6" fill="#b23b3b"/>
 <text x="1248" y="574" font-size="10" fill="#1f2933">15:20</text>
-<text x="1236" y="614" font-size="10" fill="#b23b3b">rollback</text>
+<text x="1236" y="614" font-size="10" fill="#b23b3b">откат</text>
 <rect x="960" y="636" width="388" height="70" rx="6" fill="#f8fafc"/>
-<text x="972" y="656" font-size="11" fill="#5f6b7a">Every panel shares the same time range and shows</text>
-<text x="972" y="672" font-size="11" fill="#5f6b7a">deployment and incident annotations. A burn after a</text>
-<text x="972" y="688" font-size="11" fill="#5f6b7a">change is compared with the marker before paging.</text>
+<text x="972" y="656" font-size="11" fill="#5f6b7a">Все панели имеют общий диапазон времени</text>
+<text x="972" y="672" font-size="11" fill="#5f6b7a">и отметки выкладок и инцидентов. Перед</text>
+<text x="972" y="688" font-size="11" fill="#5f6b7a">вызовом дежурного сверяют расход с изменениями.</text>
 </g>
 
-<text x="24" y="752" font-size="10" fill="#8a94a6">SLO tiles feed the burn-rate alerts; the RED, dependency and outbox panels answer “where”; the journey and business panels answer “what the user lost”. No personal data is displayed.</text>
+<text x="24" y="752" font-size="10" fill="#8a94a6">Плитки SLO показывают расход бюджета. RED, зависимости и очереди локализуют сбой. Воронка и темп показывают влияние на процесс. Персональные данные отсутствуют.</text>
 </svg>

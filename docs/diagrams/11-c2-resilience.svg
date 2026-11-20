@@ -1,23 +1,23 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1680 1100" width="1680" height="1100" font-family="Helvetica Neue, Helvetica, Arial, sans-serif">
-<title>C2 v0.3 · resilience view of RemKontur</title>
-<desc>Container view with timeouts, retries, circuit breakers, rate limits, bulkheads, dead-letter queues, high availability and disaster recovery annotations.</desc>
+<title>C2 v0.3 · устойчивость РемКонтура</title>
+<desc>Диаграмма контейнеров с таймаутами, повторами, размыканием цепи, лимитами, отдельными пулами, DLQ, высокой доступностью и аварийным восстановлением.</desc>
 <defs>
 <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#00838f"/></marker>
 <marker id="arx" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6b7785"/></marker>
 <marker id="ard" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8a94a6"/></marker>
 </defs>
 <rect width="1680" height="1100" fill="#ffffff"/>
-<text x="24" y="32" font-size="19" font-weight="700" fill="#1f2933">C2 v0.3 · resilience view — RemKontur (week 11, Topic 3.3)</text>
-<text x="24" y="54" font-size="12" fill="#5f6b7a">Resilience annotations on the week-8 external boundary. Codes: TO timeout · RT retry with the same key · CB circuit breaker · RL rate limit · BH bulkhead · LS load shedding · DLQ dead-letter queue · HA high availability · DR disaster recovery.</text>
-<text x="24" y="72" font-size="11" fill="#8a5a00">Design artefact: the patterns are specified, not yet configured in a running system. Edge numbers correspond to the tables in the SRE specification §6.3.</text>
+<text x="24" y="32" font-size="19" font-weight="700" fill="#1f2933">C2 v0.3 · устойчивость РемКонтура (неделя 11, тема 3.3)</text>
+<text x="24" y="54" font-size="12" fill="#5f6b7a">Дополнение к C2 недели 8. TO — таймаут · RT — повтор с тем же ключом · CB — размыкание · RL — лимит частоты · BH — изоляция · LS — сброс нагрузки · DLQ — очередь неразобранных · HA — высокая доступность · DR — восстановление.</text>
+<text x="24" y="72" font-size="11" fill="#8a5a00">Механизмы спроектированы. Номера связей соответствуют §6.3 спецификации SRE.</text>
 
-<!-- primary boundary -->
+<!-- Основная граница -->
 <rect x="24" y="88" width="1180" height="828" rx="14" fill="#fbfcfe" stroke="#2b6cdf" stroke-width="2" stroke-dasharray="8 5"/>
-<text x="44" y="114" font-size="14" font-weight="700" fill="#2b6cdf">RemKontur · primary region</text>
-<text x="1230" y="114" font-size="14" font-weight="700" fill="#6b7785">External systems</text>
+<text x="44" y="114" font-size="14" font-weight="700" fill="#2b6cdf">РемКонтур · основной регион</text>
+<text x="1230" y="114" font-size="14" font-weight="700" fill="#6b7785">Внешние системы</text>
 <line x1="1215" y1="88" x2="1215" y2="1036" stroke="#c9d2de" stroke-width="1" stroke-dasharray="4 4"/>
 
-<!-- edges (under boxes) -->
+<!-- Связи под блоками -->
 <path d="M254,190 L310,190" stroke="#00838f" stroke-width="2" fill="none" marker-end="url(#ar)"/>
 <path d="M430,336 L430,420" stroke="#00838f" stroke-width="2" fill="none" marker-end="url(#ar)"/>
 <path d="M630,175 L1260,175" stroke="#00838f" stroke-width="2" fill="none" marker-end="url(#ar)"/>
@@ -38,146 +38,146 @@
 <path d="M900,530 L1120,530 L1120,990 L1156,990" stroke="#8a94a6" stroke-width="1.8" stroke-dasharray="7 5" fill="none" marker-end="url(#ard)"/>
 <path d="M384,1016 L410,1016" stroke="#8a94a6" stroke-width="1.8" stroke-dasharray="7 5" fill="none" marker-end="url(#ard)"/>
 
-<!-- ARM -->
+<!-- АРМ -->
 <rect x="44" y="126" width="210" height="130" rx="9" fill="#eef4fe" stroke="#2b6cdf" stroke-width="1.5"/>
-<text x="56" y="150" font-size="13.5" font-weight="700" fill="#1f2933">Employee ARM</text>
+<text x="56" y="150" font-size="13.5" font-weight="700" fill="#1f2933">АРМ сотрудника</text>
 <text x="56" y="170" font-size="11" fill="#5f6b7a">SPA/PWA · IndexedDB</text>
-<text x="56" y="186" font-size="11" fill="#5f6b7a">Offline queue 4 h / 500 ops</text>
-<text x="56" y="202" font-size="11" fill="#5f6b7a">Cached reads; no offline assign</text>
+<text x="56" y="186" font-size="11" fill="#5f6b7a">Офлайн-очередь: 4 ч / 500 операций</text>
+<text x="56" y="202" font-size="11" fill="#5f6b7a">Чтение из кэша, назначение онлайн</text>
 <text x="56" y="228" font-size="10.5" font-weight="700" fill="#8a5a00">TO · CB · RT · LS</text>
 
-<!-- App -->
+<!-- Приложение -->
 <rect x="310" y="126" width="320" height="210" rx="9" fill="#eef4fe" stroke="#2b6cdf" stroke-width="1.5"/>
-<text x="322" y="150" font-size="13.5" font-weight="700" fill="#1f2933">Repair Request Service</text>
-<text x="322" y="170" font-size="11" fill="#5f6b7a">Python, FastAPI · modular monolith (ADR-001)</text>
-<text x="322" y="186" font-size="11" fill="#5f6b7a">Modules: work-request, dispatching, access-audit</text>
-<text x="322" y="202" font-size="11" fill="#5f6b7a">Single writer of the request aggregate</text>
-<text x="322" y="218" font-size="11" fill="#5f6b7a">Idempotency · outbox · audit buffer</text>
+<text x="322" y="150" font-size="13.5" font-weight="700" fill="#1f2933">Сервис заявок</text>
+<text x="322" y="170" font-size="11" fill="#5f6b7a">Python, FastAPI · модульный монолит (ADR-001)</text>
+<text x="322" y="186" font-size="11" fill="#5f6b7a">Модули: work-request, dispatching, access-audit</text>
+<text x="322" y="202" font-size="11" fill="#5f6b7a">Один писатель агрегата заявки</text>
+<text x="322" y="218" font-size="11" fill="#5f6b7a">Идемпотентность · очередь · буфер аудита</text>
 <text x="322" y="240" font-size="10.5" font-weight="700" fill="#8a5a00">TO · RT · CB · RL · BH · LS</text>
-<text x="322" y="258" font-size="10.5" fill="#5f6b7a">Auth via OIDC; no external call on the read path</text>
+<text x="322" y="258" font-size="10.5" fill="#5f6b7a">Вход через OIDC, чтение без внешнего вызова</text>
 
-<!-- PostgreSQL primary -->
+<!-- Основной PostgreSQL -->
 <rect x="310" y="420" width="240" height="120" rx="9" fill="#eef4fe" stroke="#2b6cdf" stroke-width="1.5"/>
-<text x="322" y="444" font-size="13.5" font-weight="700" fill="#1f2933">PostgreSQL OLTP · primary</text>
-<text x="322" y="464" font-size="11" fill="#5f6b7a">Requests, history, idempotency</text>
-<text x="322" y="480" font-size="11" fill="#5f6b7a">Audit buffer, outbox, MDM projection</text>
-<text x="322" y="496" font-size="11" fill="#5f6b7a">Synchronous standby · automatic failover</text>
-<text x="322" y="518" font-size="10.5" font-weight="700" fill="#1b7f4b">HA · single writer (ADR-002)</text>
+<text x="322" y="444" font-size="13.5" font-weight="700" fill="#1f2933">PostgreSQL OLTP · основной</text>
+<text x="322" y="464" font-size="11" fill="#5f6b7a">Заявки, история, идемпотентность</text>
+<text x="322" y="480" font-size="11" fill="#5f6b7a">Буфер аудита, очередь, проекция MDM</text>
+<text x="322" y="496" font-size="11" fill="#5f6b7a">Синхронный резерв · автопереключение</text>
+<text x="322" y="518" font-size="10.5" font-weight="700" fill="#1b7f4b">HA · один писатель (ADR-002)</text>
 
-<!-- PostgreSQL standby -->
+<!-- Резерв PostgreSQL -->
 <rect x="310" y="580" width="240" height="90" rx="9" fill="#eef4fe" stroke="#2b6cdf" stroke-width="1.5"/>
-<text x="322" y="604" font-size="13.5" font-weight="700" fill="#1f2933">PostgreSQL · synchronous standby</text>
-<text x="322" y="624" font-size="11" fill="#5f6b7a">Second availability zone</text>
-<text x="322" y="640" font-size="11" fill="#5f6b7a">Promotion on zone failure</text>
-<text x="322" y="660" font-size="10.5" font-weight="700" fill="#1b7f4b">HA · RPO 0 within a zone</text>
+<text x="322" y="604" font-size="12.5" font-weight="700" fill="#1f2933">PostgreSQL · синхронная реплика</text>
+<text x="322" y="624" font-size="11" fill="#5f6b7a">Вторая зона доступности</text>
+<text x="322" y="640" font-size="11" fill="#5f6b7a">Повышение при отказе зоны</text>
+<text x="322" y="660" font-size="10.5" font-weight="700" fill="#1b7f4b">HA · RPO 0 при потере зоны</text>
 
-<!-- Audit writer -->
+<!-- Раздел схемы -->
 <rect x="590" y="420" width="220" height="90" rx="9" fill="#e7f6ee" stroke="#1b7f4b" stroke-width="1.8"/>
-<text x="602" y="444" font-size="13.5" font-weight="700" fill="#1f2933">Audit Writer</text>
-<text x="602" y="464" font-size="11" fill="#5f6b7a">Ships the durable audit buffer</text>
-<text x="602" y="480" font-size="11" fill="#5f6b7a">Retry from the buffer; no loss</text>
+<text x="602" y="444" font-size="13.5" font-weight="700" fill="#1f2933">Отправитель аудита</text>
+<text x="602" y="464" font-size="11" fill="#5f6b7a">Выгружает устойчивый буфер</text>
+<text x="602" y="480" font-size="11" fill="#5f6b7a">Повтор из буфера без потерь</text>
 <text x="602" y="500" font-size="10.5" font-weight="700" fill="#8a5a00">TO · RT</text>
 
-<!-- Audit store -->
+<!-- Раздел схемы -->
 <rect x="850" y="420" width="230" height="110" rx="9" fill="#e7f6ee" stroke="#1b7f4b" stroke-width="1.8"/>
-<text x="862" y="444" font-size="13.5" font-weight="700" fill="#1f2933">Audit store · append-only</text>
-<text x="862" y="464" font-size="11" fill="#5f6b7a">Immutable, separate credentials</text>
-<text x="862" y="480" font-size="11" fill="#5f6b7a">Synchronous cross-region copy</text>
-<text x="862" y="496" font-size="11" fill="#5f6b7a">Read access is itself audited</text>
-<text x="862" y="518" font-size="10.5" font-weight="700" fill="#1b7f4b">RPO 0 · fail-closed</text>
+<text x="862" y="444" font-size="13.5" font-weight="700" fill="#1f2933">Хранилище аудита</text>
+<text x="862" y="464" font-size="11" fill="#5f6b7a">Только добавление, отдельный доступ</text>
+<text x="862" y="480" font-size="11" fill="#5f6b7a">Синхронная копия в другом регионе</text>
+<text x="862" y="496" font-size="11" fill="#5f6b7a">Чтение аудируется</text>
+<text x="862" y="518" font-size="10.5" font-weight="700" fill="#1b7f4b">RPO 0 · безопасный отказ</text>
 
-<!-- Outbox relay -->
+<!-- Раздел схемы -->
 <rect x="310" y="720" width="220" height="90" rx="9" fill="#eef4fe" stroke="#2b6cdf" stroke-width="1.5"/>
-<text x="322" y="744" font-size="13.5" font-weight="700" fill="#1f2933">Outbox Relay</text>
-<text x="322" y="764" font-size="11" fill="#5f6b7a">Publisher confirm 5 s</text>
-<text x="322" y="780" font-size="11" fill="#5f6b7a">Retry from the outbox</text>
+<text x="322" y="744" font-size="13.5" font-weight="700" fill="#1f2933">Отправитель событий</text>
+<text x="322" y="764" font-size="11" fill="#5f6b7a">Подтверждение брокера 5 с</text>
+<text x="322" y="780" font-size="11" fill="#5f6b7a">Повтор из исходящей очереди</text>
 <text x="322" y="800" font-size="10.5" font-weight="700" fill="#8a5a00">TO · RT · CB</text>
 
-<!-- RabbitMQ -->
+<!-- Раздел схемы -->
 <rect x="590" y="720" width="230" height="100" rx="9" fill="#eef4fe" stroke="#2b6cdf" stroke-width="1.5"/>
-<text x="602" y="744" font-size="13.5" font-weight="700" fill="#1f2933">RabbitMQ · quorum queues</text>
-<text x="602" y="764" font-size="11" fill="#5f6b7a">Three nodes · three zones</text>
-<text x="602" y="780" font-size="11" fill="#5f6b7a">At-least-once · deduplication</text>
-<text x="602" y="796" font-size="11" fill="#5f6b7a">DLQ after five attempts</text>
+<text x="602" y="744" font-size="13.5" font-weight="700" fill="#1f2933">RabbitMQ · кворумные очереди</text>
+<text x="602" y="764" font-size="11" fill="#5f6b7a">Три узла · три зоны</text>
+<text x="602" y="780" font-size="11" fill="#5f6b7a">Доставка ≥ 1 раза · дедупликация</text>
+<text x="602" y="796" font-size="11" fill="#5f6b7a">DLQ после пяти попыток</text>
 <text x="602" y="816" font-size="10.5" font-weight="700" fill="#1b7f4b">HA · DLQ</text>
 
-<!-- Notification worker -->
+<!-- Раздел схемы -->
 <rect x="590" y="850" width="220" height="60" rx="9" fill="#eef4fe" stroke="#2b6cdf" stroke-width="1.5"/>
-<text x="602" y="872" font-size="13" font-weight="700" fill="#1f2933">Notification Worker</text>
-<text x="602" y="890" font-size="11" fill="#5f6b7a">Inbox · retry · DLQ</text>
+<text x="602" y="872" font-size="13" font-weight="700" fill="#1f2933">Обработчик уведомлений</text>
+<text x="602" y="890" font-size="11" fill="#5f6b7a">Входящие · повтор · DLQ</text>
 <text x="602" y="904" font-size="10.5" font-weight="700" fill="#8a5a00">RT · DLQ</text>
 
-<!-- Notification adapter -->
+<!-- Раздел схемы -->
 <rect x="850" y="850" width="230" height="60" rx="9" fill="#e7f6ee" stroke="#1b7f4b" stroke-width="1.8"/>
-<text x="862" y="872" font-size="13" font-weight="700" fill="#1f2933">Notification Adapter · ACL</text>
-<text x="862" y="890" font-size="11" fill="#5f6b7a">Provider translation · same key</text>
+<text x="862" y="872" font-size="13" font-weight="700" fill="#1f2933">Адаптер уведомлений · ACL</text>
+<text x="862" y="890" font-size="11" fill="#5f6b7a">Перевод формата · тот же ключ</text>
 <text x="862" y="904" font-size="10.5" font-weight="700" fill="#8a5a00">TO · RT · CB · RL · BH</text>
 
-<!-- Analytics -->
+<!-- Раздел схемы -->
 <rect x="850" y="720" width="230" height="100" rx="9" fill="#eef4fe" stroke="#2b6cdf" stroke-width="1.5"/>
-<text x="862" y="744" font-size="13" font-weight="700" fill="#1f2933">Analytics Loader + Warehouse</text>
-<text x="862" y="764" font-size="11" fill="#5f6b7a">Read-only relative to OLTP</text>
-<text x="862" y="780" font-size="11" fill="#5f6b7a">Replay · DLQ · freshness marker</text>
-<text x="862" y="800" font-size="10.5" font-weight="700" fill="#8a5a00">RT · DLQ · 15 min</text>
+<text x="862" y="744" font-size="13" font-weight="700" fill="#1f2933">Загрузчик и витрина аналитики</text>
+<text x="862" y="764" font-size="11" fill="#5f6b7a">Только чтение из OLTP</text>
+<text x="862" y="780" font-size="11" fill="#5f6b7a">Повтор · DLQ · отметка свежести</text>
+<text x="862" y="800" font-size="10.5" font-weight="700" fill="#8a5a00">RT · DLQ · 15 мин</text>
 
-<!-- MDA -->
+<!-- Раздел схемы -->
 <rect x="850" y="580" width="230" height="110" rx="9" fill="#e7f6ee" stroke="#1b7f4b" stroke-width="1.8"/>
-<text x="862" y="604" font-size="13" font-weight="700" fill="#1f2933">Master Data Adapter · ACL</text>
-<text x="862" y="624" font-size="11" fill="#5f6b7a">Read-only EAM and HR</text>
-<text x="862" y="640" font-size="11" fill="#5f6b7a">Last valid projection</text>
-<text x="862" y="656" font-size="11" fill="#5f6b7a">Freshness banner after 60 min</text>
+<text x="862" y="604" font-size="13" font-weight="700" fill="#1f2933">Адаптер мастер-данных · ACL</text>
+<text x="862" y="624" font-size="11" fill="#5f6b7a">Только чтение EAM и HR</text>
+<text x="862" y="640" font-size="11" fill="#5f6b7a">Последняя корректная проекция</text>
+<text x="862" y="656" font-size="11" fill="#5f6b7a">Предупреждение через 60 мин</text>
 <text x="862" y="676" font-size="10.5" font-weight="700" fill="#8a5a00">TO · RT · CB · RL · BH</text>
 
-<!-- External boxes -->
+<!-- Раздел схемы -->
 <rect x="1260" y="126" width="380" height="100" rx="9" fill="#f4f5f7" stroke="#6b7785" stroke-width="1.5"/>
-<text x="1272" y="150" font-size="13.5" font-weight="700" fill="#1f2933">Corporate SSO</text>
-<text x="1272" y="170" font-size="11" fill="#5f6b7a">OIDC · standard, no ACL</text>
-<text x="1272" y="186" font-size="11" fill="#5f6b7a">JWKS cache with TTL</text>
-<text x="1272" y="202" font-size="11" fill="#5f6b7a">New sessions fail closed</text>
-<text x="1272" y="222" font-size="10.5" font-weight="700" fill="#8a5a00">TO · CB · cached keys</text>
+<text x="1272" y="150" font-size="13.5" font-weight="700" fill="#1f2933">Корпоративный SSO</text>
+<text x="1272" y="170" font-size="11" fill="#5f6b7a">Стандарт OIDC, без ACL</text>
+<text x="1272" y="186" font-size="11" fill="#5f6b7a">Кэш JWKS с TTL</text>
+<text x="1272" y="202" font-size="11" fill="#5f6b7a">Новые сессии отклоняются</text>
+<text x="1272" y="222" font-size="10.5" font-weight="700" fill="#8a5a00">TO · CB · кэш ключей</text>
 
 <rect x="1260" y="260" width="380" height="100" rx="9" fill="#f4f5f7" stroke="#6b7785" stroke-width="1.5"/>
-<text x="1272" y="284" font-size="13.5" font-weight="700" fill="#1f2933">Workforce Service</text>
-<text x="1272" y="304" font-size="11" fill="#5f6b7a">Neighbouring team · workforce-v1</text>
-<text x="1272" y="320" font-size="11" fill="#5f6b7a">No ACL · contract-bound</text>
-<text x="1272" y="336" font-size="11" fill="#5f6b7a">Assignment degrades when unavailable</text>
-<text x="1272" y="356" font-size="10.5" font-weight="700" fill="#8a5a00">TO 2 s · CB · BH 10</text>
+<text x="1272" y="284" font-size="13.5" font-weight="700" fill="#1f2933">Сервис Workforce</text>
+<text x="1272" y="304" font-size="11" fill="#5f6b7a">Соседняя команда · workforce-v1</text>
+<text x="1272" y="320" font-size="11" fill="#5f6b7a">Без ACL · по контракту</text>
+<text x="1272" y="336" font-size="11" fill="#5f6b7a">При отказе нет назначения</text>
+<text x="1272" y="356" font-size="10.5" font-weight="700" fill="#8a5a00">TO 2 с · CB · BH 10</text>
 
 <rect x="1260" y="400" width="380" height="90" rx="9" fill="#f4f5f7" stroke="#6b7785" stroke-width="1.5"/>
-<text x="1272" y="424" font-size="13.5" font-weight="700" fill="#1f2933">EAM / equipment records</text>
-<text x="1272" y="444" font-size="11" fill="#5f6b7a">Legacy · read-only</text>
-<text x="1272" y="460" font-size="11" fill="#5f6b7a">Contract unknown</text>
-<text x="1272" y="480" font-size="10.5" font-weight="700" fill="#8a5a00">TO 10 s · CB · last projection</text>
+<text x="1272" y="424" font-size="13.5" font-weight="700" fill="#1f2933">EAM · учёт оборудования</text>
+<text x="1272" y="444" font-size="11" fill="#5f6b7a">Унаследованная система · чтение</text>
+<text x="1272" y="460" font-size="11" fill="#5f6b7a">Контракт неизвестен</text>
+<text x="1272" y="480" font-size="10.5" font-weight="700" fill="#8a5a00">TO 10 с · CB · последняя проекция</text>
 
 <rect x="1260" y="520" width="380" height="90" rx="9" fill="#f4f5f7" stroke="#6b7785" stroke-width="1.5"/>
-<text x="1272" y="544" font-size="13.5" font-weight="700" fill="#1f2933">HR / IAM catalogue</text>
-<text x="1272" y="564" font-size="11" fill="#5f6b7a">Legacy · read-only</text>
-<text x="1272" y="580" font-size="11" fill="#5f6b7a">Roles, units, employee status</text>
-<text x="1272" y="600" font-size="10.5" font-weight="700" fill="#8a5a00">TO 10 s · CB · last projection</text>
+<text x="1272" y="544" font-size="13.5" font-weight="700" fill="#1f2933">HR/IAM · справочник сотрудников</text>
+<text x="1272" y="564" font-size="11" fill="#5f6b7a">Унаследованная система · чтение</text>
+<text x="1272" y="580" font-size="11" fill="#5f6b7a">Роли, участки, статус</text>
+<text x="1272" y="600" font-size="10.5" font-weight="700" fill="#8a5a00">TO 10 с · CB · последняя проекция</text>
 
 <rect x="1260" y="850" width="380" height="80" rx="9" fill="#f4f5f7" stroke="#6b7785" stroke-width="1.5"/>
-<text x="1272" y="874" font-size="13.5" font-weight="700" fill="#1f2933">Notification provider</text>
-<text x="1272" y="894" font-size="11" fill="#5f6b7a">Vendor or corporate platform</text>
-<text x="1272" y="910" font-size="11" fill="#5f6b7a">Contract not selected</text>
-<text x="1272" y="926" font-size="10.5" font-weight="700" fill="#8a5a00">TO 5 s · CB · RL · DLQ</text>
+<text x="1272" y="874" font-size="13.5" font-weight="700" fill="#1f2933">Провайдер уведомлений</text>
+<text x="1272" y="894" font-size="11" fill="#5f6b7a">Вендор или корпоративная платформа</text>
+<text x="1272" y="910" font-size="11" fill="#5f6b7a">Контракт не выбран</text>
+<text x="1272" y="926" font-size="10.5" font-weight="700" fill="#8a5a00">TO 5 с · CB · RL · DLQ</text>
 
-<!-- DR boundary -->
+<!-- Раздел схемы -->
 <rect x="24" y="936" width="1180" height="140" rx="14" fill="#fdf1f1" stroke="#b23b3b" stroke-width="2" stroke-dasharray="8 5"/>
-<text x="44" y="960" font-size="14" font-weight="700" fill="#b23b3b">DR region · pilot light (ADR-009)</text>
+<text x="44" y="960" font-size="14" font-weight="700" fill="#b23b3b">Регион DR · минимальный резерв (ADR-009)</text>
 <rect x="44" y="976" width="340" height="80" rx="9" fill="#ffffff" stroke="#b23b3b" stroke-width="1.5"/>
-<text x="56" y="998" font-size="13" font-weight="700" fill="#1f2933">PostgreSQL cross-region replica</text>
-<text x="56" y="1016" font-size="11" fill="#5f6b7a">Continuous WAL · promote on declaration</text>
-<text x="56" y="1034" font-size="10.5" font-weight="700" fill="#b23b3b">RTO 60 min · RPO 5 min</text>
+<text x="56" y="998" font-size="13" font-weight="700" fill="#1f2933">Межрегиональная реплика PostgreSQL</text>
+<text x="56" y="1016" font-size="11" fill="#5f6b7a">Непрерывный WAL · повышение при аварии</text>
+<text x="56" y="1034" font-size="10.5" font-weight="700" fill="#b23b3b">RTO 60 мин · RPO 5 мин</text>
 <rect x="410" y="976" width="340" height="80" rx="9" fill="#ffffff" stroke="#b23b3b" stroke-width="1.5"/>
-<text x="422" y="998" font-size="13" font-weight="700" fill="#1f2933">Pilot-light platform</text>
-<text x="422" y="1016" font-size="11" fill="#5f6b7a">IaC · images · secrets · DNS TTL 60 s</text>
-<text x="422" y="1034" font-size="10.5" font-weight="700" fill="#b23b3b">Scaled on declaration</text>
+<text x="422" y="998" font-size="13" font-weight="700" fill="#1f2933">Резервная платформа</text>
+<text x="422" y="1016" font-size="11" fill="#5f6b7a">IaC · образы · секреты · TTL DNS 60 с</text>
+<text x="422" y="1034" font-size="10.5" font-weight="700" fill="#b23b3b">Масштабирование при аварии</text>
 <rect x="776" y="976" width="380" height="80" rx="9" fill="#ffffff" stroke="#b23b3b" stroke-width="1.5"/>
-<text x="788" y="998" font-size="13" font-weight="700" fill="#1f2933">Immutable audit copy</text>
-<text x="788" y="1016" font-size="11" fill="#5f6b7a">Object lock · synchronous copy</text>
-<text x="788" y="1034" font-size="10.5" font-weight="700" fill="#b23b3b">RPO 0 · legal evidence</text>
+<text x="788" y="998" font-size="13" font-weight="700" fill="#1f2933">Неизменяемая копия аудита</text>
+<text x="788" y="1016" font-size="11" fill="#5f6b7a">Блокировка объектов · синхронная копия</text>
+<text x="788" y="1034" font-size="10.5" font-weight="700" fill="#b23b3b">RPO 0 · юридические доказательства</text>
 
-<!-- edge badges -->
+<!-- Номера связей -->
 <circle cx="282" cy="190" r="11" fill="#00838f"/><text x="282" y="194" font-size="10.5" font-weight="700" fill="#ffffff" text-anchor="middle">E1</text>
 <circle cx="430" cy="378" r="11" fill="#00838f"/><text x="430" y="382" font-size="10.5" font-weight="700" fill="#ffffff" text-anchor="middle">E2</text>
 <circle cx="900" cy="175" r="11" fill="#00838f"/><text x="900" y="179" font-size="10.5" font-weight="700" fill="#ffffff" text-anchor="middle">E3</text>
@@ -191,22 +191,22 @@
 <circle cx="1160" cy="530" r="11" fill="#00838f"/><text x="1160" y="534" font-size="10.5" font-weight="700" fill="#ffffff" text-anchor="middle">E10</text>
 <circle cx="1160" cy="610" r="11" fill="#00838f"/><text x="1160" y="614" font-size="10.5" font-weight="700" fill="#ffffff" text-anchor="middle">E11</text>
 
-<!-- edge annotations -->
+<!-- Подписи связей -->
 <text x="258" y="176" font-size="10" fill="#5f6b7a">HTTPS</text>
-<text x="438" y="372" font-size="10" fill="#5f6b7a">SQL</text>
+<text x="438" y="372" font-size="10" fill="#5f6b7a">SQL · E5: запись в буфер аудита в той же транзакции</text>
 <text x="910" y="166" font-size="10" fill="#5f6b7a">OIDC</text>
 <text x="910" y="300" font-size="10" fill="#5f6b7a">REST</text>
-<text x="538" y="752" font-size="10" fill="#5f6b7a">outbox</text>
-<text x="716" y="838" font-size="10" fill="#5f6b7a">consume</text>
-<text x="1120" y="872" font-size="10" fill="#5f6b7a">deliver</text>
-<text x="1090" y="518" font-size="10" fill="#5f6b7a">read</text>
-<text x="1090" y="598" font-size="10" fill="#5f6b7a">read</text>
-<text x="680" y="572" font-size="10" fill="#5f6b7a">projection</text>
-<text x="440" y="564" font-size="10" fill="#5f6b7a">sync</text>
+<text x="538" y="752" font-size="10" fill="#5f6b7a">очередь</text>
+<text x="723" y="838" font-size="10" fill="#5f6b7a">получение</text>
+<text x="1120" y="872" font-size="10" fill="#5f6b7a">доставка</text>
+<text x="1090" y="518" font-size="10" fill="#5f6b7a">чтение</text>
+<text x="1090" y="598" font-size="10" fill="#5f6b7a">чтение</text>
+<text x="680" y="572" font-size="10" fill="#5f6b7a">проекция</text>
+<text x="440" y="564" font-size="10" fill="#5f6b7a">синхронизация</text>
 <text x="258" y="820" font-size="10" fill="#8a94a6">WAL</text>
-<text x="1128" y="760" font-size="10" fill="#8a94a6">immutable copy</text>
+<text x="1128" y="760" font-size="10" fill="#8a94a6">копия аудита</text>
 
-<!-- legend -->
+<!-- Легенда -->
 <rect x="24" y="1086" width="1180" height="1" fill="#c9d2de"/>
-<text x="24" y="1094" font-size="10" fill="#5f6b7a">E1–E12 correspond to SRE specification §6.3. Solid teal: synchronous call. Solid grey: internal data flow. Dashed grey: replication or recovery copy.</text>
+<text x="24" y="1094" font-size="10" fill="#5f6b7a">Связи E1–E12 описаны в §6.3. Бирюзовая линия — синхронный вызов, серая — внутренний поток, серый пунктир — репликация или копия для восстановления.</text>
 </svg>

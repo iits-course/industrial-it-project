@@ -1,53 +1,53 @@
-# Week 11 · SRE and disaster recovery: overview
+# Неделя 11 · SRE и аварийное восстановление
 
-This section completes the reliability part of the Architecture Dossier. It turns the quality evidence of week 10 into measurable service objectives, a telemetry design, resilience patterns on the container view, an explicit degradation model and a tested recovery plan.
+Раздел завершает описание надёжности в архитектурном досье. Результаты работы по качеству за неделю 10 превращаются в измеримые цели обслуживания, схему телеметрии, защитные механизмы на диаграмме контейнеров, режимы деградации и программу проверки восстановления.
 
-The package is a design hypothesis. No production telemetry, load test or disaster-recovery exercise has been executed; the volumes, targets and thresholds are proposals that the pilot must replace with measurements.
+Комплект имеет статус проектной гипотезы. Промышленная телеметрия пока отсутствует, нагрузочные испытания и учения по восстановлению ещё не проводились. Объёмы, цели и пороги предстоит уточнить по измерениям пилота.
 
-## Artifacts
+## Артефакты
 
-| Artifact | Content | Homework item |
+| Артефакт | Содержание | Пункт задания |
 |---|---|---|
-| [SRE specification](11-sre-specification.md) | Five user-path SLIs and SLOs, proposed SLAs, error budgets and policy, burn-rate alerts, logs/metrics/traces with correlation ID, dashboard sketch, resilience patterns on C2, graceful degradation, verification programme | 1–5 |
-| [DR plan](11-dr-plan.md) | RTO/RPO by component, HA versus DR, pilot-light strategy, disaster scenarios and playbooks, roles, validation gates, exercise programme | 6 |
-| [ADR-009](../adr/ADR-009-disaster-recovery-strategy.md) | Decision record for the pilot-light strategy with continuous replication and an immutable audit copy | 6 |
-| [C2 v0.3 · resilience view](../diagrams/11-c2-resilience.svg) | Container view with timeouts, retries, circuit breakers, rate limits, bulkheads, DLQ and degradation annotations | 4 |
-| [SRE dashboard sketch](../diagrams/11-sre-dashboard.svg) | Panel layout for SLO burn, RED, journey funnel, dependencies, outbox and business throughput | 3 |
+| [Спецификация SRE](11-sre-specification.md) | Пять SLI и SLO пользовательских сценариев, предложения по SLA, бюджеты ошибок и правила их применения, оповещения о расходе бюджета, журналы, метрики и трассировки с идентификатором корреляции, эскиз панели, механизмы устойчивости на C2, управляемая деградация, программа проверок | 1–5 |
+| [План аварийного восстановления](11-dr-plan.md) | RTO/RPO по компонентам, высокая доступность и восстановление, стратегия минимального резерва (pilot light), сценарии и процедуры, роли, критерии приёмки и программа учений | 6 |
+| [ADR-009](../adr/ADR-009-disaster-recovery-strategy.md) | Решение о минимальном резерве с непрерывной репликацией и неизменяемой копией аудита | 6 |
+| [C2 v0.3 · Устойчивость](../diagrams/11-c2-resilience.svg) | Диаграмма контейнеров с таймаутами, повторами, автоматами размыкания, ограничениями частоты, изоляцией ресурсов, DLQ и режимами деградации | 4 |
+| [Эскиз панели SRE](../diagrams/11-sre-dashboard.svg) | Расход бюджета SLO, метрики RED, воронка процесса, состояние зависимостей, исходящая очередь и темп бизнес-операций | 3 |
 
-## Reading order
+## Порядок чтения
 
-1. [SRE specification §2–3](11-sre-specification.md) — which journeys matter, how the SLI is counted, why the target is 99.5% rather than 99.99%, and how the error budget changes the release posture.
-2. [SRE specification §4–5](11-sre-specification.md) — how the numbers are produced: the correlation ID, the log schema, the metric catalogue, traces, retention and the dashboard.
-3. [SRE specification §6–7](11-sre-specification.md) — what protects each external edge and what the user sees when a dependency fails.
-4. [DR plan §3–6](11-dr-plan.md) — the recovery objectives, the selected strategy and the two most important playbooks.
-5. [ADR-009](../adr/ADR-009-disaster-recovery-strategy.md) — why the pilot light was chosen over backup/restore, warm standby and active-active.
+1. [Спецификация SRE §2–3](11-sre-specification.md) — ключевые сценарии, расчёт SLI, обоснование цели 99,5% вместо 99,99% и влияние бюджета ошибок на релизы.
+2. [Спецификация SRE §4–5](11-sre-specification.md) — идентификатор корреляции, схема журналов, каталог метрик, трассировки, сроки хранения и панель мониторинга.
+3. [Спецификация SRE §6–7](11-sre-specification.md) — защита внешних связей и сообщения пользователю при сбоях.
+4. [План восстановления §3–6](11-dr-plan.md) — цели, стратегия и ключевые процедуры.
+5. [ADR-009](../adr/ADR-009-disaster-recovery-strategy.md) — сравнение минимального резерва, восстановления из копии, тёплого резерва и схемы с двумя активными регионами.
 
-## Key decisions at a glance
+## Ключевые решения
 
-| Decision | Value | Consequence |
+| Решение | Значение | Следствие |
 |---|---|---|
-| Reliability is measured per user journey | Five SLOs: registration, read, assignment, propagation, completion | A single "system availability" number cannot hide a broken journey |
-| Internal target is stricter than the external promise | SLO 99.5%, proposed SLA 99.0% for registration | The team has a margin before a contractual breach |
-| The error budget decides releases | >50% normal, 25–50% cautious, 1–25% reliability-only, 0% freeze | Reliability becomes a shared currency, not an argument |
-| One correlation ID per business operation | ARM → API → database → outbox → broker → consumers → audit | A single trace answers "where" and "why" |
-| Every external edge has a timeout, a retry rule and a bulkhead | C2 v0.3, edges E1–E12 | A slow Workforce cannot exhaust the read and write paths |
-| Degradation is explicit and tested | M0–M5 modes, failure table | Users see what still works, not a generic error |
-| Audit fails closed | Privileged action is rejected if the audit cannot be recorded | Legal evidence is not traded for availability |
-| DR is a pilot light with a warm data tier | RTO 60 min, RPO 5 min, audit RPO 0 | A regional loss is recoverable without a permanently running second region |
+| Надёжность оценивается по пользовательским сценариям | Пять SLO: регистрация, чтение, назначение, распространение факта, завершение | Сбой отдельного сценария виден явно |
+| Внутренняя цель строже внешнего обязательства | Для регистрации SLO 99,5%, предлагаемый SLA 99,0% | Команда получает запас до нарушения договора |
+| Остаток бюджета задаёт режим выпуска | >50% — обычный, 25–50% — осторожный, 1–25% — только надёжность, 0% — заморозка | Решение о выпуске опирается на измерения |
+| Один идентификатор корреляции на операцию | АРМ → API → БД → исходящая очередь → брокер → потребители → аудит | По одной трассировке можно локализовать и объяснить сбой |
+| Внешние связи защищены таймаутом, правилами повтора и изоляцией ресурсов | C2 v0.3, связи E1–E12 | Медленная работа Workforce не исчерпывает ресурсы чтения и записи |
+| Деградация описана и предусмотрена в тестах | Режимы M0–M5 и таблица отказов | Пользователь видит доступные функции |
+| При недоступности аудита действует безопасный отказ | Привилегированная операция отклоняется, если её нельзя записать в аудит | Сохраняются юридически значимые доказательства |
+| DR использует минимальный резерв с тёплым слоем данных | RTO 60 мин, RPO 5 мин, RPO аудита 0 | После потери региона сервис можно восстановить без постоянной работы второго региона на полной мощности |
 
-## Status and evidence
+## Статус и подтверждения
 
-| Area | Designed | Implemented | Verified |
+| Область | Спроектировано | Реализовано | Проверено |
 |---|---|---|---|
-| SLO catalogue and budgets | Yes | No | No |
-| Telemetry schema and correlation ID | Yes | No | No |
-| Dashboard | Sketch | No | No |
-| Resilience patterns | Yes, on C2 | No | No |
-| Degradation table | Yes | No | No |
-| DR plan and ADR | Yes | No | No |
+| Каталог SLO и бюджеты | Да | Нет | Нет |
+| Схема телеметрии и идентификатор корреляции | Да | Нет | Нет |
+| Панель мониторинга | Эскиз | Нет | Нет |
+| Механизмы устойчивости | Да, на C2 | Нет | Нет |
+| Таблица деградации | Да | Нет | Нет |
+| План DR и ADR | Да | Нет | Нет |
 
-The distinction matters for review: a design artefact can be accepted as a plan, but it cannot be presented as evidence that the system meets the target. The readiness checklist in [§8.3](11-sre-specification.md) lists the missing measurements and the open questions.
+Статус проекта позволяет принять документы как план. Достижение целей подтверждается измерениями и учениями. Недостающие данные и открытые вопросы перечислены в [§8.3 спецификации](11-sre-specification.md).
 
-## Relation to earlier weeks
+## Связь с предыдущими неделями
 
-The SLOs reuse the NFR thresholds rather than inventing new ones: NFR-02 for registration durability, NFR-03 for the two-second read budget, DQ-06 for the fifteen-minute freshness target and NFR-04 for the audit guardrail. The E2E catalogue supplies the journeys and the negative branches; the external-environment tables supply the dependency timeouts; the access-and-audit document supplies the fail-closed rule and the audit fields. The resilience view is an overlay on the week-8 C2 external boundary, not a replacement for it.
+Цели опираются на исходные требования: NFR-02 задаёт сохранность регистрации, NFR-03 — двухсекундный порог чтения, DQ-06 — пятнадцатиминутную свежесть, NFR-04 — контроль аудита. Каталог E2E задаёт сценарии и негативные ветки, описание внешней среды — таймауты зависимостей, документ по доступу и аудиту — правило безопасного отказа и состав его полей. Вид устойчивости дополняет C2 внешней границы недели 8.
